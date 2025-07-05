@@ -12,6 +12,7 @@ import { OrderSummary } from "@/components/order-summary";
 import { HomeTemplate, Upgrade } from "@shared/schema";
 import { groupUpgradesByCategory, sortUpgrades } from "@/lib/upgrade-data";
 import { apiRequest } from "@/lib/queryClient";
+import { formatNumberWithCommas, handleNumberInputChange } from "@/lib/number-utils";
 
 export default function PurchaseOrder() {
   const { toast } = useToast();
@@ -274,12 +275,10 @@ export default function PurchaseOrder() {
                         <span className="text-sm font-medium text-gray-700">$</span>
                         <Input
                           id="lot-premium"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0.00"
-                          value={formData.lotPremium}
-                          onChange={(e) => setFormData({ ...formData, lotPremium: e.target.value })}
+                          type="text"
+                          placeholder="0"
+                          value={formatNumberWithCommas(formData.lotPremium)}
+                          onChange={(e) => handleNumberInputChange(e.target.value, (value) => setFormData({ ...formData, lotPremium: value }))}
                         />
                       </div>
                     </div>
@@ -300,10 +299,10 @@ export default function PurchaseOrder() {
                             <Label htmlFor="base-price" className="text-sm font-medium text-gray-700">Price $</Label>
                             <Input
                               id="base-price"
-                              type="number"
-                              className="w-32 font-semibold"
-                              value={parseFloat(template.basePrice)}
-                              onChange={(e) => handleBasePriceUpdate(e.target.value)}
+                              type="text"
+                              className="w-40 font-semibold"
+                              value={formatNumberWithCommas(template.basePrice)}
+                              onChange={(e) => handleNumberInputChange(e.target.value, handleBasePriceUpdate)}
                             />
                           </div>
                           {showCostColumns && (
@@ -311,10 +310,10 @@ export default function PurchaseOrder() {
                               <Label htmlFor="base-cost" className="text-sm font-medium text-gray-700">Cost $</Label>
                               <Input
                                 id="base-cost"
-                                type="number"
-                                className="w-32"
-                                value={parseFloat(template.baseCost || "0")}
-                                onChange={(e) => handleBaseCostUpdate(e.target.value)}
+                                type="text"
+                                className="w-40"
+                                value={formatNumberWithCommas(template.baseCost || "0")}
+                                onChange={(e) => handleNumberInputChange(e.target.value, handleBaseCostUpdate)}
                               />
                             </div>
                           )}

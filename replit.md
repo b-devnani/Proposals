@@ -93,6 +93,9 @@ Three main entities:
 
 ## Changelog
 - July 05, 2025. Initial setup
+- July 05, 2025. Added lot premium feature with running total calculation
+- July 05, 2025. Added base cost tracking and comprehensive margin calculations
+- July 05, 2025. Implemented formatted number inputs with comma separators for all dollar amounts
 
 ## User Preferences
 
