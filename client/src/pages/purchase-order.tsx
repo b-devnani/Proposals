@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Search, Filter } from "lucide-react";
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import { useToast } from "@/hooks/use-toast";
 import { UpgradeTable } from "@/components/upgrade-table";
 import { OrderSummary } from "@/components/order-summary";
@@ -341,18 +343,186 @@ export default function PurchaseOrder() {
   const handleGeneratePO = () => {
     if (!currentTemplate) return;
 
+    // Create PDF
+    const pdf = new jsPDF();
+    
+    // Company Header
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("BEECHEN&DILL", 105, 25, { align: "center" });
+    pdf.setFontSize(14);
+    pdf.text("HOMES", 105, 32, { align: "center" });
+    
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("Beechen and Dill Homes", 105, 42, { align: "center" });
+    
+    pdf.setFontSize(10);
+    pdf.text("565 Village Center Dr    •    Burr Ridge, IL 60527-4516    •    Phone: 6309209430", 105, 50, { align: "center" });
+    
+    // Job Address Section
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("DESIGNER HOME", 20, 70);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("Job Address:", 20, 80);
+    pdf.text("16520 Kayla Drive", 20, 88);
+    pdf.text("Lemont, IL 60439", 20, 96);
+    
+    // Purchase Order Title
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("PURCHASE ORDER", 105, 115, { align: "center" });
+    
+    // Buyer Information
+    pdf.setFontSize(11);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("BUYER INFORMATION", 20, 135);
+    
+    pdf.setFont("helvetica", "normal");
+    let yPos = 145;
+    pdf.text(`Date: ${formData.todaysDate}`, 20, yPos);
+    yPos += 8;
+    pdf.text(`Buyer Name: ${formData.buyerFirstName} ${formData.buyerLastName}`, 20, yPos);
+    yPos += 8;
+    pdf.text(`Community: ${formData.community}`, 20, yPos);
+    yPos += 8;
+    pdf.text(`Lot Number: ${formData.lotNumber}`, 20, yPos);
+    yPos += 8;
+    pdf.text(`Lot Address: ${formData.lotAddress}`, 20, yPos);
+    yPos += 15;
+    
+    // Home Template Information
+    pdf.setFont("helvetica", "bold");
+    pdf.text("HOME TEMPLATE", 20, yPos);
+    yPos += 10;
+    
+    pdf.setFont("helvetica", "normal");
+    pdf.text(`Model: ${currentTemplate.name}`, 20, yPos);
+    yPos += 8;
+    pdf.text(`Base Price: $${parseInt(currentTemplate.basePrice).toLocaleString()}`, 20, yPos);
+    yPos += 8;
+    if (formData.lotPremium && parseInt(formData.lotPremium) > 0) {
+      pdf.text(`Lot Premium: $${parseInt(formData.lotPremium).toLocaleString()}`, 20, yPos);
+      yPos += 15;
+    } else {
+      yPos += 8;
+    }
+    
+    // Selected Upgrades Table
+    if (selectedUpgradeItems.length > 0) {
+      pdf.setFont("helvetica", "bold");
+      pdf.text("SELECTED UPGRADES", 20, yPos);
+      yPos += 10;
+      
+      const upgradeTableData = selectedUpgradeItems.map(upgrade => [
+        upgrade.choiceTitle,
+        upgrade.category,
+        upgrade.location,
+        `$${parseInt(upgrade.clientPrice).toLocaleString()}`
+      ]);
+      
+      (pdf as any).autoTable({
+        startY: yPos,
+        head: [['Choice Title', 'Category', 'Location', 'Price']],
+        body: upgradeTableData,
+        theme: 'grid',
+        headStyles: { fillColor: [66, 139, 202] },
+        styles: { fontSize: 9 },
+        columnStyles: {
+          0: { cellWidth: 70 },
+          1: { cellWidth: 40 },
+          2: { cellWidth: 35 },
+          3: { cellWidth: 25, halign: 'right' }
+        }
+      });
+      
+      yPos = (pdf as any).lastAutoTable.finalY + 15;
+    }
+    
+    // Pricing Summary
+    const basePrice = parseInt(currentTemplate.basePrice);
+    const lotPremium = parseInt(formData.lotPremium || "0");
+    const upgradesTotal = selectedUpgradeItems.reduce((sum, u) => sum + parseInt(u.clientPrice), 0);
+    const grandTotal = basePrice + lotPremium + upgradesTotal;
+    
+    pdf.setFont("helvetica", "bold");
+    pdf.text("PRICING SUMMARY", 120, yPos);
+    yPos += 10;
+    
+    pdf.setFont("helvetica", "normal");
+    pdf.text(`Base Price:`, 120, yPos);
+    pdf.text(`$${basePrice.toLocaleString()}`, 170, yPos, { align: "right" });
+    yPos += 8;
+    
+    if (lotPremium > 0) {
+      pdf.text(`Lot Premium:`, 120, yPos);
+      pdf.text(`$${lotPremium.toLocaleString()}`, 170, yPos, { align: "right" });
+      yPos += 8;
+    }
+    
+    if (upgradesTotal > 0) {
+      pdf.text(`Upgrades Total:`, 120, yPos);
+      pdf.text(`$${upgradesTotal.toLocaleString()}`, 170, yPos, { align: "right" });
+      yPos += 8;
+    }
+    
+    // Grand Total
+    pdf.setFont("helvetica", "bold");
+    pdf.line(120, yPos, 170, yPos);
+    yPos += 8;
+    pdf.text(`TOTAL:`, 120, yPos);
+    pdf.text(`$${grandTotal.toLocaleString()}`, 170, yPos, { align: "right" });
+    yPos += 20;
+    
+    // Signature Section
+    if (yPos > 250) {
+      pdf.addPage();
+      yPos = 30;
+    }
+    
+    pdf.setFont("helvetica", "bold");
+    pdf.text("SIGNATURES", 20, yPos);
+    yPos += 20;
+    
+    // Buyer Signature
+    pdf.setFont("helvetica", "normal");
+    pdf.text("Buyer Signature:", 20, yPos);
+    pdf.text("Date:", 120, yPos);
+    pdf.line(20, yPos + 15, 100, yPos + 15);
+    pdf.line(120, yPos + 15, 180, yPos + 15);
+    yPos += 30;
+    
+    // Company Representative Signature
+    pdf.text("Beechen & Dill Homes Representative:", 20, yPos);
+    pdf.text("Date:", 120, yPos);
+    pdf.line(20, yPos + 15, 100, yPos + 15);
+    pdf.line(120, yPos + 15, 180, yPos + 15);
+    
+    // Footer
+    pdf.setFontSize(8);
+    pdf.text("This purchase order constitutes the complete agreement between the parties.", 105, 280, { align: "center" });
+    
+    // Save PDF
+    const filename = `PurchaseOrder_${formData.buyerLastName || 'Buyer'}_${formData.todaysDate.replace(/-/g, '')}.pdf`;
+    pdf.save(filename);
+
+    // Also save to database
     const orderData = {
       ...formData,
       housePlan: currentTemplate.name,
       basePrice: currentTemplate.basePrice,
       lotPremium: formData.lotPremium || "0",
       selectedUpgrades: Array.from(selectedUpgrades).map(String),
-      totalPrice: (parseFloat(currentTemplate.basePrice) + 
-        parseFloat(formData.lotPremium || "0") +
-        selectedUpgradeItems.reduce((total, upgrade) => total + parseFloat(upgrade.clientPrice), 0)).toString(),
+      totalPrice: grandTotal.toString(),
     };
 
     createPurchaseOrderMutation.mutate(orderData);
+
+    toast({
+      title: "Purchase Order Generated",
+      description: `PDF generated: ${filename}`,
+    });
   };
 
   if (templatesLoading || upgradesLoading) {
@@ -403,7 +573,7 @@ export default function PurchaseOrder() {
               <TabsContent key={template.id} value={template.id.toString()}>
                 <CardContent className="p-6">
                   {/* Form Inputs */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
                     <div>
                       <Label htmlFor="todays-date">Today's Date</Label>
                       <Input
@@ -415,9 +585,19 @@ export default function PurchaseOrder() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="buyer-name">Buyer's Last Name</Label>
+                      <Label htmlFor="buyer-first-name">Buyer's First Name</Label>
                       <Input
-                        id="buyer-name"
+                        id="buyer-first-name"
+                        placeholder="Enter first name"
+                        value={formData.buyerFirstName}
+                        onChange={(e) => setFormData({ ...formData, buyerFirstName: e.target.value })}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="buyer-last-name">Buyer's Last Name</Label>
+                      <Input
+                        id="buyer-last-name"
                         placeholder="Enter last name"
                         value={formData.buyerLastName}
                         onChange={(e) => setFormData({ ...formData, buyerLastName: e.target.value })}
