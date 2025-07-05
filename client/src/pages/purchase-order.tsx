@@ -34,7 +34,6 @@ export default function PurchaseOrder() {
   const [formData, setFormData] = useState({
     todaysDate: new Date().toISOString().split('T')[0],
     buyerLastName: "",
-    buyerFirstName: "",
     community: "",
     lotNumber: "",
     lotAddress: "",
@@ -165,7 +164,6 @@ export default function PurchaseOrder() {
     const orderData = {
       template: currentTemplate,
       buyer: {
-        firstName: formData.buyerFirstName,
         lastName: formData.buyerLastName,
       },
       community: formData.community,
@@ -383,7 +381,7 @@ export default function PurchaseOrder() {
     let yPos = 145;
     pdf.text(`Date: ${formData.todaysDate}`, 20, yPos);
     yPos += 8;
-    pdf.text(`Buyer Name: ${formData.buyerFirstName} ${formData.buyerLastName}`, 20, yPos);
+    pdf.text(`Buyer Name: ${formData.buyerLastName}`, 20, yPos);
     yPos += 8;
     pdf.text(`Community: ${formData.community}`, 20, yPos);
     yPos += 8;
@@ -573,7 +571,7 @@ export default function PurchaseOrder() {
               <TabsContent key={template.id} value={template.id.toString()}>
                 <CardContent className="p-6">
                   {/* Form Inputs */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div>
                       <Label htmlFor="todays-date">Today's Date</Label>
                       <Input
@@ -585,19 +583,9 @@ export default function PurchaseOrder() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="buyer-first-name">Buyer's First Name</Label>
+                      <Label htmlFor="buyer-name">Buyer's Last Name</Label>
                       <Input
-                        id="buyer-first-name"
-                        placeholder="Enter first name"
-                        value={formData.buyerFirstName}
-                        onChange={(e) => setFormData({ ...formData, buyerFirstName: e.target.value })}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="buyer-last-name">Buyer's Last Name</Label>
-                      <Input
-                        id="buyer-last-name"
+                        id="buyer-name"
                         placeholder="Enter last name"
                         value={formData.buyerLastName}
                         onChange={(e) => setFormData({ ...formData, buyerLastName: e.target.value })}
