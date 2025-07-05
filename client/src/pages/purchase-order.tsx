@@ -10,6 +10,7 @@ import { Search, Filter } from "lucide-react";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import logoPath from "@assets/logo-fullColor (1)_1751758486563.png";
 import { useToast } from "@/hooks/use-toast";
 import { UpgradeTable } from "@/components/upgrade-table";
 import { OrderSummary } from "@/components/order-summary";
@@ -344,183 +345,232 @@ export default function PurchaseOrder() {
     // Create PDF
     const pdf = new jsPDF();
     
-    // Company Header
-    pdf.setFontSize(16);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("BEECHEN&DILL", 105, 25, { align: "center" });
-    pdf.setFontSize(14);
-    pdf.text("HOMES", 105, 32, { align: "center" });
-    
-    pdf.setFontSize(12);
-    pdf.setFont("helvetica", "normal");
-    pdf.text("Beechen and Dill Homes", 105, 42, { align: "center" });
-    
-    pdf.setFontSize(10);
-    pdf.text("565 Village Center Dr    •    Burr Ridge, IL 60527-4516    •    Phone: 6309209430", 105, 50, { align: "center" });
-    
-    // Job Address Section
-    pdf.setFontSize(12);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("DESIGNER HOME", 20, 70);
-    pdf.setFont("helvetica", "normal");
-    pdf.text("Job Address:", 20, 80);
-    pdf.text("16520 Kayla Drive", 20, 88);
-    pdf.text("Lemont, IL 60439", 20, 96);
-    
-    // Purchase Order Title
-    pdf.setFontSize(16);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("PURCHASE ORDER", 105, 115, { align: "center" });
-    
-    // Buyer Information
-    pdf.setFontSize(11);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("BUYER INFORMATION", 20, 135);
-    
-    pdf.setFont("helvetica", "normal");
-    let yPos = 145;
-    pdf.text(`Date: ${formData.todaysDate}`, 20, yPos);
-    yPos += 8;
-    pdf.text(`Buyer Name: ${formData.buyerLastName}`, 20, yPos);
-    yPos += 8;
-    pdf.text(`Community: ${formData.community}`, 20, yPos);
-    yPos += 8;
-    pdf.text(`Lot Number: ${formData.lotNumber}`, 20, yPos);
-    yPos += 8;
-    pdf.text(`Lot Address: ${formData.lotAddress}`, 20, yPos);
-    yPos += 15;
-    
-    // Home Template Information
-    pdf.setFont("helvetica", "bold");
-    pdf.text("HOME TEMPLATE", 20, yPos);
-    yPos += 10;
-    
-    pdf.setFont("helvetica", "normal");
-    pdf.text(`Model: ${currentTemplate.name}`, 20, yPos);
-    yPos += 8;
-    pdf.text(`Base Price: $${parseInt(currentTemplate.basePrice).toLocaleString()}`, 20, yPos);
-    yPos += 8;
-    if (formData.lotPremium && parseInt(formData.lotPremium) > 0) {
-      pdf.text(`Lot Premium: $${parseInt(formData.lotPremium).toLocaleString()}`, 20, yPos);
-      yPos += 15;
-    } else {
-      yPos += 8;
-    }
-    
-    // Selected Upgrades Table
-    if (selectedUpgradeItems.length > 0) {
+    // Add Logo (centered at top)
+    const logoImg = new Image();
+    logoImg.onload = () => {
+      // Logo - centered and properly sized
+      pdf.addImage(logoImg, 'PNG', 85, 10, 40, 20);
+      
+      // Company contact info
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(100, 100, 100);
+      pdf.text("565 Village Center Dr  •  Burr Ridge, IL 60527-4516  •  Phone: 6309209430", 105, 35, { align: "center" });
+      
+      // Add subtle line separator
+      pdf.setDrawColor(66, 139, 202);
+      pdf.setLineWidth(0.5);
+      pdf.line(20, 45, 190, 45);
+      
+      // Job Address Section (left side)
+      pdf.setFontSize(11);
       pdf.setFont("helvetica", "bold");
-      pdf.text("SELECTED UPGRADES", 20, yPos);
-      yPos += 10;
+      pdf.setTextColor(0, 0, 0);
+      pdf.text("DESIGNER HOME", 20, 60);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      pdf.text("Job Address:", 20, 70);
+      pdf.text("16520 Kayla Drive", 20, 78);
+      pdf.text("Lemont, IL 60439", 20, 86);
       
-      const upgradeTableData = selectedUpgradeItems.map(upgrade => [
-        upgrade.choiceTitle,
-        upgrade.category,
-        upgrade.location,
-        `$${parseInt(upgrade.clientPrice).toLocaleString()}`
-      ]);
+      // Purchase Order Title (right side)
+      pdf.setFontSize(18);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(66, 139, 202);
+      pdf.text("PURCHASE ORDER", 140, 65);
+      pdf.setTextColor(0, 0, 0);
       
-      (pdf as any).autoTable({
-        startY: yPos,
-        head: [['Choice Title', 'Category', 'Location', 'Price']],
-        body: upgradeTableData,
-        theme: 'grid',
-        headStyles: { fillColor: [66, 139, 202] },
-        styles: { fontSize: 9 },
-        columnStyles: {
-          0: { cellWidth: 70 },
-          1: { cellWidth: 40 },
-          2: { cellWidth: 35 },
-          3: { cellWidth: 25, halign: 'right' }
-        }
+      // Buyer Information Section
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("BUYER INFORMATION", 20, 105);
+      
+      // Add background for buyer info
+      pdf.setFillColor(248, 249, 250);
+      pdf.rect(20, 110, 170, 35, 'F');
+      
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      let yPos = 120;
+      pdf.text(`Date: ${formData.todaysDate}`, 25, yPos);
+      pdf.text(`Buyer Name: ${formData.buyerLastName}`, 110, yPos);
+      yPos += 8;
+      pdf.text(`Community: ${formData.community}`, 25, yPos);
+      pdf.text(`Lot Number: ${formData.lotNumber}`, 110, yPos);
+      yPos += 8;
+      pdf.text(`Lot Address: ${formData.lotAddress}`, 25, yPos);
+      yPos = 155;
+    
+      // Home Template Information
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("HOME TEMPLATE", 20, yPos);
+      yPos += 5;
+      
+      // Template info background
+      pdf.setFillColor(248, 249, 250);
+      pdf.rect(20, yPos, 85, 25, 'F');
+      
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      yPos += 8;
+      pdf.text(`Model: ${currentTemplate.name}`, 25, yPos);
+      yPos += 8;
+      pdf.text(`Base Price: $${parseInt(currentTemplate.basePrice).toLocaleString()}`, 25, yPos);
+      if (formData.lotPremium && parseInt(formData.lotPremium) > 0) {
+        yPos += 8;
+        pdf.text(`Lot Premium: $${parseInt(formData.lotPremium).toLocaleString()}`, 25, yPos);
+      }
+      yPos += 20;
+      
+      // Selected Upgrades Table
+      if (selectedUpgradeItems.length > 0) {
+        pdf.setFontSize(12);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("SELECTED UPGRADES", 20, yPos);
+        yPos += 10;
+        
+        const upgradeTableData = selectedUpgradeItems.map(upgrade => [
+          upgrade.choiceTitle,
+          upgrade.category,
+          upgrade.location,
+          `$${parseInt(upgrade.clientPrice).toLocaleString()}`
+        ]);
+        
+        (pdf as any).autoTable({
+          startY: yPos,
+          head: [['Choice Title', 'Category', 'Location', 'Price']],
+          body: upgradeTableData,
+          theme: 'striped',
+          headStyles: { 
+            fillColor: [66, 139, 202],
+            textColor: 255,
+            fontSize: 10,
+            fontStyle: 'bold'
+          },
+          styles: { 
+            fontSize: 9,
+            cellPadding: 4
+          },
+          alternateRowStyles: {
+            fillColor: [248, 249, 250]
+          },
+          columnStyles: {
+            0: { cellWidth: 75 },
+            1: { cellWidth: 40 },
+            2: { cellWidth: 35 },
+            3: { cellWidth: 30, halign: 'right' }
+          }
+        });
+        
+        yPos = (pdf as any).lastAutoTable.finalY + 15;
+      }
+      
+      // Pricing Summary
+      const basePrice = parseInt(currentTemplate.basePrice);
+      const lotPremium = parseInt(formData.lotPremium || "0");
+      const upgradesTotal = selectedUpgradeItems.reduce((sum, u) => sum + parseInt(u.clientPrice), 0);
+      const grandTotal = basePrice + lotPremium + upgradesTotal;
+      
+      // Position pricing summary on the right side or below upgrades
+      let summaryX = selectedUpgradeItems.length > 0 ? 120 : 20;
+      let summaryY = selectedUpgradeItems.length > 0 && yPos < 200 ? 155 : yPos;
+      
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("PRICING SUMMARY", summaryX, summaryY);
+      
+      // Pricing summary background
+      pdf.setFillColor(66, 139, 202);
+      pdf.setTextColor(255, 255, 255);
+      pdf.rect(summaryX, summaryY + 5, 70, 35, 'F');
+      
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      summaryY += 15;
+      pdf.text(`Base Price:`, summaryX + 5, summaryY);
+      pdf.text(`$${basePrice.toLocaleString()}`, summaryX + 65, summaryY, { align: "right" });
+      summaryY += 8;
+      
+      if (lotPremium > 0) {
+        pdf.text(`Lot Premium:`, summaryX + 5, summaryY);
+        pdf.text(`$${lotPremium.toLocaleString()}`, summaryX + 65, summaryY, { align: "right" });
+        summaryY += 8;
+      }
+      
+      if (upgradesTotal > 0) {
+        pdf.text(`Upgrades Total:`, summaryX + 5, summaryY);
+        pdf.text(`$${upgradesTotal.toLocaleString()}`, summaryX + 65, summaryY, { align: "right" });
+        summaryY += 8;
+      }
+      
+      // Grand Total
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(11);
+      pdf.text(`TOTAL: $${grandTotal.toLocaleString()}`, summaryX + 5, summaryY);
+      
+      pdf.setTextColor(0, 0, 0);
+      yPos = Math.max(yPos, summaryY + 25);
+      
+      // Signature Section
+      if (yPos > 230) {
+        pdf.addPage();
+        pdf.addImage(logoImg, 'PNG', 85, 10, 40, 20);
+        yPos = 50;
+      }
+      
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("SIGNATURES", 20, yPos);
+      yPos += 15;
+      
+      // Signature boxes
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setLineWidth(0.5);
+      
+      // Buyer Signature
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      pdf.text("Buyer Signature:", 20, yPos);
+      pdf.text("Date:", 120, yPos);
+      pdf.rect(20, yPos + 5, 80, 20);
+      pdf.rect(120, yPos + 5, 50, 20);
+      yPos += 35;
+      
+      // Company Representative Signature
+      pdf.text("Beechen & Dill Homes Representative:", 20, yPos);
+      pdf.text("Date:", 120, yPos);
+      pdf.rect(20, yPos + 5, 80, 20);
+      pdf.rect(120, yPos + 5, 50, 20);
+      
+      // Footer
+      pdf.setFontSize(8);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text("This purchase order constitutes the complete agreement between the parties.", 105, 280, { align: "center" });
+      
+      // Save PDF
+      const filename = `PurchaseOrder_${formData.buyerLastName || 'Buyer'}_${formData.todaysDate.replace(/-/g, '')}.pdf`;
+      pdf.save(filename);
+
+      // Also save to database
+      const orderData = {
+        ...formData,
+        housePlan: currentTemplate.name,
+        basePrice: currentTemplate.basePrice,
+        lotPremium: formData.lotPremium || "0",
+        selectedUpgrades: Array.from(selectedUpgrades).map(String),
+        totalPrice: grandTotal.toString(),
+      };
+
+      createPurchaseOrderMutation.mutate(orderData);
+
+      toast({
+        title: "Purchase Order Generated",
+        description: `PDF generated: ${filename}`,
       });
-      
-      yPos = (pdf as any).lastAutoTable.finalY + 15;
-    }
-    
-    // Pricing Summary
-    const basePrice = parseInt(currentTemplate.basePrice);
-    const lotPremium = parseInt(formData.lotPremium || "0");
-    const upgradesTotal = selectedUpgradeItems.reduce((sum, u) => sum + parseInt(u.clientPrice), 0);
-    const grandTotal = basePrice + lotPremium + upgradesTotal;
-    
-    pdf.setFont("helvetica", "bold");
-    pdf.text("PRICING SUMMARY", 120, yPos);
-    yPos += 10;
-    
-    pdf.setFont("helvetica", "normal");
-    pdf.text(`Base Price:`, 120, yPos);
-    pdf.text(`$${basePrice.toLocaleString()}`, 170, yPos, { align: "right" });
-    yPos += 8;
-    
-    if (lotPremium > 0) {
-      pdf.text(`Lot Premium:`, 120, yPos);
-      pdf.text(`$${lotPremium.toLocaleString()}`, 170, yPos, { align: "right" });
-      yPos += 8;
-    }
-    
-    if (upgradesTotal > 0) {
-      pdf.text(`Upgrades Total:`, 120, yPos);
-      pdf.text(`$${upgradesTotal.toLocaleString()}`, 170, yPos, { align: "right" });
-      yPos += 8;
-    }
-    
-    // Grand Total
-    pdf.setFont("helvetica", "bold");
-    pdf.line(120, yPos, 170, yPos);
-    yPos += 8;
-    pdf.text(`TOTAL:`, 120, yPos);
-    pdf.text(`$${grandTotal.toLocaleString()}`, 170, yPos, { align: "right" });
-    yPos += 20;
-    
-    // Signature Section
-    if (yPos > 250) {
-      pdf.addPage();
-      yPos = 30;
-    }
-    
-    pdf.setFont("helvetica", "bold");
-    pdf.text("SIGNATURES", 20, yPos);
-    yPos += 20;
-    
-    // Buyer Signature
-    pdf.setFont("helvetica", "normal");
-    pdf.text("Buyer Signature:", 20, yPos);
-    pdf.text("Date:", 120, yPos);
-    pdf.line(20, yPos + 15, 100, yPos + 15);
-    pdf.line(120, yPos + 15, 180, yPos + 15);
-    yPos += 30;
-    
-    // Company Representative Signature
-    pdf.text("Beechen & Dill Homes Representative:", 20, yPos);
-    pdf.text("Date:", 120, yPos);
-    pdf.line(20, yPos + 15, 100, yPos + 15);
-    pdf.line(120, yPos + 15, 180, yPos + 15);
-    
-    // Footer
-    pdf.setFontSize(8);
-    pdf.text("This purchase order constitutes the complete agreement between the parties.", 105, 280, { align: "center" });
-    
-    // Save PDF
-    const filename = `PurchaseOrder_${formData.buyerLastName || 'Buyer'}_${formData.todaysDate.replace(/-/g, '')}.pdf`;
-    pdf.save(filename);
-
-    // Also save to database
-    const orderData = {
-      ...formData,
-      housePlan: currentTemplate.name,
-      basePrice: currentTemplate.basePrice,
-      lotPremium: formData.lotPremium || "0",
-      selectedUpgrades: Array.from(selectedUpgrades).map(String),
-      totalPrice: grandTotal.toString(),
     };
-
-    createPurchaseOrderMutation.mutate(orderData);
-
-    toast({
-      title: "Purchase Order Generated",
-      description: `PDF generated: ${filename}`,
-    });
+    
+    logoImg.src = logoPath;
   };
 
   if (templatesLoading || upgradesLoading) {
