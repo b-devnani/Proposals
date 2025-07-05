@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Search, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { UpgradeTable } from "@/components/upgrade-table";
 import { OrderSummary } from "@/components/order-summary";
@@ -22,6 +23,9 @@ export default function PurchaseOrder() {
   const [activeTemplate, setActiveTemplate] = useState<string>("1"); // Ravello ID
   const [showCostColumns, setShowCostColumns] = useState(true);
   const [selectedUpgrades, setSelectedUpgrades] = useState<Set<number>>(new Set());
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
   
   // Form state
   const [formData, setFormData] = useState({
@@ -71,10 +75,30 @@ export default function PurchaseOrder() {
   // Get current template
   const currentTemplate = templates.find(t => t.id.toString() === activeTemplate);
   
-  // Process upgrades
-  const sortedUpgrades = sortUpgrades(upgrades);
+  // Process upgrades with search and filters
+  const filteredUpgrades = upgrades.filter(upgrade => {
+    // Search filter
+    const matchesSearch = searchTerm === "" || 
+      upgrade.choiceTitle.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Category filter
+    const matchesCategory = categoryFilter === "all" || 
+      upgrade.category === categoryFilter;
+    
+    // Location filter
+    const matchesLocation = locationFilter === "all" || 
+      upgrade.location === locationFilter;
+    
+    return matchesSearch && matchesCategory && matchesLocation;
+  });
+
+  const sortedUpgrades = sortUpgrades(filteredUpgrades);
   const groupedUpgrades = groupUpgradesByCategory(sortedUpgrades);
   const selectedUpgradeItems = upgrades.filter(upgrade => selectedUpgrades.has(upgrade.id));
+
+  // Get unique categories and locations for filter dropdowns
+  const uniqueCategories = Array.from(new Set(upgrades.map(u => u.category))).sort();
+  const uniqueLocations = Array.from(new Set(upgrades.map(u => u.location))).sort();
 
   // Handlers
   const handleTemplateChange = (templateId: string) => {
@@ -325,6 +349,78 @@ export default function PurchaseOrder() {
               </TabsContent>
             ))}
           </Tabs>
+        </Card>
+
+        {/* Search and Filter Controls */}
+        <Card className="mb-4">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row gap-4 items-end">
+              <div className="flex-1">
+                <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
+                  Search Upgrades
+                </Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    id="search"
+                    type="text"
+                    placeholder="Search by choice title..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <div>
+                  <Label htmlFor="category-filter" className="text-sm font-medium text-gray-700 mb-2 block">
+                    Category
+                  </Label>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {uniqueCategories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="location-filter" className="text-sm font-medium text-gray-700 mb-2 block">
+                    Location
+                  </Label>
+                  <Select value={locationFilter} onValueChange={setLocationFilter}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Locations</SelectItem>
+                      {uniqueLocations.map((location) => (
+                        <SelectItem key={location} value={location}>
+                          {location}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            
+            {/* Results count */}
+            <div className="mt-4 text-sm text-gray-600">
+              Showing {filteredUpgrades.length} of {upgrades.length} upgrades
+              {searchTerm && ` matching "${searchTerm}"`}
+              {categoryFilter !== "all" && ` in ${categoryFilter}`}
+              {locationFilter !== "all" && ` at ${locationFilter}`}
+            </div>
+          </CardContent>
         </Card>
 
         {/* Upgrades Table */}

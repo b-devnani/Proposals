@@ -142,6 +142,78 @@ export class MemStorage implements IStorage {
         builderCost: "802",
         clientPrice: "1370",
         margin: "41.46"
+      },
+      {
+        id: this.currentUpgradeId++,
+        selectionId: "52896049",
+        choiceId: "20673200",
+        parentSelection: "(20) Master Bath Vanity",
+        choiceTitle: "Upgrade to Quartz Countertop (Calacatta)",
+        category: "Countertops",
+        location: "Master Bath",
+        builderCost: "1200",
+        clientPrice: "1650",
+        margin: "27.27"
+      },
+      {
+        id: this.currentUpgradeId++,
+        selectionId: "52896050",
+        choiceId: "20673201",
+        parentSelection: "(21) Kitchen Island",
+        choiceTitle: "Upgrade to Granite Countertop (Black Pearl)",
+        category: "Countertops",
+        location: "Kitchen",
+        builderCost: "890",
+        clientPrice: "1245",
+        margin: "28.51"
+      },
+      {
+        id: this.currentUpgradeId++,
+        selectionId: "52896051",
+        choiceId: "20673202",
+        parentSelection: "(22) Flooring",
+        choiceTitle: "Upgrade to Hardwood Flooring (Oak)",
+        category: "Flooring",
+        location: "Living Room",
+        builderCost: "2800",
+        clientPrice: "3500",
+        margin: "20.00"
+      },
+      {
+        id: this.currentUpgradeId++,
+        selectionId: "52896052",
+        choiceId: "20673203",
+        parentSelection: "(23) Bathroom Tile",
+        choiceTitle: "Upgrade to Porcelain Tile (Marble Look)",
+        category: "Flooring",
+        location: "Guest Bath",
+        builderCost: "1100",
+        clientPrice: "1450",
+        margin: "24.14"
+      },
+      {
+        id: this.currentUpgradeId++,
+        selectionId: "52896053",
+        choiceId: "20673204",
+        parentSelection: "(24) Light Fixtures",
+        choiceTitle: "Upgrade to Designer Chandelier",
+        category: "Electrical",
+        location: "Dining Room",
+        builderCost: "650",
+        clientPrice: "950",
+        margin: "31.58"
+      },
+      {
+        id: this.currentUpgradeId++,
+        selectionId: "52896054",
+        choiceId: "20673205",
+        parentSelection: "(25) Ceiling Fans",
+        choiceTitle: "Upgrade to Smart Ceiling Fans",
+        category: "Electrical",
+        location: "Bedrooms",
+        builderCost: "425",
+        clientPrice: "625",
+        margin: "32.00"
       }
     ];
 
