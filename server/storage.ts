@@ -48,9 +48,9 @@ export class MemStorage implements IStorage {
   private initializeData() {
     // Initialize home templates
     const templates: HomeTemplate[] = [
-      { id: this.currentTemplateId++, name: "Ravello", basePrice: "631995.00", baseCost: "500000.00" },
-      { id: this.currentTemplateId++, name: "Sorrento", basePrice: "614995.00", baseCost: "485000.00" },
-      { id: this.currentTemplateId++, name: "Verona", basePrice: "609995.00", baseCost: "475000.00" },
+      { id: this.currentTemplateId++, name: "Ravello", basePrice: "631995", baseCost: "500000" },
+      { id: this.currentTemplateId++, name: "Sorrento", basePrice: "614995", baseCost: "485000" },
+      { id: this.currentTemplateId++, name: "Verona", basePrice: "609995", baseCost: "475000" },
     ];
 
     templates.forEach(template => {
@@ -67,8 +67,8 @@ export class MemStorage implements IStorage {
         choiceTitle: "Upgrade to Artifacts Touchless (Vibrant Polished Chrome)",
         category: "Plumbing Trim Options",
         location: "Kitchen",
-        builderCost: "1108.00",
-        clientPrice: "1404.00",
+        builderCost: "1108",
+        clientPrice: "1404",
         margin: "21.08"
       },
       {
@@ -79,8 +79,8 @@ export class MemStorage implements IStorage {
         choiceTitle: "Upgrade to Artifacts Pulldown (Vibrant Stainless)",
         category: "Plumbing Trim Options",
         location: "Kitchen",
-        builderCost: "619.00",
-        clientPrice: "731.00",
+        builderCost: "619",
+        clientPrice: "731",
         margin: "15.32"
       },
       {
@@ -91,8 +91,8 @@ export class MemStorage implements IStorage {
         choiceTitle: "Upgrade to Artifacts Touchless (Vibrant Stainless)",
         category: "Plumbing Trim Options",
         location: "Kitchen",
-        builderCost: "1013.00",
-        clientPrice: "1120.00",
+        builderCost: "1013",
+        clientPrice: "1120",
         margin: "9.55"
       },
       {
@@ -103,8 +103,8 @@ export class MemStorage implements IStorage {
         choiceTitle: "Upgrade to Artifacts Touchless (Vibrant Brushed Bronze)",
         category: "Plumbing Trim Options",
         location: "Kitchen",
-        builderCost: "922.00",
-        clientPrice: "897.00",
+        builderCost: "922",
+        clientPrice: "897",
         margin: "-2.79"
       },
       {
@@ -115,8 +115,8 @@ export class MemStorage implements IStorage {
         choiceTitle: "Upgrade to Cruë Touchless (Vibrant Brushed Bronze)",
         category: "Plumbing Trim Options",
         location: "Kitchen",
-        builderCost: "881.00",
-        clientPrice: "1495.00",
+        builderCost: "881",
+        clientPrice: "1495",
         margin: "41.07"
       },
       {
@@ -127,8 +127,8 @@ export class MemStorage implements IStorage {
         choiceTitle: "Upgrade to Cruë Pulldown (Matte Black)",
         category: "Plumbing Trim Options",
         location: "Kitchen",
-        builderCost: "547.00",
-        clientPrice: "1043.00",
+        builderCost: "547",
+        clientPrice: "1043",
         margin: "47.55"
       },
       {
@@ -139,8 +139,8 @@ export class MemStorage implements IStorage {
         choiceTitle: "Upgrade to Cruë Touchless (Matte Black)",
         category: "Plumbing Trim Options",
         location: "Kitchen",
-        builderCost: "802.00",
-        clientPrice: "1370.00",
+        builderCost: "802",
+        clientPrice: "1370",
         margin: "41.46"
       }
     ];
@@ -181,7 +181,7 @@ export class MemStorage implements IStorage {
       ...order, 
       id,
       selectedUpgrades: order.selectedUpgrades || null,
-      lotPremium: order.lotPremium || "0.00"
+      lotPremium: order.lotPremium || "0"
     };
     this.purchaseOrdersMap.set(id, newOrder);
     return newOrder;

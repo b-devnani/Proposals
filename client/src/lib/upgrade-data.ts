@@ -39,11 +39,12 @@ export function sortUpgrades(upgrades: Upgrade[]): Upgrade[] {
 }
 
 export function formatCurrency(amount: string | number): string {
-  const num = typeof amount === "string" ? parseFloat(amount) : amount;
+  const num = typeof amount === "string" ? parseInt(amount) : Math.floor(amount);
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(num);
 }
 
