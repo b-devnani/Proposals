@@ -322,6 +322,7 @@ export default function PurchaseOrder() {
             basePrice={currentTemplate.basePrice}
             lotPremium={formData.lotPremium}
             selectedUpgrades={selectedUpgradeItems}
+            showCostColumns={showCostColumns}
             onSaveDraft={handleSaveDraft}
             onPreview={handlePreview}
             onGeneratePO={handleGeneratePO}

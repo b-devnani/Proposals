@@ -8,6 +8,7 @@ interface OrderSummaryProps {
   basePrice: string;
   lotPremium: string;
   selectedUpgrades: Upgrade[];
+  showCostColumns: boolean;
   onSaveDraft: () => void;
   onPreview: () => void;
   onGeneratePO: () => void;
@@ -17,6 +18,7 @@ export function OrderSummary({
   basePrice,
   lotPremium,
   selectedUpgrades,
+  showCostColumns,
   onSaveDraft,
   onPreview,
   onGeneratePO,
@@ -25,6 +27,13 @@ export function OrderSummary({
     (total, upgrade) => total + parseFloat(upgrade.clientPrice),
     0
   );
+
+  const upgradesBuilderCost = selectedUpgrades.reduce(
+    (total, upgrade) => total + parseFloat(upgrade.builderCost),
+    0
+  );
+
+  const totalMargin = upgradesTotal > 0 ? ((upgradesTotal - upgradesBuilderCost) / upgradesTotal * 100) : 0;
 
   const grandTotal = parseFloat(basePrice) + parseFloat(lotPremium || "0") + upgradesTotal;
 
@@ -47,6 +56,20 @@ export function OrderSummary({
                 <span>Selected Upgrades ({selectedUpgrades.length}):</span>
                 <span className="font-medium">{formatCurrency(upgradesTotal)}</span>
               </div>
+              {showCostColumns && selectedUpgrades.length > 0 && (
+                <>
+                  <div className="flex justify-between items-center text-sm">
+                    <span>Upgrades Builder Cost:</span>
+                    <span className="font-medium">{formatCurrency(upgradesBuilderCost)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span>Upgrades Margin:</span>
+                    <span className={`font-medium ${totalMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {totalMargin >= 0 ? '+' : ''}{totalMargin.toFixed(2)}%
+                    </span>
+                  </div>
+                </>
+              )}
               <Separator className="my-2" />
               <div className="flex justify-between items-center text-lg font-bold text-gray-900">
                 <span>Total:</span>
