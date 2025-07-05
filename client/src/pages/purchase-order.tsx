@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Search, Filter } from "lucide-react";
+import * as XLSX from 'xlsx';
 import { useToast } from "@/hooks/use-toast";
 import { UpgradeTable } from "@/components/upgrade-table";
 import { OrderSummary } from "@/components/order-summary";
@@ -31,6 +32,7 @@ export default function PurchaseOrder() {
   const [formData, setFormData] = useState({
     todaysDate: new Date().toISOString().split('T')[0],
     buyerLastName: "",
+    buyerFirstName: "",
     community: "",
     lotNumber: "",
     lotAddress: "",
@@ -157,9 +159,182 @@ export default function PurchaseOrder() {
   };
 
   const handlePreview = () => {
+    // Create a preview window with the purchase order details
+    const orderData = {
+      template: currentTemplate,
+      buyer: {
+        firstName: formData.buyerFirstName,
+        lastName: formData.buyerLastName,
+      },
+      community: formData.community,
+      lot: {
+        address: formData.lotAddress,
+        premium: formData.lotPremium || "0",
+      },
+      upgrades: selectedUpgradeItems,
+      totals: {
+        basePrice: currentTemplate?.basePrice || "0",
+        lotPremium: formData.lotPremium || "0",
+        upgradesTotal: selectedUpgradeItems.reduce((sum, upgrade) => sum + parseInt(upgrade.clientPrice), 0),
+        grandTotal: parseInt(currentTemplate?.basePrice || "0") + 
+                   parseInt(formData.lotPremium || "0") + 
+                   selectedUpgradeItems.reduce((sum, upgrade) => sum + parseInt(upgrade.clientPrice), 0)
+      }
+    };
+
+    // Open preview in new window
+    const previewWindow = window.open('', '_blank', 'width=800,height=600');
+    if (previewWindow) {
+      previewWindow.document.write(`
+        <html>
+          <head>
+            <title>Purchase Order Preview</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              .header { text-align: center; margin-bottom: 30px; }
+              .section { margin-bottom: 20px; }
+              .section h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+              .row { display: flex; justify-content: space-between; margin: 5px 0; }
+              .total { font-weight: bold; font-size: 1.2em; }
+              table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+              th { background-color: #f2f2f2; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>Purchase Order Preview</h1>
+              <p>Date: ${formData.todaysDate}</p>
+            </div>
+            
+            <div class="section">
+              <h3>Buyer Information</h3>
+              <div class="row"><span>Name:</span><span>${orderData.buyer.lastName}</span></div>
+              <div class="row"><span>Community:</span><span>${orderData.community}</span></div>
+              <div class="row"><span>Lot Address:</span><span>${orderData.lot.address}</span></div>
+            </div>
+
+            <div class="section">
+              <h3>Home Template</h3>
+              <div class="row"><span>Model:</span><span>${orderData.template?.name}</span></div>
+              <div class="row"><span>Base Price:</span><span>$${parseInt(orderData.totals.basePrice).toLocaleString()}</span></div>
+              <div class="row"><span>Lot Premium:</span><span>$${parseInt(orderData.lot.premium).toLocaleString()}</span></div>
+            </div>
+
+            <div class="section">
+              <h3>Selected Upgrades</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Choice Title</th>
+                    <th>Category</th>
+                    <th>Location</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${orderData.upgrades.map(upgrade => `
+                    <tr>
+                      <td>${upgrade.choiceTitle}</td>
+                      <td>${upgrade.category}</td>
+                      <td>${upgrade.location}</td>
+                      <td>$${parseInt(upgrade.clientPrice).toLocaleString()}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="section">
+              <h3>Total Summary</h3>
+              <div class="row"><span>Base Price:</span><span>$${parseInt(orderData.totals.basePrice).toLocaleString()}</span></div>
+              <div class="row"><span>Lot Premium:</span><span>$${parseInt(orderData.lot.premium).toLocaleString()}</span></div>
+              <div class="row"><span>Upgrades Total:</span><span>$${orderData.totals.upgradesTotal.toLocaleString()}</span></div>
+              <div class="row total"><span>Grand Total:</span><span>$${orderData.totals.grandTotal.toLocaleString()}</span></div>
+            </div>
+          </body>
+        </html>
+      `);
+      previewWindow.document.close();
+    }
+
     toast({
-      title: "Preview",
-      description: "Opening purchase order preview...",
+      title: "Preview Generated",
+      description: "Purchase order preview opened in new window.",
+    });
+  };
+
+  const handleExportExcel = () => {
+    if (!currentTemplate) return;
+
+    const orderData = {
+      template: currentTemplate,
+      buyer: {
+        lastName: formData.buyerLastName,
+      },
+      community: formData.community,
+      lot: {
+        address: formData.lotAddress,
+        premium: formData.lotPremium || "0",
+      },
+      date: formData.todaysDate,
+    };
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+
+    // Order Summary Sheet
+    const summaryData = [
+      ['Purchase Order Summary'],
+      [''],
+      ['Date:', orderData.date],
+      ['Buyer Name:', orderData.buyer.lastName],
+      ['Community:', orderData.community],
+      ['Lot Address:', orderData.lot.address],
+      [''],
+      ['Home Template:', currentTemplate.name],
+      ['Base Price:', parseInt(currentTemplate.basePrice)],
+      ['Lot Premium:', parseInt(orderData.lot.premium)],
+      [''],
+      ['TOTALS:'],
+      ['Base Price:', parseInt(currentTemplate.basePrice)],
+      ['Lot Premium:', parseInt(orderData.lot.premium)],
+      ['Upgrades Total:', selectedUpgradeItems.reduce((sum, u) => sum + parseInt(u.clientPrice), 0)],
+      ['Grand Total:', parseInt(currentTemplate.basePrice) + parseInt(orderData.lot.premium) + selectedUpgradeItems.reduce((sum, u) => sum + parseInt(u.clientPrice), 0)]
+    ];
+
+    const summaryWS = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, summaryWS, 'Order Summary');
+
+    // Upgrades Sheet
+    if (selectedUpgradeItems.length > 0) {
+      const upgradesData = [
+        ['Selection ID', 'Choice ID', 'Choice Title', 'Category', 'Location', 'Builder Cost', 'Client Price', 'Margin %'],
+        ...selectedUpgradeItems.map(upgrade => [
+          upgrade.selectionId,
+          upgrade.choiceId,
+          upgrade.choiceTitle,
+          upgrade.category,
+          upgrade.location,
+          parseInt(upgrade.builderCost),
+          parseInt(upgrade.clientPrice),
+          parseFloat(upgrade.margin)
+        ])
+      ];
+
+      const upgradesWS = XLSX.utils.aoa_to_sheet(upgradesData);
+      XLSX.utils.book_append_sheet(wb, upgradesWS, 'Selected Upgrades');
+    }
+
+    // Generate filename
+    const filename = `PO_${orderData.buyer.lastName || 'Buyer'}_${orderData.date.replace(/-/g, '')}.xlsx`;
+    
+    // Save file
+    XLSX.writeFile(wb, filename);
+
+    toast({
+      title: "Excel Export Complete",
+      description: `Purchase order exported as ${filename}`,
     });
   };
 
@@ -444,6 +619,7 @@ export default function PurchaseOrder() {
             showCostColumns={showCostColumns}
             onSaveDraft={handleSaveDraft}
             onPreview={handlePreview}
+            onExportExcel={handleExportExcel}
             onGeneratePO={handleGeneratePO}
           />
         )}

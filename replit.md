@@ -96,6 +96,9 @@ Three main entities:
 - July 05, 2025. Added lot premium feature with running total calculation
 - July 05, 2025. Added base cost tracking and comprehensive margin calculations
 - July 05, 2025. Implemented formatted number inputs with comma separators for all dollar amounts
+- July 05, 2025. Removed decimal formatting from all currency displays - now shows whole dollars only
+- July 05, 2025. Added search and filter functionality for upgrades (search by Choice Title, filter by Category/Location)
+- July 05, 2025. Implemented Preview, Export Excel, and Generate PO functionality with comprehensive data export
 
 ## User Preferences
 

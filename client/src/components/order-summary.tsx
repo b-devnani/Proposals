@@ -1,4 +1,4 @@
-import { Save, Eye, FileText } from "lucide-react";
+import { Save, Eye, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/lib/upgrade-data";
@@ -13,6 +13,7 @@ interface OrderSummaryProps {
   onSaveDraft: () => void;
   onPreview: () => void;
   onGeneratePO: () => void;
+  onExportExcel: () => void;
 }
 
 export function OrderSummary({
@@ -24,6 +25,7 @@ export function OrderSummary({
   onSaveDraft,
   onPreview,
   onGeneratePO,
+  onExportExcel,
 }: OrderSummaryProps) {
   const upgradesTotal = selectedUpgrades.reduce(
     (total, upgrade) => total + parseFloat(upgrade.clientPrice),
@@ -114,6 +116,10 @@ export function OrderSummary({
             <Button variant="secondary" onClick={onPreview}>
               <Eye className="w-4 h-4 mr-2" />
               Preview
+            </Button>
+            <Button variant="outline" onClick={onExportExcel}>
+              <Download className="w-4 h-4 mr-2" />
+              Export Excel
             </Button>
             <Button onClick={onGeneratePO}>
               <FileText className="w-4 h-4 mr-2" />
