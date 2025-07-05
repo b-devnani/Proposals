@@ -6,6 +6,7 @@ import { Upgrade } from "@shared/schema";
 
 interface OrderSummaryProps {
   basePrice: string;
+  lotPremium: string;
   selectedUpgrades: Upgrade[];
   onSaveDraft: () => void;
   onPreview: () => void;
@@ -14,6 +15,7 @@ interface OrderSummaryProps {
 
 export function OrderSummary({
   basePrice,
+  lotPremium,
   selectedUpgrades,
   onSaveDraft,
   onPreview,
@@ -24,7 +26,7 @@ export function OrderSummary({
     0
   );
 
-  const grandTotal = parseFloat(basePrice) + upgradesTotal;
+  const grandTotal = parseFloat(basePrice) + parseFloat(lotPremium || "0") + upgradesTotal;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky bottom-0">
@@ -36,6 +38,10 @@ export function OrderSummary({
               <div className="flex justify-between items-center min-w-[300px]">
                 <span>Base Price:</span>
                 <span className="font-medium">{formatCurrency(basePrice)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Lot Premium:</span>
+                <span className="font-medium">{formatCurrency(lotPremium || "0")}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>Selected Upgrades ({selectedUpgrades.length}):</span>

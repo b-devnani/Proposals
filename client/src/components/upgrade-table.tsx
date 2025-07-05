@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { ChevronDown, ChevronRight, MapPin } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -79,7 +79,7 @@ export function UpgradeTable({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {Object.entries(groupedUpgrades).map(([category, locations]) => (
-              <tbody key={category}>
+              <React.Fragment key={category}>
                 {/* Category Header */}
                 <tr className="bg-gray-100 cursor-pointer hover:bg-gray-200" onClick={() => toggleCategory(category)}>
                   <td colSpan={showCostColumns ? 5 : 3} className="px-6 py-3">
@@ -100,7 +100,7 @@ export function UpgradeTable({
                 {/* Category Content */}
                 {expandedCategories.has(category) &&
                   Object.entries(locations).map(([location, upgrades]) => (
-                    <tbody key={`${category}-${location}`}>
+                    <React.Fragment key={`${category}-${location}`}>
                       {/* Location Header */}
                       <tr className="bg-gray-50">
                         <td className="px-6 py-2">
@@ -156,9 +156,9 @@ export function UpgradeTable({
                           </tr>
                         );
                       })}
-                    </tbody>
+                    </React.Fragment>
                   ))}
-              </tbody>
+              </React.Fragment>
             ))}
           </tbody>
         </table>

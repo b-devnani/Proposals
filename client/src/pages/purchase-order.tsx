@@ -29,6 +29,7 @@ export default function PurchaseOrder() {
     community: "",
     lotNumber: "",
     lotAddress: "",
+    lotPremium: "0",
   });
 
   // Queries
@@ -135,8 +136,10 @@ export default function PurchaseOrder() {
       ...formData,
       housePlan: currentTemplate.name,
       basePrice: currentTemplate.basePrice,
+      lotPremium: formData.lotPremium || "0",
       selectedUpgrades: Array.from(selectedUpgrades).map(String),
       totalPrice: (parseFloat(currentTemplate.basePrice) + 
+        parseFloat(formData.lotPremium || "0") +
         selectedUpgradeItems.reduce((total, upgrade) => total + parseFloat(upgrade.clientPrice), 0)).toString(),
     };
 
@@ -191,7 +194,7 @@ export default function PurchaseOrder() {
               <TabsContent key={template.id} value={template.id.toString()}>
                 <CardContent className="p-6">
                   {/* Form Inputs */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div>
                       <Label htmlFor="todays-date">Today's Date</Label>
                       <Input
@@ -255,6 +258,22 @@ export default function PurchaseOrder() {
                         className="bg-gray-50"
                       />
                     </div>
+
+                    <div>
+                      <Label htmlFor="lot-premium">Lot Premium</Label>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm font-medium text-gray-700">$</span>
+                        <Input
+                          id="lot-premium"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={formData.lotPremium}
+                          onChange={(e) => setFormData({ ...formData, lotPremium: e.target.value })}
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Base Price Editor */}
@@ -301,6 +320,7 @@ export default function PurchaseOrder() {
         {currentTemplate && (
           <OrderSummary
             basePrice={currentTemplate.basePrice}
+            lotPremium={formData.lotPremium}
             selectedUpgrades={selectedUpgradeItems}
             onSaveDraft={handleSaveDraft}
             onPreview={handlePreview}
