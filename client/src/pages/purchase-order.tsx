@@ -90,6 +90,15 @@ export default function PurchaseOrder() {
     }
   };
 
+  const handleBaseCostUpdate = (cost: string) => {
+    if (currentTemplate) {
+      updateTemplateMutation.mutate({
+        id: currentTemplate.id,
+        data: { baseCost: cost }
+      });
+    }
+  };
+
   const handleUpgradeToggle = (upgradeId: number) => {
     const newSelected = new Set(selectedUpgrades);
     if (newSelected.has(upgradeId)) {
@@ -282,19 +291,33 @@ export default function PurchaseOrder() {
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="text-lg font-semibold text-gray-900">
-                            {template.name} Base Price
+                            {template.name} Pricing
                           </h3>
-                          <p className="text-sm text-gray-600">Starting price for this home template</p>
+                          <p className="text-sm text-gray-600">Base pricing for this home template</p>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Label htmlFor="base-price" className="text-sm font-medium text-gray-700">$</Label>
-                          <Input
-                            id="base-price"
-                            type="number"
-                            className="w-32 font-semibold"
-                            value={parseFloat(template.basePrice)}
-                            onChange={(e) => handleBasePriceUpdate(e.target.value)}
-                          />
+                        <div className="flex items-center space-x-6">
+                          <div className="flex items-center space-x-2">
+                            <Label htmlFor="base-price" className="text-sm font-medium text-gray-700">Price $</Label>
+                            <Input
+                              id="base-price"
+                              type="number"
+                              className="w-32 font-semibold"
+                              value={parseFloat(template.basePrice)}
+                              onChange={(e) => handleBasePriceUpdate(e.target.value)}
+                            />
+                          </div>
+                          {showCostColumns && (
+                            <div className="flex items-center space-x-2">
+                              <Label htmlFor="base-cost" className="text-sm font-medium text-gray-700">Cost $</Label>
+                              <Input
+                                id="base-cost"
+                                type="number"
+                                className="w-32"
+                                value={parseFloat(template.baseCost || "0")}
+                                onChange={(e) => handleBaseCostUpdate(e.target.value)}
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -320,6 +343,7 @@ export default function PurchaseOrder() {
         {currentTemplate && (
           <OrderSummary
             basePrice={currentTemplate.basePrice}
+            baseCost={currentTemplate.baseCost || "0"}
             lotPremium={formData.lotPremium}
             selectedUpgrades={selectedUpgradeItems}
             showCostColumns={showCostColumns}

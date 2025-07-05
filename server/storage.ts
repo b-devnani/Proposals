@@ -48,9 +48,9 @@ export class MemStorage implements IStorage {
   private initializeData() {
     // Initialize home templates
     const templates: HomeTemplate[] = [
-      { id: this.currentTemplateId++, name: "Ravello", basePrice: "631995.00" },
-      { id: this.currentTemplateId++, name: "Sorrento", basePrice: "614995.00" },
-      { id: this.currentTemplateId++, name: "Verona", basePrice: "609995.00" },
+      { id: this.currentTemplateId++, name: "Ravello", basePrice: "631995.00", baseCost: "500000.00" },
+      { id: this.currentTemplateId++, name: "Sorrento", basePrice: "614995.00", baseCost: "485000.00" },
+      { id: this.currentTemplateId++, name: "Verona", basePrice: "609995.00", baseCost: "475000.00" },
     ];
 
     templates.forEach(template => {

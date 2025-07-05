@@ -6,6 +6,7 @@ export const homeTemplates = pgTable("home_templates", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
+  baseCost: decimal("base_cost", { precision: 10, scale: 2 }).notNull().default("0.00"),
 });
 
 export const upgrades = pgTable("upgrades", {

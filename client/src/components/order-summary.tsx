@@ -6,6 +6,7 @@ import { Upgrade } from "@shared/schema";
 
 interface OrderSummaryProps {
   basePrice: string;
+  baseCost: string;
   lotPremium: string;
   selectedUpgrades: Upgrade[];
   showCostColumns: boolean;
@@ -16,6 +17,7 @@ interface OrderSummaryProps {
 
 export function OrderSummary({
   basePrice,
+  baseCost,
   lotPremium,
   selectedUpgrades,
   showCostColumns,
@@ -33,9 +35,12 @@ export function OrderSummary({
     0
   );
 
-  const totalMargin = upgradesTotal > 0 ? ((upgradesTotal - upgradesBuilderCost) / upgradesTotal * 100) : 0;
-
+  const baseMargin = parseFloat(basePrice) > 0 ? ((parseFloat(basePrice) - parseFloat(baseCost || "0")) / parseFloat(basePrice) * 100) : 0;
+  const upgradesMargin = upgradesTotal > 0 ? ((upgradesTotal - upgradesBuilderCost) / upgradesTotal * 100) : 0;
+  
   const grandTotal = parseFloat(basePrice) + parseFloat(lotPremium || "0") + upgradesTotal;
+  const totalCost = parseFloat(baseCost || "0") + upgradesBuilderCost;
+  const overallMargin = grandTotal > 0 ? ((grandTotal - totalCost) / grandTotal * 100) : 0;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky bottom-0">
@@ -48,6 +53,20 @@ export function OrderSummary({
                 <span>Base Price:</span>
                 <span className="font-medium">{formatCurrency(basePrice)}</span>
               </div>
+              {showCostColumns && (
+                <>
+                  <div className="flex justify-between items-center text-sm">
+                    <span>Base Cost:</span>
+                    <span className="font-medium">{formatCurrency(baseCost || "0")}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span>Base Margin:</span>
+                    <span className={`font-medium ${baseMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {baseMargin >= 0 ? '+' : ''}{baseMargin.toFixed(2)}%
+                    </span>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between items-center">
                 <span>Lot Premium:</span>
                 <span className="font-medium">{formatCurrency(lotPremium || "0")}</span>
@@ -64,11 +83,20 @@ export function OrderSummary({
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span>Upgrades Margin:</span>
-                    <span className={`font-medium ${totalMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {totalMargin >= 0 ? '+' : ''}{totalMargin.toFixed(2)}%
+                    <span className={`font-medium ${upgradesMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {upgradesMargin >= 0 ? '+' : ''}{upgradesMargin.toFixed(2)}%
                     </span>
                   </div>
                 </>
+              )}
+              <Separator className="my-2" />
+              {showCostColumns && (
+                <div className="flex justify-between items-center text-sm font-semibold">
+                  <span>Overall Margin:</span>
+                  <span className={`${overallMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {overallMargin >= 0 ? '+' : ''}{overallMargin.toFixed(2)}%
+                  </span>
+                </div>
               )}
               <Separator className="my-2" />
               <div className="flex justify-between items-center text-lg font-bold text-gray-900">
