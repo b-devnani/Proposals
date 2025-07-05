@@ -463,7 +463,7 @@ export default function PurchaseOrder() {
           }
         });
         
-        yPos = (pdf as any).autoTable.previous.finalY + 15;
+        yPos = (pdf as any).lastAutoTable.finalY + 15;
       }
       
       // Pricing Summary
