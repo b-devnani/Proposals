@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Search, Filter } from "lucide-react";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import logoPath from "@assets/logo-fullColor (1)_1751758486563.png";
 import { useToast } from "@/hooks/use-toast";
 import { UpgradeTable } from "@/components/upgrade-table";
@@ -437,7 +437,7 @@ export default function PurchaseOrder() {
           `$${parseInt(upgrade.clientPrice).toLocaleString()}`
         ]);
         
-        (pdf as any).autoTable({
+        autoTable(pdf, {
           startY: yPos,
           head: [['Choice Title', 'Category', 'Location', 'Price']],
           body: upgradeTableData,
@@ -463,7 +463,7 @@ export default function PurchaseOrder() {
           }
         });
         
-        yPos = (pdf as any).lastAutoTable.finalY + 15;
+        yPos = (pdf as any).autoTable.previous.finalY + 15;
       }
       
       // Pricing Summary
