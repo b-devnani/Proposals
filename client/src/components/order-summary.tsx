@@ -46,11 +46,11 @@ export function OrderSummary({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky bottom-0">
-      <div className="px-6 py-4">
+      <div className="px-4 py-2">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Order Summary</h3>
-            <div className="text-sm text-gray-600 space-y-2">
+            <h3 className="text-base font-semibold text-gray-900 mb-1">Order Summary</h3>
+            <div className="text-sm text-gray-600 space-y-1">
               <div className="flex justify-between items-center min-w-[300px]">
                 <span>Base Price:</span>
                 <span className="font-medium">{formatCurrency(basePrice)}</span>
@@ -91,7 +91,7 @@ export function OrderSummary({
                   </div>
                 </>
               )}
-              <Separator className="my-2" />
+              <Separator className="my-1" />
               {showCostColumns && (
                 <div className="flex justify-between items-center text-sm font-semibold">
                   <span>Overall Margin:</span>
@@ -100,7 +100,7 @@ export function OrderSummary({
                   </span>
                 </div>
               )}
-              <Separator className="my-2" />
+              <Separator className="my-1" />
               <div className="flex justify-between items-center text-lg font-bold text-gray-900">
                 <span>Total:</span>
                 <span>{formatCurrency(grandTotal)}</span>
@@ -108,21 +108,21 @@ export function OrderSummary({
             </div>
           </div>
 
-          <div className="flex space-x-3">
-            <Button variant="outline" onClick={onSaveDraft}>
-              <Save className="w-4 h-4 mr-2" />
+          <div className="flex space-x-2">
+            <Button variant="outline" size="sm" onClick={onSaveDraft}>
+              <Save className="w-3 h-3 mr-1" />
               Save Draft
             </Button>
-            <Button variant="secondary" onClick={onPreview}>
-              <Eye className="w-4 h-4 mr-2" />
+            <Button variant="secondary" size="sm" onClick={onPreview}>
+              <Eye className="w-3 h-3 mr-1" />
               Preview
             </Button>
-            <Button variant="outline" onClick={onExportExcel}>
-              <Download className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={onExportExcel}>
+              <Download className="w-3 h-3 mr-1" />
               Export Excel
             </Button>
-            <Button onClick={onGeneratePO}>
-              <FileText className="w-4 h-4 mr-2" />
+            <Button size="sm" onClick={onGeneratePO}>
+              <FileText className="w-3 h-3 mr-1" />
               Generate PO
             </Button>
           </div>
