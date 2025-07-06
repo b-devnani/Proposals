@@ -265,7 +265,7 @@ export default function PurchaseOrder() {
     });
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcelOLD = async () => {
     if (!currentTemplate) {
       toast({
         title: "Export Failed",
@@ -275,64 +275,53 @@ export default function PurchaseOrder() {
       return;
     }
 
-    // Create workbook
-    const wb = XLSX.utils.book_new();
+    // Use ExcelJS for proper styling support
+    const ExcelJS = (await import('exceljs')).default;
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Order Summary');
 
     const selectedUpgradeItems = upgrades?.filter(upgrade => selectedUpgrades.has(upgrade.id)) || [];
     
-    // Create workbook with template structure
-    const ws: any = {};
+    // Set column widths to match template
+    worksheet.columns = [
+      { width: 15 }, // A - Option
+      { width: 15 }, // B - Form labels  
+      { width: 5 },  // C - Spacer
+      { width: 15 }, // D - Form data
+      { width: 20 }, // E - Description start
+      { width: 20 }, // F
+      { width: 20 }, // G  
+      { width: 20 }, // H
+      { width: 15 }  // I - Subtotal
+    ];
     
-    // Create cells with styling applied immediately
+    // Title with blue background and white text
+    const titleCell = worksheet.getCell('A1');
+    titleCell.value = 'PURCHASE ORDER';
+    titleCell.font = { bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
+    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells('A1:I1');
+    worksheet.getRow(1).height = 30;
     
-    // Title with styling
-    ws['A1'] = { 
-      v: 'PURCHASE ORDER', 
-      t: 's',
-      s: { 
-        font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } }, 
-        fill: { fgColor: { rgb: "366092" } }, 
-        alignment: { horizontal: "center" } 
-      }
-    };
-    
-    // Company info with styling
-    ws['A3'] = { 
-      v: '• BEECHEN & DILL HOMES •', 
-      t: 's',
-      s: { 
-        font: { bold: true, sz: 14, color: { rgb: "366092" } }, 
-        fill: { fgColor: { rgb: "E7F3FF" } }, 
-        alignment: { horizontal: "center" } 
-      }
-    };
+    // Company info with light blue background
+    const companyCell = worksheet.getCell('A3');
+    companyCell.value = '• BEECHEN & DILL HOMES •';
+    companyCell.font = { bold: true, size: 14, color: { argb: 'FF366092' } };
+    companyCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE7F3FF' } };
+    companyCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells('A3:I3');
+    worksheet.getRow(3).height = 25;
     
     // Address line
-    ws['A7'] = { v: '565 Village Center Dr', t: 's' };
-    ws['C7'] = { v: '•', t: 's' };
-    ws['D7'] = { v: 'Burr Ridge, IL 60527-4516', t: 's' };
-    ws['G7'] = { v: '•', t: 's' };
-    ws['H7'] = { v: 'Phone: (630) 920-9430', t: 's' };
-    
-    // Form data section with styling
-    ws['B9'] = { v: 'Date', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
-    ws['E9'] = { v: new Date().toLocaleDateString(), t: 's' };
-    ws['B10'] = { v: "Buyer's Last Name", t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
-    ws['E10'] = { v: formData.buyerLastName || '', t: 's' };
-    ws['B11'] = { v: 'Community', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
-    ws['E11'] = { v: formData.community || '', t: 's' };
-    ws['B12'] = { v: 'Lot Number', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
-    ws['E12'] = { v: formData.lotNumber || '', t: 's' };
-    ws['B13'] = { v: 'Lot Address', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
-    ws['E13'] = { v: formData.lotAddress || '', t: 's' };
-    ws['B14'] = { v: 'House Plan', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
-    ws['E14'] = { v: currentTemplate.name, t: 's' };
-    
-    // Base pricing with styling
-    ws['E16'] = { v: `${currentTemplate.name} Base Price`, t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "D1ECF1" } } } };
-    ws['I16'] = { v: parseInt(currentTemplate.basePrice), t: 'n', s: { numFmt: '"$"#,##0', font: { bold: true }, alignment: { horizontal: "right" } } };
-    ws['E17'] = { v: 'Lot Premium', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "D1ECF1" } } } };
-    ws['I17'] = { v: parseInt(formData.lotPremium || "0"), t: 'n', s: { numFmt: '"$"#,##0', font: { bold: true }, alignment: { horizontal: "right" } } };
+    worksheet.getCell('A7').value = '565 Village Center Dr';
+    worksheet.getCell('C7').value = '•';
+    worksheet.getCell('D7').value = 'Burr Ridge, IL 60527-4516';
+    worksheet.getCell('G7').value = '•';
+    worksheet.getCell('H7').value = 'Phone: (630) 920-9430';
+    worksheet.mergeCells('A7:I7');
+
+
     
     // Headers with styling
     ws['A19'] = { 
@@ -606,6 +595,232 @@ export default function PurchaseOrder() {
     toast({
       title: "Excel Export Complete",
       description: "Purchase order exported with template format and preserved formulas.",
+    });
+  };
+
+  const handleExportExcel = async () => {
+    if (!currentTemplate) {
+      toast({
+        title: "Export Failed",
+        description: "Please select a template.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Use ExcelJS for proper styling support
+    const ExcelJS = (await import('exceljs')).default;
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Order Summary');
+
+    const selectedUpgradeItems = upgrades?.filter(upgrade => selectedUpgrades.has(upgrade.id)) || [];
+    
+    // Set column widths to match template
+    worksheet.columns = [
+      { width: 15 }, // A - Option
+      { width: 15 }, // B - Form labels  
+      { width: 5 },  // C - Spacer
+      { width: 15 }, // D - Form data
+      { width: 20 }, // E - Description start
+      { width: 20 }, // F
+      { width: 20 }, // G  
+      { width: 20 }, // H
+      { width: 15 }  // I - Subtotal
+    ];
+    
+    // Title with blue background and white text
+    const titleCell = worksheet.getCell('A1');
+    titleCell.value = 'PURCHASE ORDER';
+    titleCell.font = { bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
+    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells('A1:I1');
+    worksheet.getRow(1).height = 30;
+    
+    // Company info with light blue background
+    const companyCell = worksheet.getCell('A3');
+    companyCell.value = '• BEECHEN & DILL HOMES •';
+    companyCell.font = { bold: true, size: 14, color: { argb: 'FF366092' } };
+    companyCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE7F3FF' } };
+    companyCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells('A3:I3');
+    worksheet.getRow(3).height = 25;
+    
+    // Address line
+    worksheet.getCell('A7').value = '565 Village Center Dr';
+    worksheet.getCell('C7').value = '•';
+    worksheet.getCell('D7').value = 'Burr Ridge, IL 60527-4516';
+    worksheet.getCell('G7').value = '•';
+    worksheet.getCell('H7').value = 'Phone: (630) 920-9430';
+    worksheet.mergeCells('A7:I7');
+    
+    // Form data section with gray labels
+    const formLabels = [
+      ['B9', 'Date', 'E9', new Date().toLocaleDateString()],
+      ['B10', "Buyer's Last Name", 'E10', formData.buyerLastName || ''],
+      ['B11', 'Community', 'E11', formData.community || ''],
+      ['B12', 'Lot Number', 'E12', formData.lotNumber || ''],
+      ['B13', 'Lot Address', 'E13', formData.lotAddress || ''],
+      ['B14', 'House Plan', 'E14', currentTemplate.name]
+    ];
+    
+    formLabels.forEach(([labelCell, labelText, valueCell, valueText]) => {
+      const label = worksheet.getCell(labelCell);
+      label.value = labelText;
+      label.font = { bold: true };
+      label.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
+      
+      const value = worksheet.getCell(valueCell);
+      value.value = valueText;
+    });
+    
+    // Base pricing with light blue background
+    const basePriceLabel = worksheet.getCell('E16');
+    basePriceLabel.value = `${currentTemplate.name} Base Price`;
+    basePriceLabel.font = { bold: true };
+    basePriceLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1ECF1' } };
+    
+    const basePriceValue = worksheet.getCell('I16');
+    basePriceValue.value = parseInt(currentTemplate.basePrice);
+    basePriceValue.numFmt = '"$"#,##0';
+    basePriceValue.font = { bold: true };
+    basePriceValue.alignment = { horizontal: 'right' };
+    
+    const lotPremiumLabel = worksheet.getCell('E17');
+    lotPremiumLabel.value = 'Lot Premium';
+    lotPremiumLabel.font = { bold: true };
+    lotPremiumLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1ECF1' } };
+    
+    const lotPremiumValue = worksheet.getCell('I17');
+    lotPremiumValue.value = parseInt(formData.lotPremium || "0");
+    lotPremiumValue.numFmt = '"$"#,##0';
+    lotPremiumValue.font = { bold: true };
+    lotPremiumValue.alignment = { horizontal: 'right' };
+    
+    // Headers with blue background and white text
+    const headerStyle = {
+      font: { bold: true, color: { argb: 'FFFFFFFF' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } },
+      alignment: { horizontal: 'center', vertical: 'middle' }
+    };
+    
+    const optionHeader = worksheet.getCell('A19');
+    optionHeader.value = 'Option';
+    Object.assign(optionHeader, headerStyle);
+    worksheet.mergeCells('A19:D19');
+    
+    const descHeader = worksheet.getCell('E19');
+    descHeader.value = 'Description/Notes';
+    Object.assign(descHeader, headerStyle);
+    worksheet.mergeCells('E19:H19');
+    
+    const subtotalHeader = worksheet.getCell('I19');
+    subtotalHeader.value = 'Subtotal';
+    Object.assign(subtotalHeader, headerStyle);
+    
+    worksheet.getRow(19).height = 20;
+    
+    // Track current row for upgrades
+    let currentRow = 20;
+    
+    // Group and sort upgrades by category and location
+    const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
+    
+    Object.entries(groupedUpgrades).forEach(([category, locations]) => {
+      // Category header with blue background
+      const categoryRow = worksheet.getRow(currentRow);
+      categoryRow.getCell(1).value = category;
+      
+      for (let col = 1; col <= 9; col++) {
+        const cell = categoryRow.getCell(col);
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
+        cell.alignment = { horizontal: 'left', vertical: 'middle' };
+      }
+      currentRow++;
+      
+      Object.entries(locations).forEach(([location, upgrades]) => {
+        // Location header (if not N/A)
+        if (location !== "N/A") {
+          const locationRow = worksheet.getRow(currentRow);
+          locationRow.getCell(1).value = location;
+          
+          for (let col = 1; col <= 9; col++) {
+            const cell = locationRow.getCell(col);
+            cell.font = { bold: true, italic: true };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE9ECEF' } };
+            cell.alignment = { horizontal: 'left', vertical: 'middle' };
+          }
+          currentRow++;
+        }
+        
+        // Add upgrade items with alternating colors
+        upgrades.forEach((upgrade, upgradeIndex) => {
+          const row = worksheet.getRow(currentRow);
+          const isEvenRow = upgradeIndex % 2 === 0;
+          const bgColor = isEvenRow ? 'FFF8F9FA' : 'FFFFFFFF';
+          
+          // Choice title
+          const titleCell = row.getCell(1);
+          titleCell.value = upgrade.choiceTitle;
+          titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+          titleCell.alignment = { horizontal: 'left', vertical: 'middle' };
+          
+          // Price value
+          const priceCell = row.getCell(9);
+          priceCell.value = parseInt(upgrade.clientPrice);
+          priceCell.numFmt = '"$"#,##0';
+          priceCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+          priceCell.alignment = { horizontal: 'right', vertical: 'middle' };
+          
+          // Empty cells with background
+          for (let col = 2; col <= 8; col++) {
+            const cell = row.getCell(col);
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+          }
+          
+          currentRow++;
+        });
+      });
+    });
+    
+    // Grand Total with blue background
+    const grandTotalRow = worksheet.getRow(currentRow);
+    grandTotalRow.getCell(1).value = 'Grand Total';
+    
+    // Formula for grand total
+    const grandTotalCell = grandTotalRow.getCell(9);
+    grandTotalCell.value = { formula: `SUM(I16:I${currentRow - 1})` };
+    grandTotalCell.numFmt = '"$"#,##0';
+    
+    for (let col = 1; col <= 9; col++) {
+      const cell = grandTotalRow.getCell(col);
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+      cell.alignment = { horizontal: col === 9 ? 'right' : 'left', vertical: 'middle' };
+    }
+    
+    // Generate filename with buyer name and date
+    const buyerName = formData.buyerLastName || 'Customer';
+    const dateStr = new Date().toISOString().split('T')[0];
+    const fileName = `PO_${currentTemplate.name}_${buyerName}_${dateStr}.xlsx`;
+    
+    // Generate buffer and download
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Excel Export Complete",
+      description: `Purchase order exported as ${fileName}`
     });
   };
 
