@@ -434,48 +434,35 @@ export default function PurchaseOrder() {
           currentRow++;
         }
         
-        // Add upgrade items with styling
+        // Upgrade Items with exact mapping - Alternating row colors, borders, aligned
         upgrades.forEach((upgrade, upgradeIndex) => {
-          const rowIndex = currentRow - 1;
+          const row = worksheet.getRow(currentRow);
           const isEvenRow = upgradeIndex % 2 === 0;
-          const bgColor = isEvenRow ? "F8F9FA" : "FFFFFF";
+          const bgColor = isEvenRow ? 'FFF8F9FA' : 'FFFFFFFF';
           
-          // Create all cells in the row with styling
-          for (let col = 0; col < 9; col++) {
-            const cellAddr = XLSX.utils.encode_cell({ r: rowIndex, c: col });
-            
-            if (col === 0) {
-              // Choice title
-              ws[cellAddr] = { 
-                v: upgrade.choiceTitle, 
-                t: 's',
-                s: {
-                  fill: { fgColor: { rgb: bgColor } },
-                  alignment: { horizontal: "left" }
-                }
-              };
-            } else if (col === 8) {
-              // Price value
-              ws[cellAddr] = { 
-                v: parseInt(upgrade.clientPrice), 
-                t: 'n',
-                s: {
-                  numFmt: '"$"#,##0',
-                  fill: { fgColor: { rgb: bgColor } },
-                  alignment: { horizontal: "right" }
-                }
-              };
-            } else {
-              // Empty cells with background
-              ws[cellAddr] = { 
-                v: '', 
-                t: 's',
-                s: {
-                  fill: { fgColor: { rgb: bgColor } },
-                  alignment: { horizontal: "left" }
-                }
-              };
-            }
+          // Upgrade Item: Choice Title Column A - Alternating row colors, borders, left aligned
+          const titleCell = row.getCell(1);
+          titleCell.value = upgrade.choiceTitle;
+          titleCell.font = { name: 'Calibri' };
+          titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+          titleCell.alignment = { horizontal: 'left', vertical: 'middle' };
+          titleCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+          
+          // Upgrade Item: Price Column I - Alternating row colors, borders, right aligned, currency format
+          const priceCell = row.getCell(9);
+          priceCell.value = parseInt(upgrade.clientPrice);
+          priceCell.numFmt = '"$"#,##0';
+          priceCell.font = { name: 'Calibri' };
+          priceCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+          priceCell.alignment = { horizontal: 'right', vertical: 'middle' };
+          priceCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+          
+          // Upgrade Item: Spacer Columns B-H - Empty cells with background, borders
+          for (let col = 2; col <= 8; col++) {
+            const cell = row.getCell(col);
+            cell.font = { name: 'Calibri' };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
           }
           
           currentRow++;
@@ -487,147 +474,146 @@ export default function PurchaseOrder() {
     const grandTotalRow = currentRow;
     const grandTotalRowIndex = grandTotalRow - 1;
     
-    // Create Grand Total row with styling
-    for (let col = 0; col < 9; col++) {
-      const cellAddr = XLSX.utils.encode_cell({ r: grandTotalRowIndex, c: col });
-      
-      if (col === 0) {
-        // Grand Total label
-        ws[cellAddr] = { 
-          v: 'Grand Total', 
-          t: 's',
-          s: {
-            font: { bold: true, color: { rgb: "FFFFFF" } },
-            fill: { fgColor: { rgb: "366092" } },
-            alignment: { horizontal: "left" }
-          }
-        };
-      } else if (col === 8) {
-        // Grand Total formula
-        ws[cellAddr] = { 
-          f: `SUM(I16:I${grandTotalRow - 1})`, 
-          t: 'n',
-          s: {
-            font: { bold: true, color: { rgb: "FFFFFF" } },
-            fill: { fgColor: { rgb: "366092" } },
-            alignment: { horizontal: "right" },
-            numFmt: '"$"#,##0'
-          }
-        };
-      } else {
-        // Empty cells with background
-        ws[cellAddr] = { 
-          v: '', 
-          t: 's',
-          s: {
-            font: { bold: true, color: { rgb: "FFFFFF" } },
-            fill: { fgColor: { rgb: "366092" } },
-            alignment: { horizontal: "left" }
-          }
-        };
-      }
-    };
-    
-    // Summary section with formulas
-    const summaryStartRow = grandTotalRow + 2;
-    ws[XLSX.utils.encode_cell({ r: summaryStartRow, c: 8 })] = { v: 'SUMMARY:', t: 's' };
-    
-    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 1, c: 7 })] = { v: 'Base Price:', t: 's' };
-    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 1, c: 8 })] = { f: 'I16', t: 'n' };
-    
-    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 2, c: 7 })] = { v: 'Lot Premium:', t: 's' };
-    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 2, c: 8 })] = { f: 'I17', t: 'n' };
-    
-    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 3, c: 7 })] = { v: 'Upgrades Total:', t: 's' };
-    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 3, c: 8 })] = { 
-      f: `SUM(I20:I${grandTotalRow - 1})`, 
-      t: 'n' 
-    };
-    
-    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 4, c: 7 })] = { v: 'Grand Total:', t: 's' };
-    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 4, c: 8 })] = { 
-      f: `SUM(I${summaryStartRow + 2}:I${summaryStartRow + 4})`, 
-      t: 'n' 
-    };
-    
-    // Signature section
-    const sigStartRow = summaryStartRow + 6;
-    ws[XLSX.utils.encode_cell({ r: sigStartRow, c: 0 })] = { 
-      v: 'By signing below, both parties acknowledge and agree to the terms and conditions outlined in this Purchase Order.', 
-      t: 's' 
-    };
-    
-    ws[XLSX.utils.encode_cell({ r: sigStartRow + 3, c: 0 })] = { v: 'Buyer Signature:', t: 's' };
-    ws[XLSX.utils.encode_cell({ r: sigStartRow + 3, c: 7 })] = { v: 'Date:', t: 's' };
-    
-    ws[XLSX.utils.encode_cell({ r: sigStartRow + 7, c: 0 })] = { v: 'Beechen & Dill Homes Representative:', t: 's' };
-    ws[XLSX.utils.encode_cell({ r: sigStartRow + 7, c: 7 })] = { v: 'Date:', t: 's' };
-    
-    // Set worksheet range
-    ws['!ref'] = `A1:I${sigStartRow + 8}`;
-    
-    // Add merged cells for proper formatting
-    ws['!merges'] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } }, // Title
-      { s: { r: 2, c: 0 }, e: { r: 2, c: 8 } }, // Company name
-      { s: { r: 6, c: 0 }, e: { r: 6, c: 1 } }, // Address
-      { s: { r: 6, c: 3 }, e: { r: 6, c: 5 } }, // Address continued
-      { s: { r: 8, c: 4 }, e: { r: 8, c: 8 } }, // Date
-      { s: { r: 9, c: 4 }, e: { r: 9, c: 8 } }, // Buyer name
-      { s: { r: 10, c: 4 }, e: { r: 10, c: 8 } }, // Community
-      { s: { r: 11, c: 4 }, e: { r: 11, c: 8 } }, // Lot number
-      { s: { r: 12, c: 4 }, e: { r: 12, c: 8 } }, // Lot address
-      { s: { r: 13, c: 4 }, e: { r: 13, c: 8 } }, // House plan
-      { s: { r: 15, c: 4 }, e: { r: 15, c: 7 } }, // Base price label
-      { s: { r: 16, c: 4 }, e: { r: 16, c: 7 } }, // Lot premium label
-      { s: { r: 18, c: 4 }, e: { r: 18, c: 7 } }, // Description header
-      { s: { r: grandTotalRow - 1, c: 0 }, e: { r: grandTotalRow - 1, c: 7 } }, // Grand total
-      { s: { r: sigStartRow, c: 0 }, e: { r: sigStartRow + 1, c: 8 } } // Agreement text
+    // Add proper column widths for professional appearance
+    worksheet.columns = [
+      { width: 25 }, // A - Option
+      { width: 15 }, // B 
+      { width: 15 }, // C
+      { width: 15 }, // D
+      { width: 20 }, // E - Description
+      { width: 15 }, // F
+      { width: 15 }, // G
+      { width: 15 }, // H
+      { width: 15 }  // I - Subtotal
     ];
     
-    // Add column widths for better formatting
-    ws['!cols'] = [
-      { wch: 20 }, // A - Option
-      { wch: 12 }, // B - Labels
-      { wch: 3 },  // C - Bullet
-      { wch: 20 }, // D - Address
-      { wch: 20 }, // E - Description/Data
-      { wch: 12 }, // F
-      { wch: 3 },  // G - Bullet
-      { wch: 15 }, // H - Phone/Summary Labels
-      { wch: 12 }  // I - Subtotal/Values
-    ];
+    currentRow += 2; // Add space before summary section
     
-    // Add row heights for better spacing
-    ws['!rows'] = [
-      { hpt: 25 }, // Title row
-      null, null, null, null, null,
-      { hpt: 20 }, // Address row
-      null,
-      { hpt: 18 }, // Form data rows
-      { hpt: 18 },
-      { hpt: 18 },
-      { hpt: 18 },
-      { hpt: 18 },
-      { hpt: 18 },
-      null,
-      { hpt: 20 }, // Pricing rows
-      { hpt: 20 },
-      null,
-      { hpt: 20 }  // Headers
-    ];
+    // Summary Section as per mapping
+    const summaryHeaderCell = worksheet.getCell(`H${currentRow}`);
+    summaryHeaderCell.value = 'SUMMARY';
+    summaryHeaderCell.font = { name: 'Calibri', bold: true };
+    summaryHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells(`H${currentRow}:I${currentRow}`);
     
-    // Formatting is now applied when cells are created above
-    // No additional formatting needed here
+    currentRow++;
     
-    // Add worksheet to workbook
-    XLSX.utils.book_append_sheet(wb, ws, 'Order Summary');
+    // Base Price Summary
+    const basePriceSummaryLabel = worksheet.getCell(`H${currentRow}`);
+    basePriceSummaryLabel.value = 'Base Price:';
+    basePriceSummaryLabel.font = { name: 'Calibri', bold: true };
+    basePriceSummaryLabel.alignment = { horizontal: 'right', vertical: 'middle' };
     
-    // Generate filename
-    const filename = `PO_${currentTemplate.name}_${formData.buyerLastName || 'Draft'}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const basePriceSummaryValue = worksheet.getCell(`I${currentRow}`);
+    basePriceSummaryValue.value = { formula: 'I16' };
+    basePriceSummaryValue.numFmt = '"$"#,##0';
+    basePriceSummaryValue.font = { name: 'Calibri' };
+    basePriceSummaryValue.alignment = { horizontal: 'right', vertical: 'middle' };
     
-    // Save file
-    XLSX.writeFile(wb, filename);
+    currentRow++;
+    
+    // Lot Premium Summary
+    const lotPremiumSummaryLabel = worksheet.getCell(`H${currentRow}`);
+    lotPremiumSummaryLabel.value = 'Lot Premium:';
+    lotPremiumSummaryLabel.font = { name: 'Calibri', bold: true };
+    lotPremiumSummaryLabel.alignment = { horizontal: 'right', vertical: 'middle' };
+    
+    const lotPremiumSummaryValue = worksheet.getCell(`I${currentRow}`);
+    lotPremiumSummaryValue.value = { formula: 'I17' };
+    lotPremiumSummaryValue.numFmt = '"$"#,##0';
+    lotPremiumSummaryValue.font = { name: 'Calibri' };
+    lotPremiumSummaryValue.alignment = { horizontal: 'right', vertical: 'middle' };
+    
+    currentRow++;
+    
+    // Upgrades Total Summary
+    const upgradesRowEnd = currentRow - 4; // Adjust for current position
+    const upgradesSummaryLabel = worksheet.getCell(`H${currentRow}`);
+    upgradesSummaryLabel.value = 'Upgrades Total:';
+    upgradesSummaryLabel.font = { name: 'Calibri', bold: true };
+    upgradesSummaryLabel.alignment = { horizontal: 'right', vertical: 'middle' };
+    
+    const upgradesSummaryValue = worksheet.getCell(`I${currentRow}`);
+    upgradesSummaryValue.value = { formula: `SUM(I20:I${upgradesRowEnd})` };
+    upgradesSummaryValue.numFmt = '"$"#,##0';
+    upgradesSummaryValue.font = { name: 'Calibri' };
+    upgradesSummaryValue.alignment = { horizontal: 'right', vertical: 'middle' };
+    
+    currentRow++;
+    
+    // Grand Total Summary
+    const grandTotalSummaryLabel = worksheet.getCell(`H${currentRow}`);
+    grandTotalSummaryLabel.value = 'Grand Total:';
+    grandTotalSummaryLabel.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
+    grandTotalSummaryLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+    grandTotalSummaryLabel.alignment = { horizontal: 'right', vertical: 'middle' };
+    grandTotalSummaryLabel.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    
+    const grandTotalSummaryValue = worksheet.getCell(`I${currentRow}`);
+    grandTotalSummaryValue.value = { formula: `SUM(I${currentRow-3}:I${currentRow-1})` };
+    grandTotalSummaryValue.numFmt = '"$"#,##0';
+    grandTotalSummaryValue.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
+    grandTotalSummaryValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+    grandTotalSummaryValue.alignment = { horizontal: 'right', vertical: 'middle' };
+    grandTotalSummaryValue.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    
+    currentRow += 3; // Add space before signature section
+    
+    // Signature Section as per mapping
+    // Signature Text: Full Row - Merge cells A:I, normal text
+    const signatureTextRow = worksheet.getRow(currentRow);
+    const signatureTextCell = signatureTextRow.getCell(1);
+    signatureTextCell.value = 'By signing below, both parties agree to the terms and total amount shown above.';
+    signatureTextCell.font = { name: 'Calibri' };
+    signatureTextCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
+    
+    currentRow += 2;
+    
+    // Buyer Signature section
+    const buyerSigRow = worksheet.getRow(currentRow);
+    buyerSigRow.getCell(2).value = 'Buyer Signature:';
+    buyerSigRow.getCell(2).font = { name: 'Calibri', bold: true };
+    buyerSigRow.getCell(2).border = { bottom: {style:'thin'} }; // Signature line
+    
+    buyerSigRow.getCell(6).value = 'Date:';
+    buyerSigRow.getCell(6).font = { name: 'Calibri', bold: true };
+    buyerSigRow.getCell(7).border = { bottom: {style:'thin'} }; // Signature line
+    
+    currentRow += 2;
+    
+    // Company Signature section
+    const companySigRow = worksheet.getRow(currentRow);
+    companySigRow.getCell(2).value = 'Company Representative:';
+    companySigRow.getCell(2).font = { name: 'Calibri', bold: true };
+    companySigRow.getCell(2).border = { bottom: {style:'thin'} }; // Signature line
+    
+    companySigRow.getCell(6).value = 'Date:';
+    companySigRow.getCell(6).font = { name: 'Calibri', bold: true };
+    companySigRow.getCell(7).border = { bottom: {style:'thin'} }; // Signature line
+    
+    // Generate filename with buyer name and date
+    const buyerName = formData.buyerLastName || 'Customer';
+    const dateStr = new Date().toISOString().split('T')[0];
+    const fileName = `PO_${currentTemplate.name}_${buyerName}_${dateStr}.xlsx`;
+    
+    // Generate buffer and download
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Excel Export Complete",
+      description: "Purchase order exported following exact template cell mapping with proper formatting, merged cells, borders, fonts, summary, and signatures.",
+    });
     
     toast({
       title: "Excel Export Complete",
