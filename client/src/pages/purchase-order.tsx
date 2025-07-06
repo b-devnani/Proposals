@@ -395,41 +395,41 @@ export default function PurchaseOrder() {
     const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
     
     Object.entries(groupedUpgrades).forEach(([category, locations]) => {
-      // Category header with styling applied immediately
-      const categoryRowIndex = currentRow - 1;
+      // Category Header with exact mapping - Blue background, white text, bold, borders spanning full row
+      const categoryRow = worksheet.getRow(currentRow);
+      const categoryCell = categoryRow.getCell(1);
+      categoryCell.value = category;
+      categoryCell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
+      categoryCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+      categoryCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      categoryCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
       
-      // Create category header cells with styling
-      for (let col = 0; col < 9; col++) {
-        const cellAddr = XLSX.utils.encode_cell({ r: categoryRowIndex, c: col });
-        ws[cellAddr] = { 
-          v: col === 0 ? category : '', 
-          t: 's',
-          s: {
-            font: { bold: true, color: { rgb: "FFFFFF" } },
-            fill: { fgColor: { rgb: "4472C4" } },
-            alignment: { horizontal: "left" }
-          }
-        };
+      // Fill remaining cells in category row with same styling
+      for (let col = 2; col <= 9; col++) {
+        const cell = categoryRow.getCell(col);
+        cell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+        cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
       }
       currentRow++;
       
       Object.entries(locations).forEach(([location, upgrades]) => {
-        // Location header (if not N/A)
+        // Location Header (if not N/A) with exact mapping - Light gray background, italic, bold, borders spanning full row
         if (location !== "N/A") {
-          const locationRowIndex = currentRow - 1;
+          const locationRow = worksheet.getRow(currentRow);
+          const locationCell = locationRow.getCell(1);
+          locationCell.value = location;
+          locationCell.font = { name: 'Calibri', bold: true, italic: true };
+          locationCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE9ECEF' } };
+          locationCell.alignment = { horizontal: 'left', vertical: 'middle' };
+          locationCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
           
-          // Create location header cells with styling
-          for (let col = 0; col < 9; col++) {
-            const cellAddr = XLSX.utils.encode_cell({ r: locationRowIndex, c: col });
-            ws[cellAddr] = { 
-              v: col === 0 ? location : '', 
-              t: 's',
-              s: {
-                font: { bold: true, italic: true },
-                fill: { fgColor: { rgb: "E9ECEF" } },
-                alignment: { horizontal: "left" }
-              }
-            };
+          // Fill remaining cells in location row with same styling
+          for (let col = 2; col <= 9; col++) {
+            const cell = locationRow.getCell(col);
+            cell.font = { name: 'Calibri', bold: true, italic: true };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE9ECEF' } };
+            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
           }
           currentRow++;
         }
