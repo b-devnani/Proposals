@@ -1,0 +1,34 @@
+📊 Cell-by-Cell Mapping Table:
+Excel Template Section	Cell(s)	Notes
+Title	A1:I1	"PURCHASE ORDER" - Blue background, white text, centered, bold, 16pt Calibri
+Company Name	A3:I3	"• BEECHEN & DILL HOMES •" - Light blue background, dark blue text, centered, bold, 14pt Calibri
+Company Address	A7:I7	Full address with bullets - centered
+Form Field: Date	B9 (Label), E9 (Value)	Gray background for label, borders around both
+Form Field: Buyer Last Name	B10 (Label), E10 (Value)	Gray background for label, borders around both
+Form Field: Community	B11 (Label), E11 (Value)	Gray background for label, borders around both
+Form Field: Lot Number	B12 (Label), E12 (Value)	Gray background for label, borders around both
+Form Field: Lot Address	B13 (Label), E13 (Value)	Gray background for label, borders around both
+Form Field: House Plan	B14 (Label), E14 (Value)	Gray background for label, borders around both
+Base Price Label	E16	Light blue background, bold, borders
+Base Price Value	I16	Right aligned, bold, currency format, borders
+Lot Premium Label	E17	Light blue background, bold, borders
+Lot Premium Value	I17	Right aligned, bold, currency format, borders
+Table Header: Option	A19:D19	Blue background, white text, bold, borders
+Table Header: Description/Notes	E19:H19	Blue background, white text, bold, borders
+Table Header: Subtotal	I19	Blue background, white text, bold, borders
+Upgrade Item: Choice Title	Column A	Alternating row colors, borders, left aligned
+Upgrade Item: Price	Column I	Alternating row colors, borders, right aligned, currency format
+Upgrade Item: Spacer Columns	Columns B-H	Empty cells with background, borders
+Category Headers	Full Row	Blue background, white text, bold, borders
+Location Headers	Full Row	Light gray background, italic, bold, borders
+Grand Total Label	Column A	Blue background, white text, bold, borders
+Grand Total Value	Column I	Blue background, white text, bold, currency format, right aligned, borders
+Summary Section: Base Price	Column H (Label), Column I (Value)	Bold, right aligned, borders
+Summary Section: Lot Premium	Column H (Label), Column I (Value)	Bold, right aligned, borders
+Summary Section: Upgrades Total	Column H (Label), Column I (Value)	Bold, right aligned, borders
+Summary Section: Grand Total	Column H (Label), Column I (Value)	Bold, right aligned, borders
+Signature Text	Full Row	Merge cells A: I, normal text
+Buyer Signature Label	Left Cell	Signature line underneath (horizontal border)
+Buyer Signature Date	Right Cell	Signature line underneath (horizontal border)
+Company Signature Label	Left Cell	Signature line underneath (horizontal border)
+Company Signature Date	Right Cell	Signature line underneath (horizontal border)

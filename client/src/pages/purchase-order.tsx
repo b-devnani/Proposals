@@ -661,32 +661,36 @@ export default function PurchaseOrder() {
       { width: 20 }, // E - Description start
       { width: 20 }, // F
       { width: 20 }, // G  
-      { width: 20 }, // H
-      { width: 15 }  // I - Subtotal
+      { width: 20 }, // H - Summary labels
+      { width: 15 }  // I - Subtotal/Values
     ];
     
-    // Title with blue background and white text - exact template match
+    // Title: A1:I1 - "PURCHASE ORDER" - Blue background, white text, centered, bold, 16pt Calibri
     const titleCell = worksheet.getCell('A1');
     titleCell.value = 'PURCHASE ORDER';
-    titleCell.font = { bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
+    titleCell.font = { name: 'Calibri', bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
     titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     worksheet.mergeCells('A1:I1');
     worksheet.getRow(1).height = 30;
     
-    // Company info with light blue background - exact template match
+    // Company Name: A3:I3 - "• BEECHEN & DILL HOMES •" - Light blue background, dark blue text, centered, bold, 14pt Calibri
     const companyCell = worksheet.getCell('A3');
     companyCell.value = '• BEECHEN & DILL HOMES •';
-    companyCell.font = { bold: true, size: 14, color: { argb: 'FF366092' } };
+    companyCell.font = { name: 'Calibri', bold: true, size: 14, color: { argb: 'FF366092' } };
     companyCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE7F3FF' } };
     companyCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    companyCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     worksheet.mergeCells('A3:I3');
     worksheet.getRow(3).height = 25;
     
-    // Address line merged across all columns - exact template match
+    // Company Address: A7:I7 - Full address with bullets - centered
     const addressCell = worksheet.getCell('A7');
     addressCell.value = '565 Village Center Dr • Burr Ridge, IL 60527-4516 • Phone: (630) 920-9430';
+    addressCell.font = { name: 'Calibri' };
     addressCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    addressCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     worksheet.mergeCells('A7:I7');
     
     // Form data section with gray labels
