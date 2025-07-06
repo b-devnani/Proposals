@@ -266,76 +266,159 @@ export default function PurchaseOrder() {
   };
 
   const handleExportExcel = () => {
-    if (!currentTemplate) return;
-
-    const orderData = {
-      template: currentTemplate,
-      buyer: {
-        lastName: formData.buyerLastName,
-      },
-      community: formData.community,
-      lot: {
-        address: formData.lotAddress,
-        premium: formData.lotPremium || "0",
-      },
-      date: formData.todaysDate,
-    };
+    if (!currentTemplate) {
+      toast({
+        title: "Export Failed",
+        description: "Please select a template.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     // Create workbook
     const wb = XLSX.utils.book_new();
 
-    // Order Summary Sheet
-    const summaryData = [
-      ['Purchase Order Summary'],
-      [''],
-      ['Date:', orderData.date],
-      ['Buyer Name:', orderData.buyer.lastName],
-      ['Community:', orderData.community],
-      ['Lot Address:', orderData.lot.address],
-      [''],
-      ['Home Template:', currentTemplate.name],
-      ['Base Price:', parseInt(currentTemplate.basePrice)],
-      ['Lot Premium:', parseInt(orderData.lot.premium)],
-      [''],
-      ['TOTALS:'],
-      ['Base Price:', parseInt(currentTemplate.basePrice)],
-      ['Lot Premium:', parseInt(orderData.lot.premium)],
-      ['Upgrades Total:', selectedUpgradeItems.reduce((sum, u) => sum + parseInt(u.clientPrice), 0)],
-      ['Grand Total:', parseInt(currentTemplate.basePrice) + parseInt(orderData.lot.premium) + selectedUpgradeItems.reduce((sum, u) => sum + parseInt(u.clientPrice), 0)]
+    const selectedUpgradeItems = upgrades?.filter(upgrade => selectedUpgrades.has(upgrade.id)) || [];
+    
+    // Create workbook with template structure
+    const ws: any = {};
+    
+    // Set up the exact template structure
+    ws['A1'] = { v: 'PURCHASE ORDER', t: 's' };
+    ws['A7'] = { v: '565 Village Center Dr', t: 's' };
+    ws['C7'] = { v: '•', t: 's' };
+    ws['D7'] = { v: 'Burr Ridge, IL 60527-4516', t: 's' };
+    ws['G7'] = { v: '•', t: 's' };
+    ws['H7'] = { v: 'Phone: (630) 920-9430', t: 's' };
+    
+    // Form data section
+    ws['B9'] = { v: 'Date', t: 's' };
+    ws['E9'] = { v: new Date().toLocaleDateString(), t: 's' };
+    ws['B10'] = { v: "Buyer's Last Name", t: 's' };
+    ws['E10'] = { v: formData.buyerLastName || '', t: 's' };
+    ws['B11'] = { v: 'Community', t: 's' };
+    ws['E11'] = { v: formData.community || '', t: 's' };
+    ws['B12'] = { v: 'Lot Number', t: 's' };
+    ws['E12'] = { v: formData.lotNumber || '', t: 's' };
+    ws['B13'] = { v: 'Lot Address', t: 's' };
+    ws['E13'] = { v: formData.lotAddress || '', t: 's' };
+    ws['B14'] = { v: 'House Plan', t: 's' };
+    ws['E14'] = { v: currentTemplate.name, t: 's' };
+    
+    // Base pricing
+    ws['E16'] = { v: `${currentTemplate.name} Base Price`, t: 's' };
+    ws['I16'] = { v: parseInt(currentTemplate.basePrice), t: 'n' };
+    ws['E17'] = { v: 'Lot Premium', t: 's' };
+    ws['I17'] = { v: parseInt(formData.lotPremium || "0"), t: 'n' };
+    
+    // Headers
+    ws['A19'] = { v: 'Option', t: 's' };
+    ws['E19'] = { v: 'Description/Notes', t: 's' };
+    ws['I19'] = { v: 'Subtotal', t: 's' };
+    
+    let currentRow = 20;
+    
+    // Group and sort upgrades by category and location
+    const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
+    
+    Object.entries(groupedUpgrades).forEach(([category, locations]) => {
+      // Category header
+      ws[XLSX.utils.encode_cell({ r: currentRow - 1, c: 0 })] = { v: category, t: 's' };
+      currentRow++;
+      
+      Object.entries(locations).forEach(([location, upgrades]) => {
+        // Location header (if not N/A)
+        if (location !== "N/A") {
+          ws[XLSX.utils.encode_cell({ r: currentRow - 1, c: 0 })] = { v: location, t: 's' };
+          currentRow++;
+        }
+        
+        // Add upgrade items
+        upgrades.forEach(upgrade => {
+          const rowIndex = currentRow - 1;
+          ws[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })] = { v: upgrade.choiceTitle, t: 's' };
+          ws[XLSX.utils.encode_cell({ r: rowIndex, c: 8 })] = { v: parseInt(upgrade.clientPrice), t: 'n' };
+          currentRow++;
+        });
+      });
+    });
+    
+    // Grand Total with formula
+    const grandTotalRow = currentRow;
+    ws[XLSX.utils.encode_cell({ r: grandTotalRow - 1, c: 0 })] = { v: 'Grand Total', t: 's' };
+    ws[XLSX.utils.encode_cell({ r: grandTotalRow - 1, c: 8 })] = { 
+      f: `SUM(I16:I${grandTotalRow - 1})`, 
+      t: 'n' 
+    };
+    
+    // Summary section with formulas
+    const summaryStartRow = grandTotalRow + 2;
+    ws[XLSX.utils.encode_cell({ r: summaryStartRow, c: 8 })] = { v: 'SUMMARY:', t: 's' };
+    
+    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 1, c: 7 })] = { v: 'Base Price:', t: 's' };
+    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 1, c: 8 })] = { f: 'I16', t: 'n' };
+    
+    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 2, c: 7 })] = { v: 'Lot Premium:', t: 's' };
+    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 2, c: 8 })] = { f: 'I17', t: 'n' };
+    
+    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 3, c: 7 })] = { v: 'Upgrades Total:', t: 's' };
+    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 3, c: 8 })] = { 
+      f: `SUM(I20:I${grandTotalRow - 1})`, 
+      t: 'n' 
+    };
+    
+    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 4, c: 7 })] = { v: 'Grand Total:', t: 's' };
+    ws[XLSX.utils.encode_cell({ r: summaryStartRow + 4, c: 8 })] = { 
+      f: `SUM(I${summaryStartRow + 2}:I${summaryStartRow + 4})`, 
+      t: 'n' 
+    };
+    
+    // Signature section
+    const sigStartRow = summaryStartRow + 6;
+    ws[XLSX.utils.encode_cell({ r: sigStartRow, c: 0 })] = { 
+      v: 'By signing below, both parties acknowledge and agree to the terms and conditions outlined in this Purchase Order.', 
+      t: 's' 
+    };
+    
+    ws[XLSX.utils.encode_cell({ r: sigStartRow + 3, c: 0 })] = { v: 'Buyer Signature:', t: 's' };
+    ws[XLSX.utils.encode_cell({ r: sigStartRow + 3, c: 7 })] = { v: 'Date:', t: 's' };
+    
+    ws[XLSX.utils.encode_cell({ r: sigStartRow + 7, c: 0 })] = { v: 'Beechen & Dill Homes Representative:', t: 's' };
+    ws[XLSX.utils.encode_cell({ r: sigStartRow + 7, c: 7 })] = { v: 'Date:', t: 's' };
+    
+    // Set worksheet range
+    ws['!ref'] = `A1:I${sigStartRow + 8}`;
+    
+    // Add merged cells for proper formatting
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } }, // Title
+      { s: { r: 6, c: 0 }, e: { r: 6, c: 1 } }, // Address
+      { s: { r: 6, c: 3 }, e: { r: 6, c: 5 } }, // Address continued
+      { s: { r: 8, c: 4 }, e: { r: 8, c: 8 } }, // Date
+      { s: { r: 9, c: 4 }, e: { r: 9, c: 8 } }, // Buyer name
+      { s: { r: 10, c: 4 }, e: { r: 10, c: 8 } }, // Community
+      { s: { r: 11, c: 4 }, e: { r: 11, c: 8 } }, // Lot number
+      { s: { r: 12, c: 4 }, e: { r: 12, c: 8 } }, // Lot address
+      { s: { r: 13, c: 4 }, e: { r: 13, c: 8 } }, // House plan
+      { s: { r: 15, c: 4 }, e: { r: 15, c: 7 } }, // Base price label
+      { s: { r: 16, c: 4 }, e: { r: 16, c: 7 } }, // Lot premium label
+      { s: { r: 18, c: 4 }, e: { r: 18, c: 7 } }, // Description header
+      { s: { r: grandTotalRow - 1, c: 0 }, e: { r: grandTotalRow - 1, c: 7 } }, // Grand total
+      { s: { r: sigStartRow, c: 0 }, e: { r: sigStartRow + 1, c: 8 } } // Agreement text
     ];
-
-    const summaryWS = XLSX.utils.aoa_to_sheet(summaryData);
-    XLSX.utils.book_append_sheet(wb, summaryWS, 'Order Summary');
-
-    // Upgrades Sheet
-    if (selectedUpgradeItems.length > 0) {
-      const upgradesData = [
-        ['Selection ID', 'Choice ID', 'Choice Title', 'Category', 'Location', 'Builder Cost', 'Client Price', 'Margin %'],
-        ...selectedUpgradeItems.map(upgrade => [
-          upgrade.selectionId,
-          upgrade.choiceId,
-          upgrade.choiceTitle,
-          upgrade.category,
-          upgrade.location,
-          parseInt(upgrade.builderCost),
-          parseInt(upgrade.clientPrice),
-          parseFloat(upgrade.margin)
-        ])
-      ];
-
-      const upgradesWS = XLSX.utils.aoa_to_sheet(upgradesData);
-      XLSX.utils.book_append_sheet(wb, upgradesWS, 'Selected Upgrades');
-    }
-
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Order Summary');
+    
     // Generate filename
-    const filename = `PO_${orderData.buyer.lastName || 'Buyer'}_${orderData.date.replace(/-/g, '')}.xlsx`;
+    const filename = `PO_${currentTemplate.name}_${formData.buyerLastName || 'Draft'}_${new Date().toISOString().split('T')[0]}.xlsx`;
     
     // Save file
     XLSX.writeFile(wb, filename);
-
+    
     toast({
       title: "Excel Export Complete",
-      description: `Purchase order exported as ${filename}`,
+      description: "Purchase order exported with template format and preserved formulas.",
     });
   };
 
