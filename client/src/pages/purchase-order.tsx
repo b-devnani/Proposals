@@ -329,21 +329,14 @@ export default function PurchaseOrder() {
       const categoryRowIndex = currentRow - 1;
       ws[XLSX.utils.encode_cell({ r: categoryRowIndex, c: 0 })] = { v: category, t: 's' };
       
-      // Apply category header styling across the entire row
+      // Apply simplified category header styling
       for (let col = 0; col < 9; col++) {
         const cellAddr = XLSX.utils.encode_cell({ r: categoryRowIndex, c: col });
         if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
         
         ws[cellAddr].s = {
-          font: { sz: 12, bold: true, color: { rgb: "FFFFFF" } },
-          alignment: { horizontal: "left", vertical: "center" },
-          fill: { fgColor: { rgb: "495057" } },
-          border: {
-            top: { style: "medium", color: { rgb: "000000" } },
-            bottom: { style: "medium", color: { rgb: "000000" } },
-            left: { style: "medium", color: { rgb: "000000" } },
-            right: { style: "medium", color: { rgb: "000000" } }
-          }
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { fgColor: { rgb: "4472C4" } }
         };
       }
       currentRow++;
@@ -354,21 +347,14 @@ export default function PurchaseOrder() {
           const locationRowIndex = currentRow - 1;
           ws[XLSX.utils.encode_cell({ r: locationRowIndex, c: 0 })] = { v: location, t: 's' };
           
-          // Apply location header styling across the row
+          // Apply simplified location header styling
           for (let col = 0; col < 9; col++) {
             const cellAddr = XLSX.utils.encode_cell({ r: locationRowIndex, c: col });
             if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
             
             ws[cellAddr].s = {
-              font: { sz: 11, bold: true, italic: true },
-              alignment: { horizontal: "left", vertical: "center" },
-              fill: { fgColor: { rgb: "E9ECEF" } },
-              border: {
-                top: { style: "thin", color: { rgb: "ADB5BD" } },
-                bottom: { style: "thin", color: { rgb: "ADB5BD" } },
-                left: { style: "thin", color: { rgb: "ADB5BD" } },
-                right: { style: "thin", color: { rgb: "ADB5BD" } }
-              }
+              font: { bold: true, italic: true },
+              fill: { fgColor: { rgb: "E9ECEF" } }
             };
           }
           currentRow++;
@@ -391,30 +377,19 @@ export default function PurchaseOrder() {
             t: 'n'
           };
           
-          // Apply formatting to entire row (A through I)
+          // Apply simplified formatting to upgrade rows
           for (let col = 0; col < 9; col++) {
             const cellAddr = XLSX.utils.encode_cell({ r: rowIndex, c: col });
             if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
             
             ws[cellAddr].s = {
-              font: { sz: 10 },
-              alignment: { 
-                horizontal: col === 8 ? "right" : "left", 
-                vertical: "center" 
-              },
               fill: { fgColor: { rgb: isEvenRow ? "F8F9FA" : "FFFFFF" } },
-              border: {
-                top: { style: "thin", color: { rgb: "DEE2E6" } },
-                bottom: { style: "thin", color: { rgb: "DEE2E6" } },
-                left: { style: "thin", color: { rgb: "DEE2E6" } },
-                right: { style: "thin", color: { rgb: "DEE2E6" } }
-              }
+              alignment: { horizontal: col === 8 ? "right" : "left" }
             };
             
             // Price formatting for column I
             if (col === 8 && ws[cellAddr].t === 'n') {
               ws[cellAddr].s.numFmt = '"$"#,##0';
-              ws[cellAddr].s.font.bold = false;
             }
           }
           
@@ -433,31 +408,18 @@ export default function PurchaseOrder() {
       t: 'n' 
     };
     
-    // Apply Grand Total styling across the entire row
+    // Apply simplified Grand Total styling
     for (let col = 0; col < 9; col++) {
       const cellAddr = XLSX.utils.encode_cell({ r: grandTotalRowIndex, c: col });
       if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
       
       ws[cellAddr].s = {
-        font: { 
-          sz: 14, 
-          bold: true, 
-          color: { rgb: "FFFFFF" } 
-        },
-        alignment: { 
-          horizontal: col === 8 ? "right" : "left", 
-          vertical: "center" 
-        },
-        fill: { fgColor: { rgb: "1F4E79" } },
-        border: {
-          top: { style: "thick", color: { rgb: "000000" } },
-          bottom: { style: "thick", color: { rgb: "000000" } },
-          left: { style: "thick", color: { rgb: "000000" } },
-          right: { style: "thick", color: { rgb: "000000" } }
-        }
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "366092" } },
+        alignment: { horizontal: col === 8 ? "right" : "left" }
       };
       
-      // Special formatting for the price cell
+      // Price formatting for the total cell
       if (col === 8) {
         ws[cellAddr].s.numFmt = '"$"#,##0';
       }
@@ -552,180 +514,60 @@ export default function PurchaseOrder() {
       { hpt: 20 }  // Headers
     ];
     
-    // Apply comprehensive formatting to all cells
-    const addCellFormatting = (cellAddr: string, cellData: any) => {
-      if (!ws[cellAddr]) ws[cellAddr] = cellData;
-      else Object.assign(ws[cellAddr], cellData);
-    };
-
-    // Apply all cell styles with proper formatting
-    Object.keys(ws).forEach(cellAddress => {
-      if (cellAddress.startsWith('!')) return;
-      
-      const cell = ws[cellAddress];
-      if (!cell.s) cell.s = {};
-
-      // Apply borders to all content cells
-      const defaultBorder = {
-        top: { style: "thin", color: { rgb: "CCCCCC" } },
-        bottom: { style: "thin", color: { rgb: "CCCCCC" } },
-        left: { style: "thin", color: { rgb: "CCCCCC" } },
-        right: { style: "thin", color: { rgb: "CCCCCC" } }
+    // Apply basic formatting that XLSX can handle reliably
+    // Note: Complex styling might not work in all Excel versions
+    
+    // Title formatting
+    if (ws['A1']) {
+      ws['A1'].s = {
+        font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "366092" } },
+        alignment: { horizontal: "center" }
       };
-
-      // Title styling
-      if (cellAddress === 'A1') {
-        cell.s = {
-          font: { bold: true, sz: 20, color: { rgb: "FFFFFF" } },
-          alignment: { horizontal: "center", vertical: "center" },
-          fill: { fgColor: { rgb: "1F4E79" } },
-          border: {
-            top: { style: "thick", color: { rgb: "000000" } },
-            bottom: { style: "thick", color: { rgb: "000000" } },
-            left: { style: "thick", color: { rgb: "000000" } },
-            right: { style: "thick", color: { rgb: "000000" } }
-          }
+    }
+    
+    // Company name formatting  
+    if (ws['A3']) {
+      ws['A3'].s = {
+        font: { bold: true, sz: 14, color: { rgb: "366092" } },
+        fill: { fgColor: { rgb: "E7F3FF" } },
+        alignment: { horizontal: "center" }
+      };
+    }
+    
+    // Header row formatting
+    ['A19', 'E19', 'I19'].forEach(cellAddr => {
+      if (ws[cellAddr]) {
+        ws[cellAddr].s = {
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { fgColor: { rgb: "366092" } },
+          alignment: { horizontal: "center" }
         };
       }
-      
-      // Company name styling
-      else if (cellAddress === 'A3') {
-        cell.s = {
-          font: { bold: true, sz: 16, color: { rgb: "1F4E79" } },
-          alignment: { horizontal: "center", vertical: "center" },
-          fill: { fgColor: { rgb: "E7F3FF" } },
-          border: {
-            top: { style: "medium", color: { rgb: "1F4E79" } },
-            bottom: { style: "medium", color: { rgb: "1F4E79" } },
-            left: { style: "medium", color: { rgb: "1F4E79" } },
-            right: { style: "medium", color: { rgb: "1F4E79" } }
-          }
+    });
+    
+    // Form labels formatting
+    ['B9', 'B10', 'B11', 'B12', 'B13', 'B14'].forEach(cellAddr => {
+      if (ws[cellAddr]) {
+        ws[cellAddr].s = {
+          font: { bold: true },
+          fill: { fgColor: { rgb: "F2F2F2" } }
         };
       }
-      
-      // Address styling
-      else if (['A7', 'C7', 'D7', 'G7', 'H7'].includes(cellAddress)) {
-        cell.s = {
-          font: { sz: 11, bold: false },
-          alignment: { horizontal: "center", vertical: "center" },
-          fill: { fgColor: { rgb: "F8F9FA" } },
-          border: defaultBorder
-        };
-      }
-      
-      // Form labels styling (B9-B14)
-      else if (['B9', 'B10', 'B11', 'B12', 'B13', 'B14'].includes(cellAddress)) {
-        cell.s = {
-          font: { bold: true, sz: 11 },
-          alignment: { horizontal: "left", vertical: "center" },
-          fill: { fgColor: { rgb: "E9ECEF" } },
-          border: defaultBorder
-        };
-      }
-      
-      // Form data styling (E9-E14)
-      else if (['E9', 'E10', 'E11', 'E12', 'E13', 'E14'].includes(cellAddress)) {
-        cell.s = {
-          font: { sz: 11 },
-          alignment: { horizontal: "left", vertical: "center" },
-          fill: { fgColor: { rgb: "FFFFFF" } },
-          border: defaultBorder
-        };
-      }
-      
-      // Price labels (E16, E17)
-      else if (['E16', 'E17'].includes(cellAddress)) {
-        cell.s = {
-          font: { bold: true, sz: 12 },
-          alignment: { horizontal: "left", vertical: "center" },
-          fill: { fgColor: { rgb: "D1ECF1" } },
-          border: defaultBorder
-        };
-      }
-      
-      // Price values (I16, I17)
-      else if (['I16', 'I17'].includes(cellAddress) && cell.t === 'n') {
-        cell.s = {
-          font: { sz: 12, bold: true },
-          alignment: { horizontal: "right", vertical: "center" },
+    });
+    
+    // Price formatting for all numeric cells in column I
+    Object.keys(ws).forEach(cellAddr => {
+      if (cellAddr.startsWith('I') && ws[cellAddr] && ws[cellAddr].t === 'n') {
+        ws[cellAddr].s = {
           numFmt: '"$"#,##0',
-          fill: { fgColor: { rgb: "FFFFFF" } },
-          border: defaultBorder
-        };
-      }
-      
-      // Header row styling (A19, E19, I19)
-      else if (['A19', 'E19', 'I19'].includes(cellAddress)) {
-        cell.s = {
-          font: { bold: true, sz: 12, color: { rgb: "FFFFFF" } },
-          alignment: { horizontal: "center", vertical: "center" },
-          fill: { fgColor: { rgb: "1F4E79" } },
-          border: {
-            top: { style: "medium", color: { rgb: "000000" } },
-            bottom: { style: "medium", color: { rgb: "000000" } },
-            left: { style: "medium", color: { rgb: "000000" } },
-            right: { style: "medium", color: { rgb: "000000" } }
-          }
-        };
-      }
-      
-      // Summary section styling
-      else if (cell.v === 'SUMMARY:') {
-        cell.s = {
-          font: { bold: true, sz: 14, color: { rgb: "1F4E79" } },
-          alignment: { horizontal: "center", vertical: "center" },
-          fill: { fgColor: { rgb: "BDD7EE" } },
-          border: defaultBorder
-        };
-      }
-      
-      // Summary labels
-      else if (cellAddress.startsWith('H') && cell.v && typeof cell.v === 'string' && cell.v.includes(':')) {
-        cell.s = {
-          font: { bold: true, sz: 11 },
-          alignment: { horizontal: "right", vertical: "center" },
-          fill: { fgColor: { rgb: "E7F3FF" } },
-          border: defaultBorder
-        };
-      }
-      
-      // Summary values
-      else if (cellAddress.startsWith('I') && cell.t === 'n' && parseInt(cellAddress.substring(1)) > 35) {
-        cell.s = {
-          font: { sz: 11, bold: true },
-          alignment: { horizontal: "right", vertical: "center" },
-          numFmt: '"$"#,##0',
-          fill: { fgColor: { rgb: "FFFFFF" } },
-          border: defaultBorder
+          alignment: { horizontal: "right" }
         };
         
-        // Grand Total special formatting
-        if (cell.f && cell.f.includes('SUM(I') && cell.f.includes(':I')) {
-          cell.s.font.sz = 12;
-          cell.s.fill = { fgColor: { rgb: "1F4E79" } };
-          cell.s.font.color = { rgb: "FFFFFF" };
+        // Bold for important totals
+        if (ws[cellAddr].f || ws[cellAddr].v > 100000) {
+          ws[cellAddr].s.font = { bold: true };
         }
-      }
-      
-      // Signature section
-      else if (cell.v && typeof cell.v === 'string' && 
-               (cell.v.includes('Buyer Signature') || cell.v.includes('Representative') || cell.v.includes('acknowledge'))) {
-        cell.s = {
-          font: { sz: 10, bold: cell.v.includes('Signature') || cell.v.includes('Representative') },
-          alignment: { horizontal: "left", vertical: "center" },
-          fill: { fgColor: { rgb: "F8F9FA" } },
-          border: defaultBorder
-        };
-      }
-      
-      // Default styling for remaining cells
-      else if (cell.v !== undefined) {
-        cell.s = {
-          font: { sz: 10 },
-          alignment: { horizontal: "left", vertical: "center" },
-          fill: { fgColor: { rgb: "FFFFFF" } },
-          border: defaultBorder
-        };
       }
     });
     
