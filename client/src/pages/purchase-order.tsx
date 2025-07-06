@@ -265,7 +265,7 @@ export default function PurchaseOrder() {
     });
   };
 
-  const handleExportExcelOLD = async () => {
+  const handleExportExcelBROKEN = async () => {
     if (!currentTemplate) {
       toast({
         title: "Export Failed",
@@ -322,36 +322,73 @@ export default function PurchaseOrder() {
     worksheet.mergeCells('A7:I7');
 
 
+    // Form data section with gray labels
+    const formLabels = [
+      ['B9', 'Date', 'E9', new Date().toLocaleDateString()],
+      ['B10', "Buyer's Last Name", 'E10', formData.buyerLastName || ''],
+      ['B11', 'Community', 'E11', formData.community || ''],
+      ['B12', 'Lot Number', 'E12', formData.lotNumber || ''],
+      ['B13', 'Lot Address', 'E13', formData.lotAddress || ''],
+      ['B14', 'House Plan', 'E14', currentTemplate.name]
+    ];
     
-    // Headers with styling
-    ws['A19'] = { 
-      v: 'Option', 
-      t: 's',
-      s: { 
-        font: { bold: true, color: { rgb: "FFFFFF" } }, 
-        fill: { fgColor: { rgb: "366092" } }, 
-        alignment: { horizontal: "center" } 
-      }
-    };
-    ws['E19'] = { 
-      v: 'Description/Notes', 
-      t: 's',
-      s: { 
-        font: { bold: true, color: { rgb: "FFFFFF" } }, 
-        fill: { fgColor: { rgb: "366092" } }, 
-        alignment: { horizontal: "center" } 
-      }
-    };
-    ws['I19'] = { 
-      v: 'Subtotal', 
-      t: 's',
-      s: { 
-        font: { bold: true, color: { rgb: "FFFFFF" } }, 
-        fill: { fgColor: { rgb: "366092" } }, 
-        alignment: { horizontal: "center" } 
-      }
+    formLabels.forEach(([labelCell, labelText, valueCell, valueText]) => {
+      const label = worksheet.getCell(labelCell);
+      label.value = labelText;
+      label.font = { bold: true };
+      label.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
+      
+      const value = worksheet.getCell(valueCell);
+      value.value = valueText;
+    });
+    
+    // Base pricing with light blue background
+    const basePriceLabel = worksheet.getCell('E16');
+    basePriceLabel.value = `${currentTemplate.name} Base Price`;
+    basePriceLabel.font = { bold: true };
+    basePriceLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1ECF1' } };
+    
+    const basePriceValue = worksheet.getCell('I16');
+    basePriceValue.value = parseInt(currentTemplate.basePrice);
+    basePriceValue.numFmt = '"$"#,##0';
+    basePriceValue.font = { bold: true };
+    basePriceValue.alignment = { horizontal: 'right' };
+    
+    const lotPremiumLabel = worksheet.getCell('E17');
+    lotPremiumLabel.value = 'Lot Premium';
+    lotPremiumLabel.font = { bold: true };
+    lotPremiumLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1ECF1' } };
+    
+    const lotPremiumValue = worksheet.getCell('I17');
+    lotPremiumValue.value = parseInt(formData.lotPremium || "0");
+    lotPremiumValue.numFmt = '"$"#,##0';
+    lotPremiumValue.font = { bold: true };
+    lotPremiumValue.alignment = { horizontal: 'right' };
+    
+    // Headers with blue background and white text
+    const headerStyle = {
+      font: { bold: true, color: { argb: 'FFFFFFFF' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } },
+      alignment: { horizontal: 'center', vertical: 'middle' }
     };
     
+    const optionHeader = worksheet.getCell('A19');
+    optionHeader.value = 'Option';
+    Object.assign(optionHeader, headerStyle);
+    worksheet.mergeCells('A19:D19');
+    
+    const descHeader = worksheet.getCell('E19');
+    descHeader.value = 'Description/Notes';
+    Object.assign(descHeader, headerStyle);
+    worksheet.mergeCells('E19:H19');
+    
+    const subtotalHeader = worksheet.getCell('I19');
+    subtotalHeader.value = 'Subtotal';
+    Object.assign(subtotalHeader, headerStyle);
+    
+    worksheet.getRow(19).height = 20;
+    
+    // Track current row for upgrades
     let currentRow = 20;
     
     // Group and sort upgrades by category and location
