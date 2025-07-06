@@ -283,41 +283,85 @@ export default function PurchaseOrder() {
     // Create workbook with template structure
     const ws: any = {};
     
-    // Set up the exact template structure
-    ws['A1'] = { v: 'PURCHASE ORDER', t: 's' };
+    // Create cells with styling applied immediately
     
-    // Add company info with logo placeholder
-    ws['A3'] = { v: '• BEECHEN & DILL HOMES •', t: 's' };
+    // Title with styling
+    ws['A1'] = { 
+      v: 'PURCHASE ORDER', 
+      t: 's',
+      s: { 
+        font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } }, 
+        fill: { fgColor: { rgb: "366092" } }, 
+        alignment: { horizontal: "center" } 
+      }
+    };
+    
+    // Company info with styling
+    ws['A3'] = { 
+      v: '• BEECHEN & DILL HOMES •', 
+      t: 's',
+      s: { 
+        font: { bold: true, sz: 14, color: { rgb: "366092" } }, 
+        fill: { fgColor: { rgb: "E7F3FF" } }, 
+        alignment: { horizontal: "center" } 
+      }
+    };
+    
+    // Address line
     ws['A7'] = { v: '565 Village Center Dr', t: 's' };
     ws['C7'] = { v: '•', t: 's' };
     ws['D7'] = { v: 'Burr Ridge, IL 60527-4516', t: 's' };
     ws['G7'] = { v: '•', t: 's' };
     ws['H7'] = { v: 'Phone: (630) 920-9430', t: 's' };
     
-    // Form data section
-    ws['B9'] = { v: 'Date', t: 's' };
+    // Form data section with styling
+    ws['B9'] = { v: 'Date', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
     ws['E9'] = { v: new Date().toLocaleDateString(), t: 's' };
-    ws['B10'] = { v: "Buyer's Last Name", t: 's' };
+    ws['B10'] = { v: "Buyer's Last Name", t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
     ws['E10'] = { v: formData.buyerLastName || '', t: 's' };
-    ws['B11'] = { v: 'Community', t: 's' };
+    ws['B11'] = { v: 'Community', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
     ws['E11'] = { v: formData.community || '', t: 's' };
-    ws['B12'] = { v: 'Lot Number', t: 's' };
+    ws['B12'] = { v: 'Lot Number', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
     ws['E12'] = { v: formData.lotNumber || '', t: 's' };
-    ws['B13'] = { v: 'Lot Address', t: 's' };
+    ws['B13'] = { v: 'Lot Address', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
     ws['E13'] = { v: formData.lotAddress || '', t: 's' };
-    ws['B14'] = { v: 'House Plan', t: 's' };
+    ws['B14'] = { v: 'House Plan', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "F2F2F2" } } } };
     ws['E14'] = { v: currentTemplate.name, t: 's' };
     
-    // Base pricing
-    ws['E16'] = { v: `${currentTemplate.name} Base Price`, t: 's' };
-    ws['I16'] = { v: parseInt(currentTemplate.basePrice), t: 'n' };
-    ws['E17'] = { v: 'Lot Premium', t: 's' };
-    ws['I17'] = { v: parseInt(formData.lotPremium || "0"), t: 'n' };
+    // Base pricing with styling
+    ws['E16'] = { v: `${currentTemplate.name} Base Price`, t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "D1ECF1" } } } };
+    ws['I16'] = { v: parseInt(currentTemplate.basePrice), t: 'n', s: { numFmt: '"$"#,##0', font: { bold: true }, alignment: { horizontal: "right" } } };
+    ws['E17'] = { v: 'Lot Premium', t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: "D1ECF1" } } } };
+    ws['I17'] = { v: parseInt(formData.lotPremium || "0"), t: 'n', s: { numFmt: '"$"#,##0', font: { bold: true }, alignment: { horizontal: "right" } } };
     
-    // Headers
-    ws['A19'] = { v: 'Option', t: 's' };
-    ws['E19'] = { v: 'Description/Notes', t: 's' };
-    ws['I19'] = { v: 'Subtotal', t: 's' };
+    // Headers with styling
+    ws['A19'] = { 
+      v: 'Option', 
+      t: 's',
+      s: { 
+        font: { bold: true, color: { rgb: "FFFFFF" } }, 
+        fill: { fgColor: { rgb: "366092" } }, 
+        alignment: { horizontal: "center" } 
+      }
+    };
+    ws['E19'] = { 
+      v: 'Description/Notes', 
+      t: 's',
+      s: { 
+        font: { bold: true, color: { rgb: "FFFFFF" } }, 
+        fill: { fgColor: { rgb: "366092" } }, 
+        alignment: { horizontal: "center" } 
+      }
+    };
+    ws['I19'] = { 
+      v: 'Subtotal', 
+      t: 's',
+      s: { 
+        font: { bold: true, color: { rgb: "FFFFFF" } }, 
+        fill: { fgColor: { rgb: "366092" } }, 
+        alignment: { horizontal: "center" } 
+      }
+    };
     
     let currentRow = 20;
     
@@ -325,18 +369,20 @@ export default function PurchaseOrder() {
     const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
     
     Object.entries(groupedUpgrades).forEach(([category, locations]) => {
-      // Category header with full row styling
+      // Category header with styling applied immediately
       const categoryRowIndex = currentRow - 1;
-      ws[XLSX.utils.encode_cell({ r: categoryRowIndex, c: 0 })] = { v: category, t: 's' };
       
-      // Apply simplified category header styling
+      // Create category header cells with styling
       for (let col = 0; col < 9; col++) {
         const cellAddr = XLSX.utils.encode_cell({ r: categoryRowIndex, c: col });
-        if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
-        
-        ws[cellAddr].s = {
-          font: { bold: true, color: { rgb: "FFFFFF" } },
-          fill: { fgColor: { rgb: "4472C4" } }
+        ws[cellAddr] = { 
+          v: col === 0 ? category : '', 
+          t: 's',
+          s: {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "4472C4" } },
+            alignment: { horizontal: "left" }
+          }
         };
       }
       currentRow++;
@@ -345,51 +391,64 @@ export default function PurchaseOrder() {
         // Location header (if not N/A)
         if (location !== "N/A") {
           const locationRowIndex = currentRow - 1;
-          ws[XLSX.utils.encode_cell({ r: locationRowIndex, c: 0 })] = { v: location, t: 's' };
           
-          // Apply simplified location header styling
+          // Create location header cells with styling
           for (let col = 0; col < 9; col++) {
             const cellAddr = XLSX.utils.encode_cell({ r: locationRowIndex, c: col });
-            if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
-            
-            ws[cellAddr].s = {
-              font: { bold: true, italic: true },
-              fill: { fgColor: { rgb: "E9ECEF" } }
+            ws[cellAddr] = { 
+              v: col === 0 ? location : '', 
+              t: 's',
+              s: {
+                font: { bold: true, italic: true },
+                fill: { fgColor: { rgb: "E9ECEF" } },
+                alignment: { horizontal: "left" }
+              }
             };
           }
           currentRow++;
         }
         
-        // Add upgrade items with professional formatting
+        // Add upgrade items with styling
         upgrades.forEach((upgrade, upgradeIndex) => {
           const rowIndex = currentRow - 1;
           const isEvenRow = upgradeIndex % 2 === 0;
+          const bgColor = isEvenRow ? "F8F9FA" : "FFFFFF";
           
-          // Choice title with full row styling
-          ws[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })] = { 
-            v: upgrade.choiceTitle, 
-            t: 's'
-          };
-          
-          // Price value
-          ws[XLSX.utils.encode_cell({ r: rowIndex, c: 8 })] = { 
-            v: parseInt(upgrade.clientPrice), 
-            t: 'n'
-          };
-          
-          // Apply simplified formatting to upgrade rows
+          // Create all cells in the row with styling
           for (let col = 0; col < 9; col++) {
             const cellAddr = XLSX.utils.encode_cell({ r: rowIndex, c: col });
-            if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
             
-            ws[cellAddr].s = {
-              fill: { fgColor: { rgb: isEvenRow ? "F8F9FA" : "FFFFFF" } },
-              alignment: { horizontal: col === 8 ? "right" : "left" }
-            };
-            
-            // Price formatting for column I
-            if (col === 8 && ws[cellAddr].t === 'n') {
-              ws[cellAddr].s.numFmt = '"$"#,##0';
+            if (col === 0) {
+              // Choice title
+              ws[cellAddr] = { 
+                v: upgrade.choiceTitle, 
+                t: 's',
+                s: {
+                  fill: { fgColor: { rgb: bgColor } },
+                  alignment: { horizontal: "left" }
+                }
+              };
+            } else if (col === 8) {
+              // Price value
+              ws[cellAddr] = { 
+                v: parseInt(upgrade.clientPrice), 
+                t: 'n',
+                s: {
+                  numFmt: '"$"#,##0',
+                  fill: { fgColor: { rgb: bgColor } },
+                  alignment: { horizontal: "right" }
+                }
+              };
+            } else {
+              // Empty cells with background
+              ws[cellAddr] = { 
+                v: '', 
+                t: 's',
+                s: {
+                  fill: { fgColor: { rgb: bgColor } },
+                  alignment: { horizontal: "left" }
+                }
+              };
             }
           }
           
@@ -398,30 +457,48 @@ export default function PurchaseOrder() {
       });
     });
     
-    // Grand Total with formula and full row styling
+    // Grand Total with styling
     const grandTotalRow = currentRow;
     const grandTotalRowIndex = grandTotalRow - 1;
     
-    ws[XLSX.utils.encode_cell({ r: grandTotalRowIndex, c: 0 })] = { v: 'Grand Total', t: 's' };
-    ws[XLSX.utils.encode_cell({ r: grandTotalRowIndex, c: 8 })] = { 
-      f: `SUM(I16:I${grandTotalRow - 1})`, 
-      t: 'n' 
-    };
-    
-    // Apply simplified Grand Total styling
+    // Create Grand Total row with styling
     for (let col = 0; col < 9; col++) {
       const cellAddr = XLSX.utils.encode_cell({ r: grandTotalRowIndex, c: col });
-      if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
       
-      ws[cellAddr].s = {
-        font: { bold: true, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "366092" } },
-        alignment: { horizontal: col === 8 ? "right" : "left" }
-      };
-      
-      // Price formatting for the total cell
-      if (col === 8) {
-        ws[cellAddr].s.numFmt = '"$"#,##0';
+      if (col === 0) {
+        // Grand Total label
+        ws[cellAddr] = { 
+          v: 'Grand Total', 
+          t: 's',
+          s: {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "366092" } },
+            alignment: { horizontal: "left" }
+          }
+        };
+      } else if (col === 8) {
+        // Grand Total formula
+        ws[cellAddr] = { 
+          f: `SUM(I16:I${grandTotalRow - 1})`, 
+          t: 'n',
+          s: {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "366092" } },
+            alignment: { horizontal: "right" },
+            numFmt: '"$"#,##0'
+          }
+        };
+      } else {
+        // Empty cells with background
+        ws[cellAddr] = { 
+          v: '', 
+          t: 's',
+          s: {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "366092" } },
+            alignment: { horizontal: "left" }
+          }
+        };
       }
     };
     
@@ -514,62 +591,8 @@ export default function PurchaseOrder() {
       { hpt: 20 }  // Headers
     ];
     
-    // Apply basic formatting that XLSX can handle reliably
-    // Note: Complex styling might not work in all Excel versions
-    
-    // Title formatting
-    if (ws['A1']) {
-      ws['A1'].s = {
-        font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "366092" } },
-        alignment: { horizontal: "center" }
-      };
-    }
-    
-    // Company name formatting  
-    if (ws['A3']) {
-      ws['A3'].s = {
-        font: { bold: true, sz: 14, color: { rgb: "366092" } },
-        fill: { fgColor: { rgb: "E7F3FF" } },
-        alignment: { horizontal: "center" }
-      };
-    }
-    
-    // Header row formatting
-    ['A19', 'E19', 'I19'].forEach(cellAddr => {
-      if (ws[cellAddr]) {
-        ws[cellAddr].s = {
-          font: { bold: true, color: { rgb: "FFFFFF" } },
-          fill: { fgColor: { rgb: "366092" } },
-          alignment: { horizontal: "center" }
-        };
-      }
-    });
-    
-    // Form labels formatting
-    ['B9', 'B10', 'B11', 'B12', 'B13', 'B14'].forEach(cellAddr => {
-      if (ws[cellAddr]) {
-        ws[cellAddr].s = {
-          font: { bold: true },
-          fill: { fgColor: { rgb: "F2F2F2" } }
-        };
-      }
-    });
-    
-    // Price formatting for all numeric cells in column I
-    Object.keys(ws).forEach(cellAddr => {
-      if (cellAddr.startsWith('I') && ws[cellAddr] && ws[cellAddr].t === 'n') {
-        ws[cellAddr].s = {
-          numFmt: '"$"#,##0',
-          alignment: { horizontal: "right" }
-        };
-        
-        // Bold for important totals
-        if (ws[cellAddr].f || ws[cellAddr].v > 100000) {
-          ws[cellAddr].s.font = { bold: true };
-        }
-      }
-    });
+    // Formatting is now applied when cells are created above
+    // No additional formatting needed here
     
     // Add worksheet to workbook
     XLSX.utils.book_append_sheet(wb, ws, 'Order Summary');
