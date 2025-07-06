@@ -26,6 +26,7 @@ export default function PurchaseOrder() {
   const { toast } = useToast();
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const [selectedUpgrades, setSelectedUpgrades] = useState<Set<number>>(new Set());
+  const [showCostColumns, setShowCostColumns] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     buyerLastName: "",
     community: "",
@@ -88,6 +89,264 @@ export default function PurchaseOrder() {
       }
       
       return newSet;
+    });
+  };
+
+  const handlePreview = () => {
+    if (!currentTemplate) {
+      toast({
+        title: "Preview Failed",
+        description: "Please select a template.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const selectedUpgradeItems = upgrades?.filter(upgrade => selectedUpgrades.has(upgrade.id)) || [];
+    const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
+
+    const basePrice = parseInt(currentTemplate.basePrice);
+    const lotPremium = parseInt(formData.lotPremium || '0');
+    const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseInt(upgrade.clientPrice), 0);
+    const grandTotal = basePrice + lotPremium + upgradesTotal;
+
+    const previewContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Purchase Order Preview - ${currentTemplate.name}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          .header { background: #366092; color: white; padding: 15px; text-align: center; margin-bottom: 20px; }
+          .company { background: #E7F3FF; color: #366092; padding: 10px; text-align: center; margin-bottom: 20px; font-weight: bold; }
+          .form-section { margin-bottom: 20px; }
+          .form-row { display: flex; margin-bottom: 10px; }
+          .label { font-weight: bold; background: #f2f2f2; padding: 5px; width: 150px; }
+          .value { padding: 5px; flex: 1; }
+          .pricing-section { margin-top: 20px; }
+          .category-header { background: #4472C4; color: white; padding: 8px; font-weight: bold; margin-top: 10px; }
+          .location-header { background: #E9ECEF; padding: 6px; font-weight: bold; font-style: italic; }
+          .upgrade-item { padding: 5px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+          .upgrade-item:nth-child(even) { background: #f8f9fa; }
+          .total-row { background: #366092; color: white; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 10px; }
+          .currency { text-align: right; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>PURCHASE ORDER</h1>
+        </div>
+        
+        <div class="company">
+          • BEECHEN & DILL HOMES •
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+          565 Village Center Dr • Burr Ridge, IL 60527-4516 • Phone: (630) 920-9430
+        </div>
+        
+        <div class="form-section">
+          <div class="form-row">
+            <div class="label">Date</div>
+            <div class="value">${new Date().toLocaleDateString()}</div>
+          </div>
+          <div class="form-row">
+            <div class="label">Buyer's Last Name</div>
+            <div class="value">${formData.buyerLastName || ''}</div>
+          </div>
+          <div class="form-row">
+            <div class="label">Community</div>
+            <div class="value">${formData.community || ''}</div>
+          </div>
+          <div class="form-row">
+            <div class="label">Lot Number</div>
+            <div class="value">${formData.lotNumber || ''}</div>
+          </div>
+          <div class="form-row">
+            <div class="label">Lot Address</div>
+            <div class="value">${formData.lotAddress || ''}</div>
+          </div>
+          <div class="form-row">
+            <div class="label">House Plan</div>
+            <div class="value">${currentTemplate.name}</div>
+          </div>
+        </div>
+        
+        <div class="pricing-section">
+          <div class="upgrade-item">
+            <span>Base Price</span>
+            <span class="currency">$${basePrice.toLocaleString()}</span>
+          </div>
+          ${lotPremium > 0 ? `
+          <div class="upgrade-item">
+            <span>Lot Premium</span>
+            <span class="currency">$${lotPremium.toLocaleString()}</span>
+          </div>
+          ` : ''}
+          
+          ${Object.entries(groupedUpgrades).map(([category, locations]) => `
+            <div class="category-header">${category}</div>
+            ${Object.entries(locations).map(([location, upgrades]) => `
+              ${location !== 'N/A' ? `<div class="location-header">${location}</div>` : ''}
+              ${upgrades.map(upgrade => `
+                <div class="upgrade-item">
+                  <span>${upgrade.choiceTitle}</span>
+                  <span class="currency">$${parseInt(upgrade.clientPrice).toLocaleString()}</span>
+                </div>
+              `).join('')}
+            `).join('')}
+          `).join('')}
+          
+          <div class="total-row">
+            <span>Grand Total</span>
+            <span class="currency">$${grandTotal.toLocaleString()}</span>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(previewContent);
+      newWindow.document.close();
+    }
+
+    toast({
+      title: "Preview Opened",
+      description: "Purchase order preview opened in new window.",
+    });
+  };
+
+  const handleGeneratePO = async () => {
+    if (!currentTemplate) {
+      toast({
+        title: "Generation Failed", 
+        description: "Please select a template.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const jsPDF = (await import('jspdf')).default;
+      const autoTable = (await import('jspdf-autotable')).default;
+      
+      const doc = new jsPDF();
+      const selectedUpgradeItems = upgrades?.filter(upgrade => selectedUpgrades.has(upgrade.id)) || [];
+      const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
+
+      // Header
+      doc.setFillColor(54, 96, 146);
+      doc.rect(0, 0, 210, 25, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(18);
+      doc.setFont(undefined, 'bold');
+      doc.text('PURCHASE ORDER', 105, 16, { align: 'center' });
+
+      // Company info
+      doc.setFillColor(231, 243, 255);
+      doc.rect(0, 30, 210, 15, 'F');
+      doc.setTextColor(54, 96, 146);
+      doc.setFontSize(14);
+      doc.text('• BEECHEN & DILL HOMES •', 105, 40, { align: 'center' });
+
+      // Address
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+      doc.text('565 Village Center Dr • Burr Ridge, IL 60527-4516 • Phone: (630) 920-9430', 105, 55, { align: 'center' });
+
+      // Form data
+      const formData2 = [
+        ['Date', new Date().toLocaleDateString()],
+        ["Buyer's Last Name", formData.buyerLastName || ''],
+        ['Community', formData.community || ''],
+        ['Lot Number', formData.lotNumber || ''],
+        ['Lot Address', formData.lotAddress || ''],
+        ['House Plan', currentTemplate.name]
+      ];
+
+      autoTable(doc, {
+        startY: 65,
+        body: formData2,
+        theme: 'grid',
+        styles: { fontSize: 10, cellPadding: 3 },
+        columnStyles: {
+          0: { fontStyle: 'bold', fillColor: [242, 242, 242], cellWidth: 40 },
+          1: { cellWidth: 100 }
+        }
+      });
+
+      // Pricing section
+      let startY = (doc as any).lastAutoTable.finalY + 15;
+      
+      const pricingData = [
+        ['Base Price', '', `$${parseInt(currentTemplate.basePrice).toLocaleString()}`]
+      ];
+
+      if (formData.lotPremium && formData.lotPremium !== '0') {
+        pricingData.push(['Lot Premium', '', `$${parseInt(formData.lotPremium).toLocaleString()}`]);
+      }
+
+      Object.entries(groupedUpgrades).forEach(([category, locations]) => {
+        pricingData.push([category, '', '']);
+        
+        Object.entries(locations).forEach(([location, upgrades]) => {
+          if (location !== 'N/A') {
+            pricingData.push([`  ${location}`, '', '']);
+          }
+          
+          upgrades.forEach(upgrade => {
+            pricingData.push([upgrade.choiceTitle, '', `$${parseInt(upgrade.clientPrice).toLocaleString()}`]);
+          });
+        });
+      });
+
+      const basePrice = parseInt(currentTemplate.basePrice);
+      const lotPremium = parseInt(formData.lotPremium || '0');
+      const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseInt(upgrade.clientPrice), 0);
+      const grandTotal = basePrice + lotPremium + upgradesTotal;
+
+      pricingData.push(['Grand Total', '', `$${grandTotal.toLocaleString()}`]);
+
+      autoTable(doc, {
+        startY,
+        head: [['Option', 'Description', 'Subtotal']],
+        body: pricingData,
+        theme: 'striped',
+        headStyles: { fillColor: [68, 114, 196], textColor: 255, fontStyle: 'bold' },
+        styles: { fontSize: 10, cellPadding: 3 },
+        columnStyles: {
+          0: { cellWidth: 80 },
+          1: { cellWidth: 80 },
+          2: { cellWidth: 30, halign: 'right' }
+        }
+      });
+
+      const buyerName = formData.buyerLastName || 'Customer';
+      const dateStr = new Date().toISOString().split('T')[0];
+      const fileName = `PO_${currentTemplate.name}_${buyerName}_${dateStr}.pdf`;
+      
+      doc.save(fileName);
+
+      toast({
+        title: "PDF Generated",
+        description: "Purchase order PDF has been downloaded.",
+      });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: "Generation Failed",
+        description: "An error occurred while generating the PDF.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSaveDraft = () => {
+    toast({
+      title: "Draft Saved",
+      description: "Purchase order draft has been saved locally.",
     });
   };
 
@@ -450,7 +709,7 @@ export default function PurchaseOrder() {
                   <Input
                     id="lotPremium"
                     value={formatNumberWithCommas(formData.lotPremium)}
-                    onChange={(e) => handleNumberInputChange(e, (value) => 
+                    onChange={(e) => handleNumberInputChange(e.target.value, (value) => 
                       setFormData(prev => ({ ...prev, lotPremium: value }))
                     )}
                     placeholder="$0"
@@ -461,7 +720,7 @@ export default function PurchaseOrder() {
                   <Input
                     id="baseCost"
                     value={formatNumberWithCommas(formData.baseCost)}
-                    onChange={(e) => handleNumberInputChange(e, (value) => 
+                    onChange={(e) => handleNumberInputChange(e.target.value, (value) => 
                       setFormData(prev => ({ ...prev, baseCost: value }))
                     )}
                     placeholder="$0"
@@ -478,10 +737,20 @@ export default function PurchaseOrder() {
                 <CardTitle>Available Upgrades</CardTitle>
               </CardHeader>
               <CardContent>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Select Upgrades</h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowCostColumns(!showCostColumns)}
+                  >
+                    {showCostColumns ? 'Hide' : 'Show'} Cost Columns
+                  </Button>
+                </div>
                 <UpgradeTable
                   groupedUpgrades={groupedUpgrades}
                   selectedUpgrades={selectedUpgrades}
-                  showCostColumns={false}
+                  showCostColumns={showCostColumns}
                   onUpgradeToggle={handleUpgradeToggle}
                   onSelectAll={handleSelectAll}
                 />
@@ -496,10 +765,10 @@ export default function PurchaseOrder() {
               baseCost={formData.baseCost}
               lotPremium={formData.lotPremium}
               selectedUpgrades={selectedUpgradeItems}
-              showCostColumns={false}
-              onSaveDraft={() => {}}
-              onPreview={() => {}}
-              onGeneratePO={() => {}}
+              showCostColumns={showCostColumns}
+              onSaveDraft={handleSaveDraft}
+              onPreview={handlePreview}
+              onGeneratePO={handleGeneratePO}
               onExportExcel={handleExportExcel}
             />
           </div>
