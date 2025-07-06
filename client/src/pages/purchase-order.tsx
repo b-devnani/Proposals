@@ -325,68 +325,142 @@ export default function PurchaseOrder() {
     const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
     
     Object.entries(groupedUpgrades).forEach(([category, locations]) => {
-      // Category header
-      ws[XLSX.utils.encode_cell({ r: currentRow - 1, c: 0 })] = { v: category, t: 's' };
+      // Category header with full row styling
+      const categoryRowIndex = currentRow - 1;
+      ws[XLSX.utils.encode_cell({ r: categoryRowIndex, c: 0 })] = { v: category, t: 's' };
+      
+      // Apply category header styling across the entire row
+      for (let col = 0; col < 9; col++) {
+        const cellAddr = XLSX.utils.encode_cell({ r: categoryRowIndex, c: col });
+        if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
+        
+        ws[cellAddr].s = {
+          font: { sz: 12, bold: true, color: { rgb: "FFFFFF" } },
+          alignment: { horizontal: "left", vertical: "center" },
+          fill: { fgColor: { rgb: "495057" } },
+          border: {
+            top: { style: "medium", color: { rgb: "000000" } },
+            bottom: { style: "medium", color: { rgb: "000000" } },
+            left: { style: "medium", color: { rgb: "000000" } },
+            right: { style: "medium", color: { rgb: "000000" } }
+          }
+        };
+      }
       currentRow++;
       
       Object.entries(locations).forEach(([location, upgrades]) => {
         // Location header (if not N/A)
         if (location !== "N/A") {
-          ws[XLSX.utils.encode_cell({ r: currentRow - 1, c: 0 })] = { v: location, t: 's' };
+          const locationRowIndex = currentRow - 1;
+          ws[XLSX.utils.encode_cell({ r: locationRowIndex, c: 0 })] = { v: location, t: 's' };
+          
+          // Apply location header styling across the row
+          for (let col = 0; col < 9; col++) {
+            const cellAddr = XLSX.utils.encode_cell({ r: locationRowIndex, c: col });
+            if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
+            
+            ws[cellAddr].s = {
+              font: { sz: 11, bold: true, italic: true },
+              alignment: { horizontal: "left", vertical: "center" },
+              fill: { fgColor: { rgb: "E9ECEF" } },
+              border: {
+                top: { style: "thin", color: { rgb: "ADB5BD" } },
+                bottom: { style: "thin", color: { rgb: "ADB5BD" } },
+                left: { style: "thin", color: { rgb: "ADB5BD" } },
+                right: { style: "thin", color: { rgb: "ADB5BD" } }
+              }
+            };
+          }
           currentRow++;
         }
         
-        // Add upgrade items with alternating row colors
+        // Add upgrade items with professional formatting
         upgrades.forEach((upgrade, upgradeIndex) => {
           const rowIndex = currentRow - 1;
           const isEvenRow = upgradeIndex % 2 === 0;
           
-          // Choice title
+          // Choice title with full row styling
           ws[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })] = { 
             v: upgrade.choiceTitle, 
-            t: 's',
-            s: {
-              font: { sz: 10 },
-              alignment: { horizontal: "left", vertical: "center" },
-              fill: { fgColor: { rgb: isEvenRow ? "F9F9F9" : "FFFFFF" } },
-              border: {
-                top: { style: "thin", color: { rgb: "E0E0E0" } },
-                bottom: { style: "thin", color: { rgb: "E0E0E0" } },
-                left: { style: "thin", color: { rgb: "E0E0E0" } },
-                right: { style: "thin", color: { rgb: "E0E0E0" } }
-              }
-            }
+            t: 's'
           };
           
           // Price value
           ws[XLSX.utils.encode_cell({ r: rowIndex, c: 8 })] = { 
             v: parseInt(upgrade.clientPrice), 
-            t: 'n',
-            s: {
-              font: { sz: 10 },
-              alignment: { horizontal: "right", vertical: "center" },
-              numFmt: '"$"#,##0',
-              fill: { fgColor: { rgb: isEvenRow ? "F9F9F9" : "FFFFFF" } },
-              border: {
-                top: { style: "thin", color: { rgb: "E0E0E0" } },
-                bottom: { style: "thin", color: { rgb: "E0E0E0" } },
-                left: { style: "thin", color: { rgb: "E0E0E0" } },
-                right: { style: "thin", color: { rgb: "E0E0E0" } }
-              }
-            }
+            t: 'n'
           };
+          
+          // Apply formatting to entire row (A through I)
+          for (let col = 0; col < 9; col++) {
+            const cellAddr = XLSX.utils.encode_cell({ r: rowIndex, c: col });
+            if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
+            
+            ws[cellAddr].s = {
+              font: { sz: 10 },
+              alignment: { 
+                horizontal: col === 8 ? "right" : "left", 
+                vertical: "center" 
+              },
+              fill: { fgColor: { rgb: isEvenRow ? "F8F9FA" : "FFFFFF" } },
+              border: {
+                top: { style: "thin", color: { rgb: "DEE2E6" } },
+                bottom: { style: "thin", color: { rgb: "DEE2E6" } },
+                left: { style: "thin", color: { rgb: "DEE2E6" } },
+                right: { style: "thin", color: { rgb: "DEE2E6" } }
+              }
+            };
+            
+            // Price formatting for column I
+            if (col === 8 && ws[cellAddr].t === 'n') {
+              ws[cellAddr].s.numFmt = '"$"#,##0';
+              ws[cellAddr].s.font.bold = false;
+            }
+          }
           
           currentRow++;
         });
       });
     });
     
-    // Grand Total with formula
+    // Grand Total with formula and full row styling
     const grandTotalRow = currentRow;
-    ws[XLSX.utils.encode_cell({ r: grandTotalRow - 1, c: 0 })] = { v: 'Grand Total', t: 's' };
-    ws[XLSX.utils.encode_cell({ r: grandTotalRow - 1, c: 8 })] = { 
+    const grandTotalRowIndex = grandTotalRow - 1;
+    
+    ws[XLSX.utils.encode_cell({ r: grandTotalRowIndex, c: 0 })] = { v: 'Grand Total', t: 's' };
+    ws[XLSX.utils.encode_cell({ r: grandTotalRowIndex, c: 8 })] = { 
       f: `SUM(I16:I${grandTotalRow - 1})`, 
       t: 'n' 
+    };
+    
+    // Apply Grand Total styling across the entire row
+    for (let col = 0; col < 9; col++) {
+      const cellAddr = XLSX.utils.encode_cell({ r: grandTotalRowIndex, c: col });
+      if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
+      
+      ws[cellAddr].s = {
+        font: { 
+          sz: 14, 
+          bold: true, 
+          color: { rgb: "FFFFFF" } 
+        },
+        alignment: { 
+          horizontal: col === 8 ? "right" : "left", 
+          vertical: "center" 
+        },
+        fill: { fgColor: { rgb: "1F4E79" } },
+        border: {
+          top: { style: "thick", color: { rgb: "000000" } },
+          bottom: { style: "thick", color: { rgb: "000000" } },
+          left: { style: "thick", color: { rgb: "000000" } },
+          right: { style: "thick", color: { rgb: "000000" } }
+        }
+      };
+      
+      // Special formatting for the price cell
+      if (col === 8) {
+        ws[cellAddr].s.numFmt = '"$"#,##0';
+      }
     };
     
     // Summary section with formulas
@@ -478,19 +552,33 @@ export default function PurchaseOrder() {
       { hpt: 20 }  // Headers
     ];
     
-    // Add cell styling
+    // Apply comprehensive formatting to all cells
+    const addCellFormatting = (cellAddr: string, cellData: any) => {
+      if (!ws[cellAddr]) ws[cellAddr] = cellData;
+      else Object.assign(ws[cellAddr], cellData);
+    };
+
+    // Apply all cell styles with proper formatting
     Object.keys(ws).forEach(cellAddress => {
       if (cellAddress.startsWith('!')) return;
       
       const cell = ws[cellAddress];
       if (!cell.s) cell.s = {};
-      
+
+      // Apply borders to all content cells
+      const defaultBorder = {
+        top: { style: "thin", color: { rgb: "CCCCCC" } },
+        bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+        left: { style: "thin", color: { rgb: "CCCCCC" } },
+        right: { style: "thin", color: { rgb: "CCCCCC" } }
+      };
+
       // Title styling
       if (cellAddress === 'A1') {
         cell.s = {
-          font: { bold: true, sz: 18, color: { rgb: "FFFFFF" } },
+          font: { bold: true, sz: 20, color: { rgb: "FFFFFF" } },
           alignment: { horizontal: "center", vertical: "center" },
-          fill: { fgColor: { rgb: "428BCA" } }, // Company blue
+          fill: { fgColor: { rgb: "1F4E79" } },
           border: {
             top: { style: "thick", color: { rgb: "000000" } },
             bottom: { style: "thick", color: { rgb: "000000" } },
@@ -503,15 +591,66 @@ export default function PurchaseOrder() {
       // Company name styling
       else if (cellAddress === 'A3') {
         cell.s = {
-          font: { bold: true, sz: 14, color: { rgb: "428BCA" } },
+          font: { bold: true, sz: 16, color: { rgb: "1F4E79" } },
           alignment: { horizontal: "center", vertical: "center" },
-          fill: { fgColor: { rgb: "F0F8FF" } },
+          fill: { fgColor: { rgb: "E7F3FF" } },
           border: {
-            top: { style: "medium", color: { rgb: "428BCA" } },
-            bottom: { style: "medium", color: { rgb: "428BCA" } },
-            left: { style: "medium", color: { rgb: "428BCA" } },
-            right: { style: "medium", color: { rgb: "428BCA" } }
+            top: { style: "medium", color: { rgb: "1F4E79" } },
+            bottom: { style: "medium", color: { rgb: "1F4E79" } },
+            left: { style: "medium", color: { rgb: "1F4E79" } },
+            right: { style: "medium", color: { rgb: "1F4E79" } }
           }
+        };
+      }
+      
+      // Address styling
+      else if (['A7', 'C7', 'D7', 'G7', 'H7'].includes(cellAddress)) {
+        cell.s = {
+          font: { sz: 11, bold: false },
+          alignment: { horizontal: "center", vertical: "center" },
+          fill: { fgColor: { rgb: "F8F9FA" } },
+          border: defaultBorder
+        };
+      }
+      
+      // Form labels styling (B9-B14)
+      else if (['B9', 'B10', 'B11', 'B12', 'B13', 'B14'].includes(cellAddress)) {
+        cell.s = {
+          font: { bold: true, sz: 11 },
+          alignment: { horizontal: "left", vertical: "center" },
+          fill: { fgColor: { rgb: "E9ECEF" } },
+          border: defaultBorder
+        };
+      }
+      
+      // Form data styling (E9-E14)
+      else if (['E9', 'E10', 'E11', 'E12', 'E13', 'E14'].includes(cellAddress)) {
+        cell.s = {
+          font: { sz: 11 },
+          alignment: { horizontal: "left", vertical: "center" },
+          fill: { fgColor: { rgb: "FFFFFF" } },
+          border: defaultBorder
+        };
+      }
+      
+      // Price labels (E16, E17)
+      else if (['E16', 'E17'].includes(cellAddress)) {
+        cell.s = {
+          font: { bold: true, sz: 12 },
+          alignment: { horizontal: "left", vertical: "center" },
+          fill: { fgColor: { rgb: "D1ECF1" } },
+          border: defaultBorder
+        };
+      }
+      
+      // Price values (I16, I17)
+      else if (['I16', 'I17'].includes(cellAddress) && cell.t === 'n') {
+        cell.s = {
+          font: { sz: 12, bold: true },
+          alignment: { horizontal: "right", vertical: "center" },
+          numFmt: '"$"#,##0',
+          fill: { fgColor: { rgb: "FFFFFF" } },
+          border: defaultBorder
         };
       }
       
@@ -520,88 +659,72 @@ export default function PurchaseOrder() {
         cell.s = {
           font: { bold: true, sz: 12, color: { rgb: "FFFFFF" } },
           alignment: { horizontal: "center", vertical: "center" },
-          fill: { fgColor: { rgb: "428BCA" } },
+          fill: { fgColor: { rgb: "1F4E79" } },
           border: {
-            top: { style: "thin", color: { rgb: "000000" } },
-            bottom: { style: "thin", color: { rgb: "000000" } },
-            left: { style: "thin", color: { rgb: "000000" } },
-            right: { style: "thin", color: { rgb: "000000" } }
+            top: { style: "medium", color: { rgb: "000000" } },
+            bottom: { style: "medium", color: { rgb: "000000" } },
+            left: { style: "medium", color: { rgb: "000000" } },
+            right: { style: "medium", color: { rgb: "000000" } }
           }
         };
       }
       
-      // Category headers styling
-      else if (cell.v && typeof cell.v === 'string' && 
-               (cell.v.includes('Options') || cell.v === 'Grand Total')) {
+      // Summary section styling
+      else if (cell.v === 'SUMMARY:') {
         cell.s = {
-          font: { bold: true, sz: 11, color: { rgb: "000000" } },
-          alignment: { horizontal: "left", vertical: "center" },
-          fill: { fgColor: { rgb: "E8F4FD" } }, // Light blue
-          border: {
-            top: { style: "thin", color: { rgb: "CCCCCC" } },
-            bottom: { style: "thin", color: { rgb: "CCCCCC" } },
-            left: { style: "thin", color: { rgb: "CCCCCC" } },
-            right: { style: "thin", color: { rgb: "CCCCCC" } }
-          }
+          font: { bold: true, sz: 14, color: { rgb: "1F4E79" } },
+          alignment: { horizontal: "center", vertical: "center" },
+          fill: { fgColor: { rgb: "BDD7EE" } },
+          border: defaultBorder
         };
       }
       
-      // Form labels styling (B9-B14)
-      else if (['B9', 'B10', 'B11', 'B12', 'B13', 'B14'].includes(cellAddress)) {
-        cell.s = {
-          font: { bold: true, sz: 10 },
-          alignment: { horizontal: "left", vertical: "center" },
-          fill: { fgColor: { rgb: "F8F8F8" } }
-        };
-      }
-      
-      // Price labels (E16, E17)
-      else if (['E16', 'E17'].includes(cellAddress)) {
+      // Summary labels
+      else if (cellAddress.startsWith('H') && cell.v && typeof cell.v === 'string' && cell.v.includes(':')) {
         cell.s = {
           font: { bold: true, sz: 11 },
-          alignment: { horizontal: "left", vertical: "center" },
-          fill: { fgColor: { rgb: "F0F8FF" } }
+          alignment: { horizontal: "right", vertical: "center" },
+          fill: { fgColor: { rgb: "E7F3FF" } },
+          border: defaultBorder
         };
       }
       
-      // Price values (I16, I17 and other price cells)
-      else if (cellAddress.startsWith('I') && cell.t === 'n') {
+      // Summary values
+      else if (cellAddress.startsWith('I') && cell.t === 'n' && parseInt(cellAddress.substring(1)) > 35) {
         cell.s = {
-          font: { sz: 11 },
+          font: { sz: 11, bold: true },
           alignment: { horizontal: "right", vertical: "center" },
-          numFmt: '"$"#,##0'
+          numFmt: '"$"#,##0',
+          fill: { fgColor: { rgb: "FFFFFF" } },
+          border: defaultBorder
         };
         
-        // Special styling for Grand Total
-        if (cell.v && cell.v > 500000) {
-          cell.s.font.bold = true;
-          cell.s.fill = { fgColor: { rgb: "428BCA" } };
+        // Grand Total special formatting
+        if (cell.f && cell.f.includes('SUM(I') && cell.f.includes(':I')) {
+          cell.s.font.sz = 12;
+          cell.s.fill = { fgColor: { rgb: "1F4E79" } };
           cell.s.font.color = { rgb: "FFFFFF" };
         }
       }
       
-      // Summary labels styling
-      else if (cellAddress.startsWith('H') && cell.v && 
-               typeof cell.v === 'string' && cell.v.includes(':')) {
+      // Signature section
+      else if (cell.v && typeof cell.v === 'string' && 
+               (cell.v.includes('Buyer Signature') || cell.v.includes('Representative') || cell.v.includes('acknowledge'))) {
         cell.s = {
-          font: { bold: true, sz: 10 },
-          alignment: { horizontal: "right", vertical: "center" }
+          font: { sz: 10, bold: cell.v.includes('Signature') || cell.v.includes('Representative') },
+          alignment: { horizontal: "left", vertical: "center" },
+          fill: { fgColor: { rgb: "F8F9FA" } },
+          border: defaultBorder
         };
       }
       
-      // SUMMARY header
-      else if (cell.v === 'SUMMARY:') {
-        cell.s = {
-          font: { bold: true, sz: 12, color: { rgb: "428BCA" } },
-          alignment: { horizontal: "center", vertical: "center" }
-        };
-      }
-      
-      // Default cell styling
-      else {
+      // Default styling for remaining cells
+      else if (cell.v !== undefined) {
         cell.s = {
           font: { sz: 10 },
-          alignment: { horizontal: "left", vertical: "center" }
+          alignment: { horizontal: "left", vertical: "center" },
+          fill: { fgColor: { rgb: "FFFFFF" } },
+          border: defaultBorder
         };
       }
     });
