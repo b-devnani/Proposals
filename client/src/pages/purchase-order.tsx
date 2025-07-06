@@ -652,7 +652,7 @@ export default function PurchaseOrder() {
 
     const selectedUpgradeItems = upgrades?.filter(upgrade => selectedUpgrades.has(upgrade.id)) || [];
     
-    // Set column widths to match template
+    // Set column widths to match template exactly
     worksheet.columns = [
       { width: 15 }, // A - Option
       { width: 15 }, // B - Form labels  
@@ -665,7 +665,7 @@ export default function PurchaseOrder() {
       { width: 15 }  // I - Subtotal
     ];
     
-    // Title with blue background and white text
+    // Title with blue background and white text - exact template match
     const titleCell = worksheet.getCell('A1');
     titleCell.value = 'PURCHASE ORDER';
     titleCell.font = { bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
@@ -674,7 +674,7 @@ export default function PurchaseOrder() {
     worksheet.mergeCells('A1:I1');
     worksheet.getRow(1).height = 30;
     
-    // Company info with light blue background
+    // Company info with light blue background - exact template match
     const companyCell = worksheet.getCell('A3');
     companyCell.value = '• BEECHEN & DILL HOMES •';
     companyCell.font = { bold: true, size: 14, color: { argb: 'FF366092' } };
@@ -683,12 +683,10 @@ export default function PurchaseOrder() {
     worksheet.mergeCells('A3:I3');
     worksheet.getRow(3).height = 25;
     
-    // Address line
-    worksheet.getCell('A7').value = '565 Village Center Dr';
-    worksheet.getCell('C7').value = '•';
-    worksheet.getCell('D7').value = 'Burr Ridge, IL 60527-4516';
-    worksheet.getCell('G7').value = '•';
-    worksheet.getCell('H7').value = 'Phone: (630) 920-9430';
+    // Address line merged across all columns - exact template match
+    const addressCell = worksheet.getCell('A7');
+    addressCell.value = '565 Village Center Dr • Burr Ridge, IL 60527-4516 • Phone: (630) 920-9430';
+    addressCell.alignment = { horizontal: 'center', vertical: 'middle' };
     worksheet.mergeCells('A7:I7');
     
     // Form data section with gray labels
