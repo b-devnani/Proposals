@@ -285,6 +285,9 @@ export default function PurchaseOrder() {
     
     // Set up the exact template structure
     ws['A1'] = { v: 'PURCHASE ORDER', t: 's' };
+    
+    // Add company info with logo placeholder
+    ws['A3'] = { v: '• BEECHEN & DILL HOMES •', t: 's' };
     ws['A7'] = { v: '565 Village Center Dr', t: 's' };
     ws['C7'] = { v: '•', t: 's' };
     ws['D7'] = { v: 'Burr Ridge, IL 60527-4516', t: 's' };
@@ -333,11 +336,46 @@ export default function PurchaseOrder() {
           currentRow++;
         }
         
-        // Add upgrade items
-        upgrades.forEach(upgrade => {
+        // Add upgrade items with alternating row colors
+        upgrades.forEach((upgrade, upgradeIndex) => {
           const rowIndex = currentRow - 1;
-          ws[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })] = { v: upgrade.choiceTitle, t: 's' };
-          ws[XLSX.utils.encode_cell({ r: rowIndex, c: 8 })] = { v: parseInt(upgrade.clientPrice), t: 'n' };
+          const isEvenRow = upgradeIndex % 2 === 0;
+          
+          // Choice title
+          ws[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })] = { 
+            v: upgrade.choiceTitle, 
+            t: 's',
+            s: {
+              font: { sz: 10 },
+              alignment: { horizontal: "left", vertical: "center" },
+              fill: { fgColor: { rgb: isEvenRow ? "F9F9F9" : "FFFFFF" } },
+              border: {
+                top: { style: "thin", color: { rgb: "E0E0E0" } },
+                bottom: { style: "thin", color: { rgb: "E0E0E0" } },
+                left: { style: "thin", color: { rgb: "E0E0E0" } },
+                right: { style: "thin", color: { rgb: "E0E0E0" } }
+              }
+            }
+          };
+          
+          // Price value
+          ws[XLSX.utils.encode_cell({ r: rowIndex, c: 8 })] = { 
+            v: parseInt(upgrade.clientPrice), 
+            t: 'n',
+            s: {
+              font: { sz: 10 },
+              alignment: { horizontal: "right", vertical: "center" },
+              numFmt: '"$"#,##0',
+              fill: { fgColor: { rgb: isEvenRow ? "F9F9F9" : "FFFFFF" } },
+              border: {
+                top: { style: "thin", color: { rgb: "E0E0E0" } },
+                bottom: { style: "thin", color: { rgb: "E0E0E0" } },
+                left: { style: "thin", color: { rgb: "E0E0E0" } },
+                right: { style: "thin", color: { rgb: "E0E0E0" } }
+              }
+            }
+          };
+          
           currentRow++;
         });
       });
@@ -392,6 +430,7 @@ export default function PurchaseOrder() {
     // Add merged cells for proper formatting
     ws['!merges'] = [
       { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } }, // Title
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 8 } }, // Company name
       { s: { r: 6, c: 0 }, e: { r: 6, c: 1 } }, // Address
       { s: { r: 6, c: 3 }, e: { r: 6, c: 5 } }, // Address continued
       { s: { r: 8, c: 4 }, e: { r: 8, c: 8 } }, // Date
@@ -406,6 +445,166 @@ export default function PurchaseOrder() {
       { s: { r: grandTotalRow - 1, c: 0 }, e: { r: grandTotalRow - 1, c: 7 } }, // Grand total
       { s: { r: sigStartRow, c: 0 }, e: { r: sigStartRow + 1, c: 8 } } // Agreement text
     ];
+    
+    // Add column widths for better formatting
+    ws['!cols'] = [
+      { wch: 20 }, // A - Option
+      { wch: 12 }, // B - Labels
+      { wch: 3 },  // C - Bullet
+      { wch: 20 }, // D - Address
+      { wch: 20 }, // E - Description/Data
+      { wch: 12 }, // F
+      { wch: 3 },  // G - Bullet
+      { wch: 15 }, // H - Phone/Summary Labels
+      { wch: 12 }  // I - Subtotal/Values
+    ];
+    
+    // Add row heights for better spacing
+    ws['!rows'] = [
+      { hpt: 25 }, // Title row
+      null, null, null, null, null,
+      { hpt: 20 }, // Address row
+      null,
+      { hpt: 18 }, // Form data rows
+      { hpt: 18 },
+      { hpt: 18 },
+      { hpt: 18 },
+      { hpt: 18 },
+      { hpt: 18 },
+      null,
+      { hpt: 20 }, // Pricing rows
+      { hpt: 20 },
+      null,
+      { hpt: 20 }  // Headers
+    ];
+    
+    // Add cell styling
+    Object.keys(ws).forEach(cellAddress => {
+      if (cellAddress.startsWith('!')) return;
+      
+      const cell = ws[cellAddress];
+      if (!cell.s) cell.s = {};
+      
+      // Title styling
+      if (cellAddress === 'A1') {
+        cell.s = {
+          font: { bold: true, sz: 18, color: { rgb: "FFFFFF" } },
+          alignment: { horizontal: "center", vertical: "center" },
+          fill: { fgColor: { rgb: "428BCA" } }, // Company blue
+          border: {
+            top: { style: "thick", color: { rgb: "000000" } },
+            bottom: { style: "thick", color: { rgb: "000000" } },
+            left: { style: "thick", color: { rgb: "000000" } },
+            right: { style: "thick", color: { rgb: "000000" } }
+          }
+        };
+      }
+      
+      // Company name styling
+      else if (cellAddress === 'A3') {
+        cell.s = {
+          font: { bold: true, sz: 14, color: { rgb: "428BCA" } },
+          alignment: { horizontal: "center", vertical: "center" },
+          fill: { fgColor: { rgb: "F0F8FF" } },
+          border: {
+            top: { style: "medium", color: { rgb: "428BCA" } },
+            bottom: { style: "medium", color: { rgb: "428BCA" } },
+            left: { style: "medium", color: { rgb: "428BCA" } },
+            right: { style: "medium", color: { rgb: "428BCA" } }
+          }
+        };
+      }
+      
+      // Header row styling (A19, E19, I19)
+      else if (['A19', 'E19', 'I19'].includes(cellAddress)) {
+        cell.s = {
+          font: { bold: true, sz: 12, color: { rgb: "FFFFFF" } },
+          alignment: { horizontal: "center", vertical: "center" },
+          fill: { fgColor: { rgb: "428BCA" } },
+          border: {
+            top: { style: "thin", color: { rgb: "000000" } },
+            bottom: { style: "thin", color: { rgb: "000000" } },
+            left: { style: "thin", color: { rgb: "000000" } },
+            right: { style: "thin", color: { rgb: "000000" } }
+          }
+        };
+      }
+      
+      // Category headers styling
+      else if (cell.v && typeof cell.v === 'string' && 
+               (cell.v.includes('Options') || cell.v === 'Grand Total')) {
+        cell.s = {
+          font: { bold: true, sz: 11, color: { rgb: "000000" } },
+          alignment: { horizontal: "left", vertical: "center" },
+          fill: { fgColor: { rgb: "E8F4FD" } }, // Light blue
+          border: {
+            top: { style: "thin", color: { rgb: "CCCCCC" } },
+            bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+            left: { style: "thin", color: { rgb: "CCCCCC" } },
+            right: { style: "thin", color: { rgb: "CCCCCC" } }
+          }
+        };
+      }
+      
+      // Form labels styling (B9-B14)
+      else if (['B9', 'B10', 'B11', 'B12', 'B13', 'B14'].includes(cellAddress)) {
+        cell.s = {
+          font: { bold: true, sz: 10 },
+          alignment: { horizontal: "left", vertical: "center" },
+          fill: { fgColor: { rgb: "F8F8F8" } }
+        };
+      }
+      
+      // Price labels (E16, E17)
+      else if (['E16', 'E17'].includes(cellAddress)) {
+        cell.s = {
+          font: { bold: true, sz: 11 },
+          alignment: { horizontal: "left", vertical: "center" },
+          fill: { fgColor: { rgb: "F0F8FF" } }
+        };
+      }
+      
+      // Price values (I16, I17 and other price cells)
+      else if (cellAddress.startsWith('I') && cell.t === 'n') {
+        cell.s = {
+          font: { sz: 11 },
+          alignment: { horizontal: "right", vertical: "center" },
+          numFmt: '"$"#,##0'
+        };
+        
+        // Special styling for Grand Total
+        if (cell.v && cell.v > 500000) {
+          cell.s.font.bold = true;
+          cell.s.fill = { fgColor: { rgb: "428BCA" } };
+          cell.s.font.color = { rgb: "FFFFFF" };
+        }
+      }
+      
+      // Summary labels styling
+      else if (cellAddress.startsWith('H') && cell.v && 
+               typeof cell.v === 'string' && cell.v.includes(':')) {
+        cell.s = {
+          font: { bold: true, sz: 10 },
+          alignment: { horizontal: "right", vertical: "center" }
+        };
+      }
+      
+      // SUMMARY header
+      else if (cell.v === 'SUMMARY:') {
+        cell.s = {
+          font: { bold: true, sz: 12, color: { rgb: "428BCA" } },
+          alignment: { horizontal: "center", vertical: "center" }
+        };
+      }
+      
+      // Default cell styling
+      else {
+        cell.s = {
+          font: { sz: 10 },
+          alignment: { horizontal: "left", vertical: "center" }
+        };
+      }
+    });
     
     // Add worksheet to workbook
     XLSX.utils.book_append_sheet(wb, ws, 'Order Summary');
