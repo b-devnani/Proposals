@@ -793,29 +793,35 @@ export default function PurchaseOrder() {
           currentRow++;
         }
         
-        // Add upgrade items with alternating colors
+        // Upgrade Items with exact mapping - Alternating row colors, borders, aligned
         upgrades.forEach((upgrade, upgradeIndex) => {
           const row = worksheet.getRow(currentRow);
           const isEvenRow = upgradeIndex % 2 === 0;
           const bgColor = isEvenRow ? 'FFF8F9FA' : 'FFFFFFFF';
           
-          // Choice title
+          // Upgrade Item: Choice Title Column A - Alternating row colors, borders, left aligned
           const titleCell = row.getCell(1);
           titleCell.value = upgrade.choiceTitle;
+          titleCell.font = { name: 'Calibri' };
           titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
           titleCell.alignment = { horizontal: 'left', vertical: 'middle' };
+          titleCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
           
-          // Price value
+          // Upgrade Item: Price Column I - Alternating row colors, borders, right aligned, currency format
           const priceCell = row.getCell(9);
           priceCell.value = parseInt(upgrade.clientPrice);
           priceCell.numFmt = '"$"#,##0';
+          priceCell.font = { name: 'Calibri' };
           priceCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
           priceCell.alignment = { horizontal: 'right', vertical: 'middle' };
+          priceCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
           
-          // Empty cells with background
+          // Upgrade Item: Spacer Columns B-H - Empty cells with background, borders
           for (let col = 2; col <= 8; col++) {
             const cell = row.getCell(col);
+            cell.font = { name: 'Calibri' };
             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
           }
           
           currentRow++;
@@ -823,21 +829,69 @@ export default function PurchaseOrder() {
       });
     });
     
-    // Grand Total with blue background
+    // Grand Total with exact mapping - Blue background, white text, bold, currency format, right aligned, borders
     const grandTotalRow = worksheet.getRow(currentRow);
-    grandTotalRow.getCell(1).value = 'Grand Total';
     
-    // Formula for grand total
+    // Grand Total Label Column A - Blue background, white text, bold, borders
+    const grandTotalLabelCell = grandTotalRow.getCell(1);
+    grandTotalLabelCell.value = 'Grand Total';
+    grandTotalLabelCell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
+    grandTotalLabelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+    grandTotalLabelCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    grandTotalLabelCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    
+    // Grand Total Value Column I - Blue background, white text, bold, currency format, right aligned, borders
     const grandTotalCell = grandTotalRow.getCell(9);
     grandTotalCell.value = { formula: `SUM(I16:I${currentRow - 1})` };
     grandTotalCell.numFmt = '"$"#,##0';
+    grandTotalCell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
+    grandTotalCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+    grandTotalCell.alignment = { horizontal: 'right', vertical: 'middle' };
+    grandTotalCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     
-    for (let col = 1; col <= 9; col++) {
+    // Fill remaining cells in Grand Total row
+    for (let col = 2; col <= 8; col++) {
       const cell = grandTotalRow.getCell(col);
-      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
-      cell.alignment = { horizontal: col === 9 ? 'right' : 'left', vertical: 'middle' };
+      cell.alignment = { horizontal: 'left', vertical: 'middle' };
+      cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     }
+    
+    currentRow += 2; // Add space before signature section
+    
+    // Signature Section as per mapping
+    // Signature Text: Full Row - Merge cells A:I, normal text
+    const signatureTextRow = worksheet.getRow(currentRow);
+    const signatureTextCell = signatureTextRow.getCell(1);
+    signatureTextCell.value = 'By signing below, both parties agree to the terms and total amount shown above.';
+    signatureTextCell.font = { name: 'Calibri' };
+    signatureTextCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
+    
+    currentRow += 2;
+    
+    // Buyer Signature section
+    const buyerSigRow = worksheet.getRow(currentRow);
+    buyerSigRow.getCell(2).value = 'Buyer Signature:';
+    buyerSigRow.getCell(2).font = { name: 'Calibri', bold: true };
+    buyerSigRow.getCell(2).border = { bottom: {style:'thin'} }; // Signature line
+    
+    buyerSigRow.getCell(6).value = 'Date:';
+    buyerSigRow.getCell(6).font = { name: 'Calibri', bold: true };
+    buyerSigRow.getCell(7).border = { bottom: {style:'thin'} }; // Signature line
+    
+    currentRow += 2;
+    
+    // Company Signature section
+    const companySigRow = worksheet.getRow(currentRow);
+    companySigRow.getCell(2).value = 'Company Representative:';
+    companySigRow.getCell(2).font = { name: 'Calibri', bold: true };
+    companySigRow.getCell(2).border = { bottom: {style:'thin'} }; // Signature line
+    
+    companySigRow.getCell(6).value = 'Date:';
+    companySigRow.getCell(6).font = { name: 'Calibri', bold: true };
+    companySigRow.getCell(7).border = { bottom: {style:'thin'} }; // Signature line
     
     // Generate filename with buyer name and date
     const buyerName = formData.buyerLastName || 'Customer';
