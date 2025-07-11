@@ -1,8 +1,8 @@
-# Purchase Order Management System
+# Proposal Generator
 
 ## Overview
 
-This is a full-stack web application for managing home purchase orders and upgrades. The system allows users to create purchase orders by selecting home templates and customizing them with various upgrades. Built with a modern tech stack including React, TypeScript, Express.js, and PostgreSQL with Drizzle ORM.
+This is a full-stack web application for generating home construction proposals and managing upgrades. The system allows users to create proposals by selecting home templates and customizing them with various upgrades. Built with a modern tech stack including React, TypeScript, Express.js, and PostgreSQL with Drizzle ORM.
 
 ## System Architecture
 
@@ -35,10 +35,10 @@ This is a full-stack web application for managing home purchase orders and upgra
 Three main entities:
 1. **Home Templates**: Base home designs with pricing
 2. **Upgrades**: Customization options with categories, locations, and pricing
-3. **Purchase Orders**: Customer orders combining templates and selected upgrades
+3. **Proposals**: Customer proposals combining templates and selected upgrades
 
 ### Frontend Components
-- **Purchase Order Form**: Main interface for creating orders
+- **Proposal Form**: Main interface for creating proposals
 - **Upgrade Table**: Interactive table for selecting home upgrades with grouping by category/location
 - **Order Summary**: Real-time calculation and display of pricing
 - **Template Selection**: Interface for choosing base home templates
@@ -46,14 +46,14 @@ Three main entities:
 ### API Endpoints
 - `/api/templates` - CRUD operations for home templates
 - `/api/upgrades` - Read operations for available upgrades
-- `/api/purchase-orders` - CRUD operations for purchase orders
+- `/api/proposals` - CRUD operations for proposals
 
 ## Data Flow
 
 1. **Template Selection**: User selects a base home template
 2. **Upgrade Selection**: User browses and selects upgrades organized by category and location
 3. **Real-time Calculation**: Order summary updates automatically as upgrades are selected/deselected
-4. **Order Creation**: Final purchase order is created with all selections and pricing
+4. **Proposal Creation**: Final proposal is created with all selections and pricing
 
 ## External Dependencies
 
@@ -103,6 +103,7 @@ Three main entities:
 - July 06, 2025. Standardized all exports (PDF, Preview, Excel) to use identical template format and structure
 - July 06, 2025. Fixed Excel formatting issue by replacing XLSX library with ExcelJS for proper styling support
 - July 06, 2025. Successfully implemented blue headers, gray labels, currency formatting, and professional Excel styling
+- July 11, 2025. Completed comprehensive rename from "Purchase Order Generator" to "Proposal Generator" across entire application including UI text, API endpoints, function names, file exports, and documentation
 
 ## User Preferences
 

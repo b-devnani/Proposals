@@ -12,7 +12,7 @@ interface OrderSummaryProps {
   showCostColumns: boolean;
   onSaveDraft: () => void;
   onPreview: () => void;
-  onGeneratePO: () => void;
+  onGenerateProposal: () => void;
   onExportExcel: () => void;
 }
 
@@ -24,7 +24,7 @@ export function OrderSummary({
   showCostColumns,
   onSaveDraft,
   onPreview,
-  onGeneratePO,
+  onGenerateProposal,
   onExportExcel,
 }: OrderSummaryProps) {
   const upgradesTotal = selectedUpgrades.reduce(
@@ -49,7 +49,7 @@ export function OrderSummary({
       <div className="px-4 py-2">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1">Order Summary</h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-1">Proposal Summary</h3>
             <div className="text-sm text-gray-600 space-y-1">
               <div className="flex justify-between items-center min-w-[300px]">
                 <span>Base Price:</span>
@@ -121,9 +121,9 @@ export function OrderSummary({
               <Download className="w-3 h-3 mr-1" />
               Export Excel
             </Button>
-            <Button size="sm" onClick={onGeneratePO}>
+            <Button size="sm" onClick={onGenerateProposal}>
               <FileText className="w-3 h-3 mr-1" />
-              Generate PO
+              Generate Proposal
             </Button>
           </div>
         </div>

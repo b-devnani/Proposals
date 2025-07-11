@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPurchaseOrderSchema, insertHomeTemplateSchema } from "@shared/schema";
+import { insertProposalSchema, insertHomeTemplateSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Home Templates
@@ -61,36 +61,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Purchase Orders
-  app.post("/api/purchase-orders", async (req, res) => {
+  // Proposals
+  app.post("/api/proposals", async (req, res) => {
     try {
-      const orderData = insertPurchaseOrderSchema.parse(req.body);
-      const order = await storage.createPurchaseOrder(orderData);
-      res.status(201).json(order);
+      const proposalData = insertProposalSchema.parse(req.body);
+      const proposal = await storage.createProposal(proposalData);
+      res.status(201).json(proposal);
     } catch (error) {
-      res.status(400).json({ message: "Invalid purchase order data" });
+      res.status(400).json({ message: "Invalid proposal data" });
     }
   });
 
-  app.get("/api/purchase-orders", async (req, res) => {
+  app.get("/api/proposals", async (req, res) => {
     try {
-      const orders = await storage.getPurchaseOrders();
-      res.json(orders);
+      const proposals = await storage.getProposals();
+      res.json(proposals);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch purchase orders" });
+      res.status(500).json({ message: "Failed to fetch proposals" });
     }
   });
 
-  app.get("/api/purchase-orders/:id", async (req, res) => {
+  app.get("/api/proposals/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const order = await storage.getPurchaseOrder(id);
-      if (!order) {
-        return res.status(404).json({ message: "Purchase order not found" });
+      const proposal = await storage.getProposal(id);
+      if (!proposal) {
+        return res.status(404).json({ message: "Proposal not found" });
       }
-      res.json(order);
+      res.json(proposal);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch purchase order" });
+      res.status(500).json({ message: "Failed to fetch proposal" });
     }
   });
 

@@ -5,9 +5,9 @@ import {
   upgrades,
   type Upgrade,
   type InsertUpgrade,
-  purchaseOrders,
-  type PurchaseOrder,
-  type InsertPurchaseOrder
+  proposals,
+  type Proposal,
+  type InsertProposal
 } from "@shared/schema";
 
 export interface IStorage {
@@ -20,27 +20,27 @@ export interface IStorage {
   getUpgrades(): Promise<Upgrade[]>;
   getUpgradesByCategory(category: string): Promise<Upgrade[]>;
   
-  // Purchase Orders
-  createPurchaseOrder(order: InsertPurchaseOrder): Promise<PurchaseOrder>;
-  getPurchaseOrders(): Promise<PurchaseOrder[]>;
-  getPurchaseOrder(id: number): Promise<PurchaseOrder | undefined>;
+  // Proposals
+  createProposal(proposal: InsertProposal): Promise<Proposal>;
+  getProposals(): Promise<Proposal[]>;
+  getProposal(id: number): Promise<Proposal | undefined>;
 }
 
 export class MemStorage implements IStorage {
   private homeTemplatesMap: Map<number, HomeTemplate>;
   private upgradesMap: Map<number, Upgrade>;
-  private purchaseOrdersMap: Map<number, PurchaseOrder>;
+  private proposalsMap: Map<number, Proposal>;
   private currentTemplateId: number;
   private currentUpgradeId: number;
-  private currentOrderId: number;
+  private currentProposalId: number;
 
   constructor() {
     this.homeTemplatesMap = new Map();
     this.upgradesMap = new Map();
-    this.purchaseOrdersMap = new Map();
+    this.proposalsMap = new Map();
     this.currentTemplateId = 1;
     this.currentUpgradeId = 1;
-    this.currentOrderId = 1;
+    this.currentProposalId = 1;
     
     this.initializeData();
   }
@@ -247,24 +247,24 @@ export class MemStorage implements IStorage {
     return Array.from(this.upgradesMap.values()).filter(upgrade => upgrade.category === category);
   }
 
-  async createPurchaseOrder(order: InsertPurchaseOrder): Promise<PurchaseOrder> {
-    const id = this.currentOrderId++;
-    const newOrder: PurchaseOrder = { 
-      ...order, 
+  async createProposal(proposal: InsertProposal): Promise<Proposal> {
+    const id = this.currentProposalId++;
+    const newProposal: Proposal = { 
+      ...proposal, 
       id,
-      selectedUpgrades: order.selectedUpgrades || null,
-      lotPremium: order.lotPremium || "0"
+      selectedUpgrades: proposal.selectedUpgrades || null,
+      lotPremium: proposal.lotPremium || "0"
     };
-    this.purchaseOrdersMap.set(id, newOrder);
-    return newOrder;
+    this.proposalsMap.set(id, newProposal);
+    return newProposal;
   }
 
-  async getPurchaseOrders(): Promise<PurchaseOrder[]> {
-    return Array.from(this.purchaseOrdersMap.values());
+  async getProposals(): Promise<Proposal[]> {
+    return Array.from(this.proposalsMap.values());
   }
 
-  async getPurchaseOrder(id: number): Promise<PurchaseOrder | undefined> {
-    return this.purchaseOrdersMap.get(id);
+  async getProposal(id: number): Promise<Proposal | undefined> {
+    return this.proposalsMap.get(id);
   }
 }
 

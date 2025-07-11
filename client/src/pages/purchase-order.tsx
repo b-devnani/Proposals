@@ -64,14 +64,14 @@ export default function PurchaseOrder() {
     },
   });
 
-  const createPurchaseOrderMutation = useMutation({
-    mutationFn: async (orderData: any) => {
-      return await apiRequest("POST", "/api/purchase-orders", orderData);
+  const createProposalMutation = useMutation({
+    mutationFn: async (proposalData: any) => {
+      return await apiRequest("POST", "/api/proposals", proposalData);
     },
     onSuccess: () => {
       toast({
-        title: "Purchase Order Created",
-        description: "Your purchase order has been generated successfully.",
+        title: "Proposal Created",
+        description: "Your proposal has been generated successfully.",
       });
     },
   });
@@ -156,7 +156,7 @@ export default function PurchaseOrder() {
   const handleSaveDraft = () => {
     toast({
       title: "Draft Saved",
-      description: "Your purchase order draft has been saved.",
+      description: "Your proposal draft has been saved.",
     });
   };
 
@@ -261,7 +261,7 @@ export default function PurchaseOrder() {
 
     toast({
       title: "Preview Generated",
-      description: "Purchase order preview opened in new window.",
+      description: "Proposal preview opened in new window.",
     });
   };
 
@@ -297,7 +297,7 @@ export default function PurchaseOrder() {
     
     // Title with blue background and white text
     const titleCell = worksheet.getCell('A1');
-    titleCell.value = 'PURCHASE ORDER';
+    titleCell.value = 'PROPOSAL';
     titleCell.font = { bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
     titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -595,7 +595,7 @@ export default function PurchaseOrder() {
     // Generate filename with buyer name and date
     const buyerName = formData.buyerLastName || 'Customer';
     const dateStr = new Date().toISOString().split('T')[0];
-    const fileName = `PO_${currentTemplate.name}_${buyerName}_${dateStr}.xlsx`;
+    const fileName = `Proposal_${currentTemplate.name}_${buyerName}_${dateStr}.xlsx`;
     
     // Generate buffer and download
     const buffer = await workbook.xlsx.writeBuffer();
@@ -612,12 +612,12 @@ export default function PurchaseOrder() {
     
     toast({
       title: "Excel Export Complete",
-      description: "Purchase order exported following exact template cell mapping with proper formatting, merged cells, borders, fonts, summary, and signatures.",
+      description: "Proposal exported following exact template cell mapping with proper formatting, merged cells, borders, fonts, summary, and signatures.",
     });
     
     toast({
       title: "Excel Export Complete",
-      description: "Purchase order exported with template format and preserved formulas.",
+      description: "Proposal exported with template format and preserved formulas.",
     });
   };
 
@@ -651,9 +651,9 @@ export default function PurchaseOrder() {
       { width: 15 }  // I - Subtotal/Values
     ];
     
-    // Title: A1:I1 - "PURCHASE ORDER" - Blue background, white text, centered, bold, 16pt Calibri
+    // Title: A1:I1 - "PROPOSAL" - Blue background, white text, centered, bold, 16pt Calibri
     const titleCell = worksheet.getCell('A1');
-    titleCell.value = 'PURCHASE ORDER';
+    titleCell.value = 'PROPOSAL';
     titleCell.font = { name: 'Calibri', bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
     titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -882,7 +882,7 @@ export default function PurchaseOrder() {
     // Generate filename with buyer name and date
     const buyerName = formData.buyerLastName || 'Customer';
     const dateStr = new Date().toISOString().split('T')[0];
-    const fileName = `PO_${currentTemplate.name}_${buyerName}_${dateStr}.xlsx`;
+    const fileName = `Proposal_${currentTemplate.name}_${buyerName}_${dateStr}.xlsx`;
     
     // Generate buffer and download
     const buffer = await workbook.xlsx.writeBuffer();
@@ -899,7 +899,7 @@ export default function PurchaseOrder() {
     
     toast({
       title: "Excel Export Complete",
-      description: `Purchase order exported as ${fileName}`
+      description: `Proposal exported as ${fileName}`
     });
   };
 
@@ -1110,14 +1110,14 @@ export default function PurchaseOrder() {
       // Footer
       pdf.setFontSize(8);
       pdf.setTextColor(100, 100, 100);
-      pdf.text("This purchase order constitutes the complete agreement between the parties.", 105, 280, { align: "center" });
+      pdf.text("This proposal constitutes the complete agreement between the parties.", 105, 280, { align: "center" });
       
       // Save PDF
-      const filename = `PurchaseOrder_${formData.buyerLastName || 'Buyer'}_${formData.todaysDate.replace(/-/g, '')}.pdf`;
+      const filename = `Proposal_${formData.buyerLastName || 'Buyer'}_${formData.todaysDate.replace(/-/g, '')}.pdf`;
       pdf.save(filename);
 
       // Also save to database
-      const orderData = {
+      const proposalData = {
         ...formData,
         housePlan: currentTemplate.name,
         basePrice: currentTemplate.basePrice,
@@ -1126,10 +1126,10 @@ export default function PurchaseOrder() {
         totalPrice: grandTotal.toString(),
       };
 
-      createPurchaseOrderMutation.mutate(orderData);
+      createProposalMutation.mutate(proposalData);
 
       toast({
-        title: "Purchase Order Generated",
+        title: "Proposal Generated",
         description: `PDF generated: ${filename}`,
       });
     };
@@ -1148,8 +1148,8 @@ export default function PurchaseOrder() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Purchase Order Generator</h1>
-              <p className="text-sm text-gray-600">Create and manage custom home purchase orders</p>
+              <h1 className="text-2xl font-bold text-gray-900">Proposal Generator</h1>
+              <p className="text-sm text-gray-600">Create and manage custom home proposals</p>
             </div>
             
             <div className="flex items-center space-x-3">
@@ -1402,7 +1402,7 @@ export default function PurchaseOrder() {
             onSaveDraft={handleSaveDraft}
             onPreview={handlePreview}
             onExportExcel={handleExportExcel}
-            onGeneratePO={handleGeneratePO}
+            onGenerateProposal={handleGeneratePO}
           />
         )}
       </div>

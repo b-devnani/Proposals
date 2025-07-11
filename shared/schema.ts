@@ -22,7 +22,7 @@ export const upgrades = pgTable("upgrades", {
   margin: decimal("margin", { precision: 5, scale: 2 }).notNull(),
 });
 
-export const purchaseOrders = pgTable("purchase_orders", {
+export const proposals = pgTable("proposals", {
   id: serial("id").primaryKey(),
   todaysDate: text("todays_date").notNull(),
   buyerLastName: text("buyer_last_name").notNull(),
@@ -44,7 +44,7 @@ export const insertUpgradeSchema = createInsertSchema(upgrades).omit({
   id: true,
 });
 
-export const insertPurchaseOrderSchema = createInsertSchema(purchaseOrders).omit({
+export const insertProposalSchema = createInsertSchema(proposals).omit({
   id: true,
 });
 
@@ -52,5 +52,5 @@ export type HomeTemplate = typeof homeTemplates.$inferSelect;
 export type InsertHomeTemplate = z.infer<typeof insertHomeTemplateSchema>;
 export type Upgrade = typeof upgrades.$inferSelect;
 export type InsertUpgrade = z.infer<typeof insertUpgradeSchema>;
-export type PurchaseOrder = typeof purchaseOrders.$inferSelect;
-export type InsertPurchaseOrder = z.infer<typeof insertPurchaseOrderSchema>;
+export type Proposal = typeof proposals.$inferSelect;
+export type InsertProposal = z.infer<typeof insertProposalSchema>;
