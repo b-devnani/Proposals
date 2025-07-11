@@ -1185,7 +1185,7 @@ export default function PurchaseOrder() {
               <TabsContent key={template.id} value={template.id.toString()}>
                 <CardContent className="p-6">
                   {/* Form Inputs */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                     <div>
                       <Label htmlFor="todays-date">Today's Date</Label>
                       <Input
@@ -1249,20 +1249,6 @@ export default function PurchaseOrder() {
                         className="bg-gray-50"
                       />
                     </div>
-
-                    <div>
-                      <Label htmlFor="lot-premium">Lot Premium</Label>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium text-gray-700">$</span>
-                        <Input
-                          id="lot-premium"
-                          type="text"
-                          placeholder="0"
-                          value={formatNumberWithCommas(formData.lotPremium)}
-                          onChange={(e) => handleNumberInputChange(e.target.value, (value) => setFormData({ ...formData, lotPremium: value }))}
-                        />
-                      </div>
-                    </div>
                   </div>
 
                   {/* Base Price Editor */}
@@ -1298,6 +1284,29 @@ export default function PurchaseOrder() {
                               />
                             </div>
                           )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Lot Premium */}
+                  <Card className="mb-6 bg-green-50 border-green-200">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">Lot Premium</h3>
+                          <p className="text-sm text-gray-600">Additional cost for lot selection</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Label htmlFor="lot-premium" className="text-sm font-medium text-gray-700">Premium $</Label>
+                          <Input
+                            id="lot-premium"
+                            type="text"
+                            className="w-40 font-semibold"
+                            placeholder="0"
+                            value={formatNumberWithCommas(formData.lotPremium)}
+                            onChange={(e) => handleNumberInputChange(e.target.value, (value) => setFormData({ ...formData, lotPremium: value }))}
+                          />
                         </div>
                       </div>
                     </CardContent>
