@@ -1316,51 +1316,52 @@ export default function PurchaseOrder() {
                     </CardContent>
                   </Card>
 
-                  {/* Sales Incentive */}
-                  <Card className="mb-6 bg-red-50 border-red-200">
-                    <CardContent className="pt-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">Sales Incentive</h3>
-                            <p className="text-sm text-gray-600">Discounts or incentives applied to the proposal</p>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Switch
-                              id="sales-incentive-toggle"
-                              checked={salesIncentiveEnabled}
-                              onCheckedChange={(checked) => {
-                                setSalesIncentiveEnabled(checked);
-                                if (!checked) {
-                                  setFormData({ ...formData, salesIncentive: "0" });
-                                }
-                              }}
-                            />
-                            <Label htmlFor="sales-incentive-toggle" className="text-sm text-gray-600">Enable</Label>
-                          </div>
-                        </div>
-                        {salesIncentiveEnabled && (
-                          <div className="flex items-center space-x-2">
-                            <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Incentive $</Label>
-                            <Input
-                              id="sales-incentive"
-                              type="text"
-                              className="w-40 font-semibold"
-                              placeholder="0"
-                              value={formData.salesIncentive === "0" ? "" : `-${formatNumberWithCommas(formData.salesIncentive.replace('-', ''))}`}
-                              onChange={(e) => {
-                                let value = e.target.value.replace(/[^0-9,]/g, '').replace(/,/g, '');
-                                if (value === "") value = "0";
-                                // Ensure the value is stored as negative
-                                const negativeValue = value === "0" ? "0" : `-${value}`;
-                                setFormData({ ...formData, salesIncentive: negativeValue });
-                              }}
-                            />
-                          </div>
-                        )}
+                  {/* Sales Incentive - Hidden Toggle */}
+                  <div className="mb-6">
+                    <div className="flex items-center justify-end mb-2">
+                      <div 
+                        className="flex items-center space-x-2 cursor-pointer opacity-30 hover:opacity-60 transition-opacity"
+                        onClick={() => {
+                          setSalesIncentiveEnabled(!salesIncentiveEnabled);
+                          if (salesIncentiveEnabled) {
+                            setFormData({ ...formData, salesIncentive: "0" });
+                          }
+                        }}
+                      >
+                        <span className="text-xs text-gray-400">SA</span>
+                        <div className={`w-2 h-2 rounded-full ${salesIncentiveEnabled ? 'bg-red-400' : 'bg-gray-300'}`}></div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                    {salesIncentiveEnabled && (
+                      <Card className="bg-red-50 border-red-200">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900">Sales Adjustment</h3>
+                              <p className="text-sm text-gray-600">Price adjustment for this proposal</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Adjustment $</Label>
+                              <Input
+                                id="sales-incentive"
+                                type="text"
+                                className="w-40 font-semibold"
+                                placeholder="0"
+                                value={formData.salesIncentive === "0" ? "" : `-${formatNumberWithCommas(formData.salesIncentive.replace('-', ''))}`}
+                                onChange={(e) => {
+                                  let value = e.target.value.replace(/[^0-9,]/g, '').replace(/,/g, '');
+                                  if (value === "") value = "0";
+                                  // Ensure the value is stored as negative
+                                  const negativeValue = value === "0" ? "0" : `-${value}`;
+                                  setFormData({ ...formData, salesIncentive: negativeValue });
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
 
                   {/* Design Studio Allowance */}
                   <Card className="mb-6 bg-purple-50 border-purple-200">

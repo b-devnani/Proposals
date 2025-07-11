@@ -74,7 +74,7 @@ export function OrderSummary({
                   </div>
                   {salesIncentiveEnabled && (
                     <div className="flex justify-between items-center">
-                      <span>Sales Incentive:</span>
+                      <span>Sales Adjustment:</span>
                       <span className="font-medium text-red-600">{formatCurrency(salesIncentive)}</span>
                     </div>
                   )}
