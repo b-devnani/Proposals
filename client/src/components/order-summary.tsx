@@ -41,7 +41,8 @@ export function OrderSummary({
     0
   );
 
-  const baseMargin = parseFloat(basePrice) > 0 ? ((parseFloat(basePrice) - parseFloat(baseCost || "0")) / parseFloat(basePrice) * 100) : 0;
+  const adjustedBasePrice = parseFloat(basePrice) + parseFloat(lotPremium || "0") + parseFloat(salesIncentive || "0");
+  const baseMargin = adjustedBasePrice > 0 ? ((adjustedBasePrice - parseFloat(baseCost || "0")) / adjustedBasePrice * 100) : 0;
   const upgradesMargin = upgradesTotal > 0 ? ((upgradesTotal - upgradesBuilderCost) / upgradesTotal * 100) : 0;
   
   const grandTotal = parseFloat(basePrice) + parseFloat(lotPremium || "0") + parseFloat(salesIncentive || "0") + parseFloat(designStudioAllowance || "0") + upgradesTotal;
@@ -59,20 +60,6 @@ export function OrderSummary({
                 <span>Base Price:</span>
                 <span className="font-medium">{formatCurrency(basePrice)}</span>
               </div>
-              {showCostColumns && (
-                <>
-                  <div className="flex justify-between items-center text-sm">
-                    <span>Base Cost:</span>
-                    <span className="font-medium">{formatCurrency(baseCost || "0")}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span>Base Margin:</span>
-                    <span className={`font-medium ${baseMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {baseMargin >= 0 ? '+' : ''}{baseMargin.toFixed(2)}%
-                    </span>
-                  </div>
-                </>
-              )}
               <div className="flex justify-between items-center">
                 <span>Lot Premium:</span>
                 <span className="font-medium">{formatCurrency(lotPremium || "0")}</span>
@@ -81,6 +68,20 @@ export function OrderSummary({
                 <span>Sales Incentive:</span>
                 <span className="font-medium text-red-600">{formatCurrency(salesIncentive)}</span>
               </div>
+              {showCostColumns && (
+                <>
+                  <div className="flex justify-between items-center text-sm">
+                    <span>Base Cost:</span>
+                    <span className="font-medium">{formatCurrency(baseCost || "0")}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span>Base Margin (incl. adjustments):</span>
+                    <span className={`font-medium ${baseMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {baseMargin >= 0 ? '+' : ''}{baseMargin.toFixed(2)}%
+                    </span>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between items-center">
                 <span>Design Studio Allowance:</span>
                 <span className="font-medium text-purple-600">{formatCurrency(designStudioAllowance)}</span>
