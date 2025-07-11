@@ -68,6 +68,12 @@ export function OrderSummary({
                   <span>Base Price:</span>
                   <span className="font-medium">{formatCurrency(basePrice)}</span>
                 </div>
+                {showCostColumns && (
+                  <div className="flex justify-between items-center text-xs text-gray-500">
+                    <span>Base Cost:</span>
+                    <span className="font-medium">{formatCurrency(baseCost || "0")}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center">
                   <span>Lot Premium:</span>
                   <span className="font-medium">{formatCurrency(lotPremium || "0")}</span>
@@ -104,6 +110,12 @@ export function OrderSummary({
                   <span>Upgrades ({selectedUpgrades.length}):</span>
                   <span className="font-medium">{formatCurrency(upgradesTotal)}</span>
                 </div>
+                {showCostColumns && selectedUpgrades.length > 0 && (
+                  <div className="flex justify-between items-center text-xs text-gray-500">
+                    <span>Upgrades Cost:</span>
+                    <span className="font-medium">{formatCurrency(upgradesBuilderCost)}</span>
+                  </div>
+                )}
                 <div className="border-t pt-1 mt-1">
                   <div className="flex justify-between items-center font-semibold">
                     <span>Upgrades Subtotal:</span>
@@ -126,11 +138,17 @@ export function OrderSummary({
                   <div className="text-lg font-bold text-gray-900 mb-1">Grand Total</div>
                   <div className="text-2xl font-bold text-blue-600">{formatCurrency(grandTotal)}</div>
                   {showCostColumns && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      <span>Overall Margin: </span>
-                      <span className={`font-medium ${overallMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {overallMargin >= 0 ? '+' : ''}{overallMargin.toFixed(1)}%
-                      </span>
+                    <div className="text-xs text-gray-500 mt-1 space-y-1">
+                      <div>
+                        <span>Total Cost: </span>
+                        <span className="font-medium">{formatCurrency(totalCost)}</span>
+                      </div>
+                      <div>
+                        <span>Overall Margin: </span>
+                        <span className={`font-medium ${overallMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {overallMargin >= 0 ? '+' : ''}{overallMargin.toFixed(1)}%
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
