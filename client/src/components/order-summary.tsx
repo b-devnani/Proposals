@@ -54,78 +54,88 @@ export function OrderSummary({
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky bottom-0">
       <div className="px-4 py-2">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1">Proposal Summary</h3>
-            <div className="text-sm text-gray-600 space-y-1">
-              <div className="flex justify-between items-center min-w-[300px]">
-                <span>Base Price:</span>
-                <span className="font-medium">{formatCurrency(basePrice)}</span>
-              </div>
-              {showCostColumns && (
-                <>
-                  <div className="flex justify-between items-center text-sm">
-                    <span>Base Cost:</span>
-                    <span className="font-medium">{formatCurrency(baseCost || "0")}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Lot Premium:</span>
-                    <span className="font-medium">{formatCurrency(lotPremium || "0")}</span>
-                  </div>
-                  {salesIncentiveEnabled && (
-                    <div className="flex justify-between items-center">
-                      <span>Sales Adjustment:</span>
-                      <span className="font-medium text-red-600">{formatCurrency(salesIncentive)}</span>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h3 className="text-base font-semibold text-gray-900 mb-2">Proposal Summary</h3>
+            <div className="grid grid-cols-2 gap-6 text-sm text-gray-600">
+              {/* Left Column */}
+              <div className="space-y-1">
+                <div className="flex justify-between items-center min-w-[250px]">
+                  <span>Base Price:</span>
+                  <span className="font-medium">{formatCurrency(basePrice)}</span>
+                </div>
+                {showCostColumns && (
+                  <>
+                    <div className="flex justify-between items-center text-sm">
+                      <span>Base Cost:</span>
+                      <span className="font-medium">{formatCurrency(baseCost || "0")}</span>
                     </div>
-                  )}
-                  <div className="flex justify-between items-center text-sm">
-                    <span>Base Margin (incl. adjustments):</span>
-                    <span className={`font-medium ${baseMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {baseMargin >= 0 ? '+' : ''}{baseMargin.toFixed(2)}%
-                    </span>
-                  </div>
-                </>
-              )}
-              <div className="flex justify-between items-center">
-                <span>Design Studio Allowance:</span>
-                <span className="font-medium text-purple-600">{formatCurrency(designStudioAllowance)}</span>
+                    <div className="flex justify-between items-center">
+                      <span>Lot Premium:</span>
+                      <span className="font-medium">{formatCurrency(lotPremium || "0")}</span>
+                    </div>
+                    {salesIncentiveEnabled && (
+                      <div className="flex justify-between items-center">
+                        <span>Sales Adjustment:</span>
+                        <span className="font-medium text-red-600">{formatCurrency(salesIncentive)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-sm">
+                      <span>Base Margin:</span>
+                      <span className={`font-medium ${baseMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {baseMargin >= 0 ? '+' : ''}{baseMargin.toFixed(2)}%
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
-              <div className="flex justify-between items-center">
-                <span>Selected Upgrades ({selectedUpgrades.length}):</span>
-                <span className="font-medium">{formatCurrency(upgradesTotal)}</span>
+
+              {/* Right Column */}
+              <div className="space-y-1">
+                <div className="flex justify-between items-center min-w-[250px]">
+                  <span>Design Studio:</span>
+                  <span className="font-medium text-purple-600">{formatCurrency(designStudioAllowance)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Upgrades ({selectedUpgrades.length}):</span>
+                  <span className="font-medium">{formatCurrency(upgradesTotal)}</span>
+                </div>
+                {showCostColumns && selectedUpgrades.length > 0 && (
+                  <>
+                    <div className="flex justify-between items-center text-sm">
+                      <span>Upgrades Cost:</span>
+                      <span className="font-medium">{formatCurrency(upgradesBuilderCost)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span>Upgrades Margin:</span>
+                      <span className={`font-medium ${upgradesMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {upgradesMargin >= 0 ? '+' : ''}{upgradesMargin.toFixed(2)}%
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
-              {showCostColumns && selectedUpgrades.length > 0 && (
-                <>
-                  <div className="flex justify-between items-center text-sm">
-                    <span>Upgrades Builder Cost:</span>
-                    <span className="font-medium">{formatCurrency(upgradesBuilderCost)}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span>Upgrades Margin:</span>
-                    <span className={`font-medium ${upgradesMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {upgradesMargin >= 0 ? '+' : ''}{upgradesMargin.toFixed(2)}%
-                    </span>
-                  </div>
-                </>
-              )}
-              <Separator className="my-1" />
+            </div>
+            
+            <Separator className="my-2" />
+            
+            <div className="flex justify-between items-center">
               {showCostColumns && (
-                <div className="flex justify-between items-center text-sm font-semibold">
-                  <span>Overall Margin:</span>
+                <div className="text-sm font-semibold">
+                  <span>Overall Margin: </span>
                   <span className={`${overallMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {overallMargin >= 0 ? '+' : ''}{overallMargin.toFixed(2)}%
                   </span>
                 </div>
               )}
-              <Separator className="my-1" />
-              <div className="flex justify-between items-center text-lg font-bold text-gray-900">
-                <span>Total:</span>
+              <div className="flex items-center text-lg font-bold text-gray-900">
+                <span className="mr-4">Total:</span>
                 <span>{formatCurrency(grandTotal)}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 ml-6">
             <Button variant="outline" size="sm" onClick={onSaveDraft}>
               <Save className="w-3 h-3 mr-1" />
               Save Draft
