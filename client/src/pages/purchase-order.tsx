@@ -1320,16 +1320,17 @@ export default function PurchaseOrder() {
                   <div className="mb-6">
                     <div className="flex items-center justify-end mb-2">
                       <div 
-                        className="flex items-center space-x-2 cursor-pointer opacity-30 hover:opacity-60 transition-opacity"
+                        className="flex items-center space-x-2 cursor-pointer opacity-50 hover:opacity-80 transition-opacity p-1 rounded"
                         onClick={() => {
                           setSalesIncentiveEnabled(!salesIncentiveEnabled);
                           if (salesIncentiveEnabled) {
                             setFormData({ ...formData, salesIncentive: "0" });
                           }
                         }}
+                        title="Sales Adjustment"
                       >
-                        <span className="text-xs text-gray-400">SA</span>
-                        <div className={`w-2 h-2 rounded-full ${salesIncentiveEnabled ? 'bg-red-400' : 'bg-gray-300'}`}></div>
+                        <span className={`text-sm font-medium ${salesIncentiveEnabled ? 'text-red-600' : 'text-gray-500'}`}>SA</span>
+                        <div className={`w-3 h-3 rounded-full border-2 ${salesIncentiveEnabled ? 'bg-red-500 border-red-500' : 'bg-white border-gray-400'}`}></div>
                       </div>
                     </div>
                     {salesIncentiveEnabled && (
