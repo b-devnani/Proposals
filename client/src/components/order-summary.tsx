@@ -9,6 +9,7 @@ interface OrderSummaryProps {
   baseCost: string;
   lotPremium: string;
   salesIncentive: string;
+  salesIncentiveEnabled: boolean;
   designStudioAllowance: string;
   selectedUpgrades: Upgrade[];
   showCostColumns: boolean;
@@ -23,6 +24,7 @@ export function OrderSummary({
   baseCost,
   lotPremium,
   salesIncentive,
+  salesIncentiveEnabled,
   designStudioAllowance,
   selectedUpgrades,
   showCostColumns,
@@ -41,11 +43,11 @@ export function OrderSummary({
     0
   );
 
-  const adjustedBasePrice = parseFloat(basePrice) + parseFloat(lotPremium || "0") + parseFloat(salesIncentive || "0");
+  const adjustedBasePrice = parseFloat(basePrice) + parseFloat(lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(salesIncentive || "0") : 0);
   const baseMargin = adjustedBasePrice > 0 ? ((adjustedBasePrice - parseFloat(baseCost || "0")) / adjustedBasePrice * 100) : 0;
   const upgradesMargin = upgradesTotal > 0 ? ((upgradesTotal - upgradesBuilderCost) / upgradesTotal * 100) : 0;
   
-  const grandTotal = parseFloat(basePrice) + parseFloat(lotPremium || "0") + parseFloat(salesIncentive || "0") + parseFloat(designStudioAllowance || "0") + upgradesTotal;
+  const grandTotal = parseFloat(basePrice) + parseFloat(lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(salesIncentive || "0") : 0) + parseFloat(designStudioAllowance || "0") + upgradesTotal;
   const totalCost = parseFloat(baseCost || "0") + upgradesBuilderCost;
   const overallMargin = grandTotal > 0 ? ((grandTotal - totalCost) / grandTotal * 100) : 0;
 
@@ -70,10 +72,12 @@ export function OrderSummary({
                     <span>Lot Premium:</span>
                     <span className="font-medium">{formatCurrency(lotPremium || "0")}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span>Sales Incentive:</span>
-                    <span className="font-medium text-red-600">{formatCurrency(salesIncentive)}</span>
-                  </div>
+                  {salesIncentiveEnabled && (
+                    <div className="flex justify-between items-center">
+                      <span>Sales Incentive:</span>
+                      <span className="font-medium text-red-600">{formatCurrency(salesIncentive)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center text-sm">
                     <span>Base Margin (incl. adjustments):</span>
                     <span className={`font-medium ${baseMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>

@@ -43,6 +43,8 @@ export default function PurchaseOrder() {
     designStudioAllowance: "0",
   });
 
+  const [salesIncentiveEnabled, setSalesIncentiveEnabled] = useState(false);
+
   // Queries
   const { data: templates = [], isLoading: templatesLoading } = useQuery<HomeTemplate[]>({
     queryKey: ["/api/templates"],
@@ -1318,27 +1320,44 @@ export default function PurchaseOrder() {
                   <Card className="mb-6 bg-red-50 border-red-200">
                     <CardContent className="pt-6">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">Sales Incentive</h3>
-                          <p className="text-sm text-gray-600">Discounts or incentives applied to the proposal</p>
+                        <div className="flex items-center space-x-3">
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">Sales Incentive</h3>
+                            <p className="text-sm text-gray-600">Discounts or incentives applied to the proposal</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              id="sales-incentive-toggle"
+                              checked={salesIncentiveEnabled}
+                              onCheckedChange={(checked) => {
+                                setSalesIncentiveEnabled(checked);
+                                if (!checked) {
+                                  setFormData({ ...formData, salesIncentive: "0" });
+                                }
+                              }}
+                            />
+                            <Label htmlFor="sales-incentive-toggle" className="text-sm text-gray-600">Enable</Label>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Incentive $</Label>
-                          <Input
-                            id="sales-incentive"
-                            type="text"
-                            className="w-40 font-semibold"
-                            placeholder="0"
-                            value={formData.salesIncentive === "0" ? "" : `-${formatNumberWithCommas(formData.salesIncentive.replace('-', ''))}`}
-                            onChange={(e) => {
-                              let value = e.target.value.replace(/[^0-9,]/g, '').replace(/,/g, '');
-                              if (value === "") value = "0";
-                              // Ensure the value is stored as negative
-                              const negativeValue = value === "0" ? "0" : `-${value}`;
-                              setFormData({ ...formData, salesIncentive: negativeValue });
-                            }}
-                          />
-                        </div>
+                        {salesIncentiveEnabled && (
+                          <div className="flex items-center space-x-2">
+                            <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Incentive $</Label>
+                            <Input
+                              id="sales-incentive"
+                              type="text"
+                              className="w-40 font-semibold"
+                              placeholder="0"
+                              value={formData.salesIncentive === "0" ? "" : `-${formatNumberWithCommas(formData.salesIncentive.replace('-', ''))}`}
+                              onChange={(e) => {
+                                let value = e.target.value.replace(/[^0-9,]/g, '').replace(/,/g, '');
+                                if (value === "") value = "0";
+                                // Ensure the value is stored as negative
+                                const negativeValue = value === "0" ? "0" : `-${value}`;
+                                setFormData({ ...formData, salesIncentive: negativeValue });
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -1461,6 +1480,7 @@ export default function PurchaseOrder() {
             baseCost={currentTemplate.baseCost || "0"}
             lotPremium={formData.lotPremium}
             salesIncentive={formData.salesIncentive}
+            salesIncentiveEnabled={salesIncentiveEnabled}
             designStudioAllowance={formData.designStudioAllowance}
             selectedUpgrades={selectedUpgradeItems}
             showCostColumns={showCostColumns}
