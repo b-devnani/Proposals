@@ -49,7 +49,7 @@ export function UpgradeTable({
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">Available Upgrades</h2>
-        <p className="text-sm text-gray-600">Select upgrades to add to your purchase order</p>
+        <p className="text-sm text-gray-600">Select upgrades to add to your proposal</p>
       </div>
 
       <div className="overflow-x-auto">
