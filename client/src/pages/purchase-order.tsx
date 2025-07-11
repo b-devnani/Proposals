@@ -1262,16 +1262,6 @@ export default function PurchaseOrder() {
                           <p className="text-sm text-gray-600">Base pricing for this home template</p>
                         </div>
                         <div className="flex items-center space-x-6">
-                          <div className="flex items-center space-x-2">
-                            <Label htmlFor="base-price" className="text-sm font-medium text-gray-700">Price $</Label>
-                            <Input
-                              id="base-price"
-                              type="text"
-                              className="w-40 font-semibold"
-                              value={formatNumberWithCommas(template.basePrice)}
-                              onChange={(e) => handleNumberInputChange(e.target.value, handleBasePriceUpdate)}
-                            />
-                          </div>
                           {showCostColumns && (
                             <div className="flex items-center space-x-2">
                               <Label htmlFor="base-cost" className="text-sm font-medium text-gray-700">Cost $</Label>
@@ -1284,6 +1274,16 @@ export default function PurchaseOrder() {
                               />
                             </div>
                           )}
+                          <div className="flex items-center space-x-2">
+                            <Label htmlFor="base-price" className="text-sm font-medium text-gray-700">Price $</Label>
+                            <Input
+                              id="base-price"
+                              type="text"
+                              className="w-40 font-semibold"
+                              value={formatNumberWithCommas(template.basePrice)}
+                              onChange={(e) => handleNumberInputChange(e.target.value, handleBasePriceUpdate)}
+                            />
+                          </div>
                         </div>
                       </div>
                     </CardContent>
