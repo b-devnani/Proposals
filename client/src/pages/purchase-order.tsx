@@ -39,6 +39,7 @@ export default function PurchaseOrder() {
     lotNumber: "",
     lotAddress: "",
     lotPremium: "0",
+    salesIncentive: "0",
   });
 
   // Queries
@@ -1311,6 +1312,35 @@ export default function PurchaseOrder() {
                       </div>
                     </CardContent>
                   </Card>
+
+                  {/* Sales Incentive */}
+                  <Card className="mb-6 bg-red-50 border-red-200">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">Sales Incentive</h3>
+                          <p className="text-sm text-gray-600">Discounts or incentives applied to the proposal</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Incentive $</Label>
+                          <Input
+                            id="sales-incentive"
+                            type="text"
+                            className="w-40 font-semibold"
+                            placeholder="0"
+                            value={formData.salesIncentive === "0" ? "" : `-${formatNumberWithCommas(formData.salesIncentive.replace('-', ''))}`}
+                            onChange={(e) => {
+                              let value = e.target.value.replace(/[^0-9,]/g, '').replace(/,/g, '');
+                              if (value === "") value = "0";
+                              // Ensure the value is stored as negative
+                              const negativeValue = value === "0" ? "0" : `-${value}`;
+                              setFormData({ ...formData, salesIncentive: negativeValue });
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </CardContent>
               </TabsContent>
             ))}
@@ -1406,6 +1436,7 @@ export default function PurchaseOrder() {
             basePrice={currentTemplate.basePrice}
             baseCost={currentTemplate.baseCost || "0"}
             lotPremium={formData.lotPremium}
+            salesIncentive={formData.salesIncentive}
             selectedUpgrades={selectedUpgradeItems}
             showCostColumns={showCostColumns}
             onSaveDraft={handleSaveDraft}
