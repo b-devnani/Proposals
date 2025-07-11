@@ -9,6 +9,7 @@ interface OrderSummaryProps {
   baseCost: string;
   lotPremium: string;
   salesIncentive: string;
+  designStudioAllowance: string;
   selectedUpgrades: Upgrade[];
   showCostColumns: boolean;
   onSaveDraft: () => void;
@@ -22,6 +23,7 @@ export function OrderSummary({
   baseCost,
   lotPremium,
   salesIncentive,
+  designStudioAllowance,
   selectedUpgrades,
   showCostColumns,
   onSaveDraft,
@@ -42,7 +44,7 @@ export function OrderSummary({
   const baseMargin = parseFloat(basePrice) > 0 ? ((parseFloat(basePrice) - parseFloat(baseCost || "0")) / parseFloat(basePrice) * 100) : 0;
   const upgradesMargin = upgradesTotal > 0 ? ((upgradesTotal - upgradesBuilderCost) / upgradesTotal * 100) : 0;
   
-  const grandTotal = parseFloat(basePrice) + parseFloat(lotPremium || "0") + parseFloat(salesIncentive || "0") + upgradesTotal;
+  const grandTotal = parseFloat(basePrice) + parseFloat(lotPremium || "0") + parseFloat(salesIncentive || "0") + parseFloat(designStudioAllowance || "0") + upgradesTotal;
   const totalCost = parseFloat(baseCost || "0") + upgradesBuilderCost;
   const overallMargin = grandTotal > 0 ? ((grandTotal - totalCost) / grandTotal * 100) : 0;
 
@@ -78,6 +80,10 @@ export function OrderSummary({
               <div className="flex justify-between items-center">
                 <span>Sales Incentive:</span>
                 <span className="font-medium text-red-600">{formatCurrency(salesIncentive)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Design Studio Allowance:</span>
+                <span className="font-medium text-purple-600">{formatCurrency(designStudioAllowance)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>Selected Upgrades ({selectedUpgrades.length}):</span>

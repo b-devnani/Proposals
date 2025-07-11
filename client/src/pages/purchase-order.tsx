@@ -40,6 +40,7 @@ export default function PurchaseOrder() {
     lotAddress: "",
     lotPremium: "0",
     salesIncentive: "0",
+    designStudioAllowance: "0",
   });
 
   // Queries
@@ -1341,6 +1342,29 @@ export default function PurchaseOrder() {
                       </div>
                     </CardContent>
                   </Card>
+
+                  {/* Design Studio Allowance */}
+                  <Card className="mb-6 bg-purple-50 border-purple-200">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">Design Studio Allowance</h3>
+                          <p className="text-sm text-gray-600">Allowance for design studio selections and upgrades</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Label htmlFor="design-studio-allowance" className="text-sm font-medium text-gray-700">Allowance $</Label>
+                          <Input
+                            id="design-studio-allowance"
+                            type="text"
+                            className="w-40 font-semibold"
+                            placeholder="0"
+                            value={formatNumberWithCommas(formData.designStudioAllowance)}
+                            onChange={(e) => handleNumberInputChange(e.target.value, (value) => setFormData({ ...formData, designStudioAllowance: value }))}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </CardContent>
               </TabsContent>
             ))}
@@ -1437,6 +1461,7 @@ export default function PurchaseOrder() {
             baseCost={currentTemplate.baseCost || "0"}
             lotPremium={formData.lotPremium}
             salesIncentive={formData.salesIncentive}
+            designStudioAllowance={formData.designStudioAllowance}
             selectedUpgrades={selectedUpgradeItems}
             showCostColumns={showCostColumns}
             onSaveDraft={handleSaveDraft}
