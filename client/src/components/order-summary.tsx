@@ -68,12 +68,6 @@ export function OrderSummary({
                   <span>Base Price:</span>
                   <span className="font-medium">{formatCurrency(basePrice)}</span>
                 </div>
-                {showCostColumns && (
-                  <div className="flex justify-between items-center text-xs text-gray-500">
-                    <span>Base Cost:</span>
-                    <span className="font-medium">{formatCurrency(baseCost || "0")}</span>
-                  </div>
-                )}
                 <div className="flex justify-between items-center">
                   <span>Lot Premium:</span>
                   <span className="font-medium">{formatCurrency(lotPremium || "0")}</span>
@@ -90,6 +84,12 @@ export function OrderSummary({
                     <span className="text-blue-600">{formatCurrency(baseSubtotal)}</span>
                   </div>
                 </div>
+                {showCostColumns && (
+                  <div className="flex justify-between items-center text-xs text-gray-500">
+                    <span>Base Cost:</span>
+                    <span className="font-medium">{formatCurrency(baseCost || "0")}</span>
+                  </div>
+                )}
                 {showCostColumns && (
                   <div className="flex justify-between items-center text-xs text-gray-500">
                     <span>Margin:</span>
@@ -110,18 +110,18 @@ export function OrderSummary({
                   <span>Upgrades ({selectedUpgrades.length}):</span>
                   <span className="font-medium">{formatCurrency(upgradesTotal)}</span>
                 </div>
-                {showCostColumns && selectedUpgrades.length > 0 && (
-                  <div className="flex justify-between items-center text-xs text-gray-500">
-                    <span>Upgrades Cost:</span>
-                    <span className="font-medium">{formatCurrency(upgradesBuilderCost)}</span>
-                  </div>
-                )}
                 <div className="border-t pt-1 mt-1">
                   <div className="flex justify-between items-center font-semibold">
                     <span>Upgrades Subtotal:</span>
                     <span className="text-blue-600">{formatCurrency(upgradesSubtotal)}</span>
                   </div>
                 </div>
+                {showCostColumns && selectedUpgrades.length > 0 && (
+                  <div className="flex justify-between items-center text-xs text-gray-500">
+                    <span>Upgrades Cost:</span>
+                    <span className="font-medium">{formatCurrency(upgradesBuilderCost)}</span>
+                  </div>
+                )}
                 {showCostColumns && selectedUpgrades.length > 0 && (
                   <div className="flex justify-between items-center text-xs text-gray-500">
                     <span>Margin:</span>
