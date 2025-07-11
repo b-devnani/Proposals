@@ -60,19 +60,19 @@ export function OrderSummary({
                 <span>Base Price:</span>
                 <span className="font-medium">{formatCurrency(basePrice)}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span>Lot Premium:</span>
-                <span className="font-medium">{formatCurrency(lotPremium || "0")}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Sales Incentive:</span>
-                <span className="font-medium text-red-600">{formatCurrency(salesIncentive)}</span>
-              </div>
               {showCostColumns && (
                 <>
                   <div className="flex justify-between items-center text-sm">
                     <span>Base Cost:</span>
                     <span className="font-medium">{formatCurrency(baseCost || "0")}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Lot Premium:</span>
+                    <span className="font-medium">{formatCurrency(lotPremium || "0")}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Sales Incentive:</span>
+                    <span className="font-medium text-red-600">{formatCurrency(salesIncentive)}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span>Base Margin (incl. adjustments):</span>
