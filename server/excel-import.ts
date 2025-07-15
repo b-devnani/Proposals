@@ -44,7 +44,7 @@ export function readExcelUpgrades(fileName: string): Upgrade[] {
 
 export function getHomeTemplateUpgrades(templateName: string): Upgrade[] {
   const fileMap: { [key: string]: string } = {
-    'Sorrento': 'Sorrento Selections_1752601734130.xlsx',
+    'Sorrento': 'Sorrento Selections_1752602550627.xlsx',
     'Ravello': 'Ravello Selections.xlsx', // Will be added when provided
     'Verona': 'Verona Selections.xlsx'    // Will be added when provided
   };
