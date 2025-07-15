@@ -9,7 +9,7 @@ export interface GroupedUpgrades {
 }
 
 export function groupUpgradesByCategory(upgrades: Upgrade[]): GroupedUpgrades {
-  return upgrades.reduce((acc, upgrade) => {
+  const grouped = upgrades.reduce((acc, upgrade) => {
     if (!acc[upgrade.category]) {
       acc[upgrade.category] = {};
     }
@@ -22,6 +22,24 @@ export function groupUpgradesByCategory(upgrades: Upgrade[]): GroupedUpgrades {
     acc[upgrade.category][upgrade.location][upgrade.parentSelection].push(upgrade);
     return acc;
   }, {} as GroupedUpgrades);
+
+  // Sort upgrades within each parent selection by client price (ascending)
+  Object.keys(grouped).forEach(category => {
+    Object.keys(grouped[category]).forEach(location => {
+      Object.keys(grouped[category][location]).forEach(parentSelection => {
+        grouped[category][location][parentSelection].sort((a, b) => {
+          const priceA = parseInt(a.clientPrice) || 0;
+          const priceB = parseInt(b.clientPrice) || 0;
+          if (priceA !== priceB) {
+            return priceA - priceB;
+          }
+          return a.choiceTitle.localeCompare(b.choiceTitle);
+        });
+      });
+    });
+  });
+
+  return grouped;
 }
 
 export function sortUpgrades(upgrades: Upgrade[]): Upgrade[] {
@@ -38,7 +56,13 @@ export function sortUpgrades(upgrades: Upgrade[]): Upgrade[] {
     if (a.parentSelection !== b.parentSelection) {
       return a.parentSelection.localeCompare(b.parentSelection);
     }
-    // Quaternary sort by choice title
+    // Quaternary sort by client price (ascending)
+    const priceA = parseInt(a.clientPrice) || 0;
+    const priceB = parseInt(b.clientPrice) || 0;
+    if (priceA !== priceB) {
+      return priceA - priceB;
+    }
+    // Final sort by choice title
     return a.choiceTitle.localeCompare(b.choiceTitle);
   });
 }
