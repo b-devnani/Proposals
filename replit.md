@@ -120,6 +120,7 @@ Three main entities:
 - July 15, 2025. Enhanced Excel export with location sub-groups displayed as separate rows (instead of in brackets) and fixed inconsistent cell colors across columns A and B for all header rows
 - July 15, 2025. Fixed Excel export signature text alignment to left-aligned and ensured complete color consistency across all header rows in both columns A and B
 - July 15, 2025. Updated Excel export to use SUM formulas instead of hardcoded values for Base Subtotal, Upgrades Subtotal, and Grand Total calculations
+- July 15, 2025. Added standardized print settings to Excel export: narrow margins, custom scaling (1 page wide x 2 pages tall), horizontal centering, and optimized column A width for better scaling
 
 ## User Preferences
 

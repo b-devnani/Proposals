@@ -309,9 +309,9 @@ export default function PurchaseOrder() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Home Proposal');
 
-    // Set optimal column widths for readability
+    // Set optimal column widths for readability and scaling
     worksheet.columns = [
-      { width: 50 }, // A - Description/Label
+      { width: 55 }, // A - Description/Label (auto-adjusts better at scale)
       { width: 20 }, // B - Value/Amount
       { width: 10 }, // C - Spacer
       { width: 10 }, // D - Spacer
@@ -321,6 +321,30 @@ export default function PurchaseOrder() {
       { width: 10 }, // H - Spacer
       { width: 15 }  // I - Secondary Amount
     ];
+
+    // Configure print settings
+    worksheet.pageSetup = {
+      // Paper size (Letter)
+      paperSize: 1,
+      // Orientation (Portrait)
+      orientation: 'portrait',
+      // Margins (Narrow)
+      margins: {
+        left: 0.25,
+        right: 0.25,
+        top: 0.75,
+        bottom: 0.75,
+        header: 0.3,
+        footer: 0.3
+      },
+      // Custom scaling: Fit to 1 page wide by 2 pages tall
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 2,
+      // Center horizontally
+      horizontalCentered: true,
+      verticalCentered: false
+    };
     
     // Modern Header Design
     const headerRow = worksheet.getRow(1);
