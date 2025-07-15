@@ -697,17 +697,21 @@ export default function PurchaseOrder() {
   const handleSaveDraft = async () => {
     if (!currentTemplate) return;
     
+    const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
+    const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
+    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal;
+    
     const proposalData = {
-      templateId: currentTemplate.id,
-      buyerLastName: formData.buyerLastName,
-      community: formData.community,
-      lotNumber: formData.lotNumber,
-      lotAddress: formData.lotAddress,
-      lotPremium: formData.lotPremium,
-      salesIncentive: formData.salesIncentive,
-      designStudioAllowance: formData.designStudioAllowance,
-      selectedUpgrades: Array.from(selectedUpgrades),
-      isDraft: true
+      todaysDate: new Date().toISOString().split('T')[0],
+      buyerLastName: formData.buyerLastName || "Customer",
+      community: formData.community || "Rolling Meadows",
+      lotNumber: formData.lotNumber || "1",
+      lotAddress: formData.lotAddress || "TBD",
+      housePlan: currentTemplate.name,
+      basePrice: currentTemplate.basePrice,
+      lotPremium: formData.lotPremium || "0",
+      selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id.toString()),
+      totalPrice: totalPrice.toString()
     };
 
     try {
@@ -732,17 +736,21 @@ export default function PurchaseOrder() {
   const handleGeneratePO = async () => {
     if (!currentTemplate) return;
     
+    const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
+    const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
+    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal;
+    
     const proposalData = {
-      templateId: currentTemplate.id,
-      buyerLastName: formData.buyerLastName,
-      community: formData.community,
-      lotNumber: formData.lotNumber,
-      lotAddress: formData.lotAddress,
-      lotPremium: formData.lotPremium,
-      salesIncentive: formData.salesIncentive,
-      designStudioAllowance: formData.designStudioAllowance,
-      selectedUpgrades: Array.from(selectedUpgrades),
-      isDraft: false
+      todaysDate: new Date().toISOString().split('T')[0],
+      buyerLastName: formData.buyerLastName || "Customer",
+      community: formData.community || "Rolling Meadows",
+      lotNumber: formData.lotNumber || "1",
+      lotAddress: formData.lotAddress || "TBD",
+      housePlan: currentTemplate.name,
+      basePrice: currentTemplate.basePrice,
+      lotPremium: formData.lotPremium || "0",
+      selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id.toString()),
+      totalPrice: totalPrice.toString()
     };
 
     try {
