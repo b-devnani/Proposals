@@ -110,6 +110,7 @@ Three main entities:
 - July 15, 2025. Created dynamic Excel import system for weekly data updates - supports Sorrento, Ravello, and Verona templates
 - July 15, 2025. Added Excel validation script and caching system for efficient data loading
 - July 15, 2025. Implemented expand all/collapse all functionality with categories expanded by default and collapse only affecting locations
+- July 15, 2025. Added custom category sorting order: Structural Options, Flooring, Cabinetry Options, Countertops, Plumbing Trim, Plumbing Options, HVAC Options, Electrical, Light Fixtures, Smart Home, Fireplace, Millwork, Interior Trim, Appliances, Paint, Roofing, Mirrors/Medicine Cabinets & Accessories
 
 ## User Preferences
 
