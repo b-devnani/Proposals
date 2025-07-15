@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Filter, Plus, Minus } from "lucide-react";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -33,6 +34,7 @@ export default function PurchaseOrder() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
+  const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -110,7 +112,10 @@ export default function PurchaseOrder() {
     const matchesLocation = locationFilter === "all" || 
       upgrade.location === locationFilter;
     
-    return matchesSearch && matchesCategory && matchesLocation;
+    // Selected only filter
+    const matchesSelectedOnly = !showSelectedOnly || selectedUpgrades.has(upgrade.id);
+    
+    return matchesSearch && matchesCategory && matchesLocation && matchesSelectedOnly;
   });
 
   const sortedUpgrades = sortUpgrades(filteredUpgrades);
@@ -1310,6 +1315,22 @@ export default function PurchaseOrder() {
                       </Select>
                     </div>
 
+                    <div className="flex flex-col items-center">
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Show Selected Only
+                      </Label>
+                      <div className="flex items-center space-x-2 h-10">
+                        <Checkbox
+                          id="show-selected-only"
+                          checked={showSelectedOnly}
+                          onCheckedChange={(checked) => setShowSelectedOnly(checked === true)}
+                        />
+                        <Label htmlFor="show-selected-only" className="text-sm text-gray-700 cursor-pointer">
+                          Selected ({selectedUpgrades.size})
+                        </Label>
+                      </div>
+                    </div>
+
                     <div className="flex items-end">
                       <Button 
                         variant="outline" 
@@ -1317,6 +1338,7 @@ export default function PurchaseOrder() {
                           setSearchTerm("");
                           setCategoryFilter("all");
                           setLocationFilter("all");
+                          setShowSelectedOnly(false);
                         }}
                         className="h-10"
                       >
