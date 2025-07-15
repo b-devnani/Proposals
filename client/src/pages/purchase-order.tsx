@@ -985,15 +985,7 @@ export default function PurchaseOrder() {
   const selectedUpgradeItems = upgrades?.filter(upgrade => selectedUpgrades.has(upgrade.id)) || [];
   
   // Group and filter upgrades
-  const groupedUpgrades = groupUpgradesByCategory(
-    upgrades?.filter(upgrade => {
-      const matchesSearch = searchTerm === "" || 
-        upgrade.choiceTitle.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = categoryFilter === "all" || upgrade.category === categoryFilter;
-      const matchesLocation = locationFilter === "all" || upgrade.location === locationFilter;
-      return matchesSearch && matchesCategory && matchesLocation;
-    }) || []
-  );
+  const groupedUpgrades = groupUpgradesByCategory(filteredUpgrades);
 
   // Get unique categories and locations for filters
   const uniqueCategories = Array.from(new Set(upgrades?.map(u => u.category) || [])).sort();
