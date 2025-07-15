@@ -975,6 +975,7 @@ export default function PurchaseOrder() {
                                     setFormData({ ...formData, salesIncentive: "0" });
                                     setSalesIncentiveEnabled(false);
                                   } else {
+                                    setFormData({ ...formData, salesIncentive: "-0" });
                                     setSalesIncentiveEnabled(true);
                                   }
                                 }}
@@ -994,11 +995,14 @@ export default function PurchaseOrder() {
                                   id="sales-incentive"
                                   type="text"
                                   className="w-32"
-                                  placeholder="0"
+                                  placeholder="-0"
                                   value={formatNumberWithCommas(formData.salesIncentive)}
                                   onChange={(e) => {
                                     handleNumberInputChange(e.target.value, (value) => {
-                                      setFormData({ ...formData, salesIncentive: value });
+                                      // Ensure sales incentive is negative
+                                      const numValue = parseFloat(value) || 0;
+                                      const negativeValue = numValue > 0 ? (-numValue).toString() : value;
+                                      setFormData({ ...formData, salesIncentive: negativeValue });
                                     });
                                   }}
                                 />
@@ -1006,7 +1010,7 @@ export default function PurchaseOrder() {
                             )}
                           </div>
                           {!salesIncentiveEnabled && (
-                            <p className="text-sm text-gray-600 mt-1">Promotional discount or credit</p>
+                            <p className="text-sm text-gray-600 mt-1">Promotional discount (negative amount)</p>
                           )}
                         </CardContent>
                       </Card>
