@@ -1002,15 +1002,15 @@ export default function PurchaseOrder() {
                       ) : (
                         // Discrete activation area - subtle but findable for staff
                         <div 
-                          className="mb-4 h-8 cursor-pointer group flex items-center justify-center border border-dashed border-gray-300 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                          className="mb-4 h-6 cursor-pointer group flex items-center justify-center"
                           onClick={() => {
                             setFormData({ ...formData, salesIncentive: "-0" });
                             setSalesIncentiveEnabled(true);
                           }}
                           title="Click to add sales incentive"
                         >
-                          <div className="text-sm text-gray-500 select-none">
-                            + Add Sales Incentive
+                          <div className="opacity-60 group-hover:opacity-90 transition-opacity duration-200 text-lg text-gray-600 select-none font-bold">
+                            ···
                           </div>
                         </div>
                       )}
