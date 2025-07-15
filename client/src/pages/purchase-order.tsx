@@ -407,6 +407,12 @@ export default function PurchaseOrder() {
     pricingHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
     pricingHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     
+    const pricingHeaderCellB = worksheet.getCell(`B${currentRow}`);
+    pricingHeaderCellB.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    pricingHeaderCellB.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
+    pricingHeaderCellB.alignment = { horizontal: 'right', vertical: 'middle' };
+    pricingHeaderCellB.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    
     currentRow++;
     
     // Base pricing items
@@ -480,6 +486,7 @@ export default function PurchaseOrder() {
     
     // Add upgrades with clean formatting
     const selectedGroupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
+    let upgradeRowIndex = 0;
     
     Object.entries(selectedGroupedUpgrades).forEach(([category, locations]) => {
       // Category Header
@@ -493,22 +500,47 @@ export default function PurchaseOrder() {
       categoryCell.alignment = { horizontal: 'left', vertical: 'middle' };
       categoryCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
       
+      const categoryCellB = worksheet.getCell(`B${currentRow}`);
+      categoryCellB.font = { name: 'Calibri', bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
+      categoryCellB.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
+      categoryCellB.alignment = { horizontal: 'right', vertical: 'middle' };
+      categoryCellB.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      
       currentRow++;
       
       Object.entries(locations).forEach(([location, parentSelections]) => {
+        // Location Sub-Header
+        const locationRow = worksheet.getRow(currentRow);
+        locationRow.height = 22;
+        
+        const locationCell = worksheet.getCell(`A${currentRow}`);
+        locationCell.value = `  ${location}`;
+        locationCell.font = { name: 'Calibri', bold: true, size: 10 };
+        locationCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F4FD' } };
+        locationCell.alignment = { horizontal: 'left', vertical: 'middle' };
+        locationCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+        
+        const locationCellB = worksheet.getCell(`B${currentRow}`);
+        locationCellB.font = { name: 'Calibri', bold: true, size: 10 };
+        locationCellB.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F4FD' } };
+        locationCellB.alignment = { horizontal: 'right', vertical: 'middle' };
+        locationCellB.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+        
+        currentRow++;
+        
         Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
           // Add each upgrade item
-          upgrades.forEach((upgrade, index) => {
+          upgrades.forEach((upgrade) => {
             const row = worksheet.getRow(currentRow);
             row.height = 20;
             
             // Clean alternating row colors
-            const isEvenRow = index % 2 === 0;
+            const isEvenRow = upgradeRowIndex % 2 === 0;
             const bgColor = isEvenRow ? 'FFF8F9FA' : 'FFFFFFFF';
             
             // Upgrade description
             const descCell = worksheet.getCell(`A${currentRow}`);
-            descCell.value = `${upgrade.choiceTitle} (${location})`;
+            descCell.value = `    ${upgrade.choiceTitle}`;
             descCell.font = { name: 'Calibri', size: 10 };
             descCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
             descCell.alignment = { horizontal: 'left', vertical: 'middle' };
@@ -524,6 +556,7 @@ export default function PurchaseOrder() {
             priceCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
             
             currentRow++;
+            upgradeRowIndex++;
           });
         });
       });
@@ -541,6 +574,12 @@ export default function PurchaseOrder() {
     summaryHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
     summaryHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
     summaryHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    
+    const summaryHeaderCellB = worksheet.getCell(`B${currentRow}`);
+    summaryHeaderCellB.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    summaryHeaderCellB.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
+    summaryHeaderCellB.alignment = { horizontal: 'right', vertical: 'middle' };
+    summaryHeaderCellB.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     
     currentRow++;
     
