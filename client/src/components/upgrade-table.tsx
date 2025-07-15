@@ -71,7 +71,8 @@ export function UpgradeTable({
   };
 
   const collapseAll = () => {
-    setExpandedCategories(new Set());
+    // Keep categories expanded, only collapse locations
+    setExpandedCategories(new Set(Object.keys(groupedUpgrades)));
     setExpandedLocations(new Set());
   };
 
