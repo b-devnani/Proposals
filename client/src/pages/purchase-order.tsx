@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Plus, Minus } from "lucide-react";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -961,27 +961,53 @@ export default function PurchaseOrder() {
                       <Card className="mb-4 bg-white border-gray-200">
                         <CardContent className="pt-4">
                           <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="text-md font-medium text-gray-900">Sales Incentive</h4>
-                              <p className="text-sm text-gray-600">Promotional discount or credit</p>
-                            </div>
                             <div className="flex items-center space-x-2">
-                              <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Amount $</Label>
-                              <Input
-                                id="sales-incentive"
-                                type="text"
-                                className="w-32"
-                                placeholder="0"
-                                value={formatNumberWithCommas(formData.salesIncentive)}
-                                onChange={(e) => {
-                                  handleNumberInputChange(e.target.value, (value) => {
-                                    setFormData({ ...formData, salesIncentive: value });
-                                    setSalesIncentiveEnabled(value !== "0" && value !== "");
-                                  });
+                              <h4 className="text-md font-medium text-gray-900">Sales Incentive</h4>
+                              {salesIncentiveEnabled && (
+                                <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">SA</span>
+                              )}
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  if (salesIncentiveEnabled) {
+                                    setFormData({ ...formData, salesIncentive: "0" });
+                                    setSalesIncentiveEnabled(false);
+                                  } else {
+                                    setSalesIncentiveEnabled(true);
+                                  }
                                 }}
-                              />
+                                className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
+                              >
+                                {salesIncentiveEnabled ? (
+                                  <Minus className="h-3 w-3" />
+                                ) : (
+                                  <Plus className="h-3 w-3" />
+                                )}
+                              </Button>
                             </div>
+                            {salesIncentiveEnabled && (
+                              <div className="flex items-center space-x-2">
+                                <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Amount $</Label>
+                                <Input
+                                  id="sales-incentive"
+                                  type="text"
+                                  className="w-32"
+                                  placeholder="0"
+                                  value={formatNumberWithCommas(formData.salesIncentive)}
+                                  onChange={(e) => {
+                                    handleNumberInputChange(e.target.value, (value) => {
+                                      setFormData({ ...formData, salesIncentive: value });
+                                    });
+                                  }}
+                                />
+                              </div>
+                            )}
                           </div>
+                          {!salesIncentiveEnabled && (
+                            <p className="text-sm text-gray-600 mt-1">Promotional discount or credit</p>
+                          )}
                         </CardContent>
                       </Card>
 
