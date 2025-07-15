@@ -1000,16 +1000,16 @@ export default function PurchaseOrder() {
                           </CardContent>
                         </Card>
                       ) : (
-                        // Ultra-subtle activation area - looks like empty space
+                        // Discrete activation area - subtle but findable for staff
                         <div 
-                          className="mb-4 h-3 cursor-pointer group"
+                          className="mb-4 h-6 cursor-pointer group flex items-center justify-center"
                           onClick={() => {
                             setFormData({ ...formData, salesIncentive: "-0" });
                             setSalesIncentiveEnabled(true);
                           }}
                           title="Click to add sales incentive"
                         >
-                          <div className="opacity-0 group-hover:opacity-20 transition-opacity duration-300 text-xs text-gray-400 text-center">
+                          <div className="opacity-30 group-hover:opacity-60 transition-opacity duration-200 text-xs text-gray-400 select-none">
                             ···
                           </div>
                         </div>
