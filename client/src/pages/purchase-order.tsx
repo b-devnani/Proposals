@@ -183,7 +183,11 @@ export default function PurchaseOrder() {
     setSelectedUpgrades(newSelected);
   };
 
-  // Duplicate functions removed - using async versions below
+  const handleExpandCollapseAll = (isExpanded: boolean) => {
+    // This function can be used to expand/collapse all upgrade categories
+    // Implementation depends on UpgradeTable component state management
+    console.log(`${isExpanded ? 'Expanding' : 'Collapsing'} all categories`);
+  };
 
   const handlePreview = () => {
     // Create a preview window with the purchase order details
