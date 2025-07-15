@@ -80,7 +80,7 @@ export function formatCurrency(amount: string | number): string {
 export function formatMargin(margin: string | number): { value: string; isPositive: boolean } {
   const num = typeof margin === "string" ? parseFloat(margin) : margin;
   return {
-    value: `${num >= 0 ? "+" : ""}${num.toFixed(2)}%`,
+    value: `${num >= 0 ? "+" : ""}${num.toFixed(1)}%`,
     isPositive: num >= 0,
   };
 }
