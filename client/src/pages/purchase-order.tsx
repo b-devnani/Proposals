@@ -52,13 +52,13 @@ export default function PurchaseOrder() {
     queryKey: ["/api/templates"],
   });
 
-  // Get current template
-  const currentTemplate = templates.find(t => t.id.toString() === activeTemplate);
+  // Current template will be determined later in the component
 
   const { data: upgrades = [], isLoading: upgradesLoading } = useQuery<Upgrade[]>({
-    queryKey: ["/api/upgrades", currentTemplate?.name || ""],
+    queryKey: ["/api/upgrades", activeTemplate],
     queryFn: async () => {
-      const templateName = currentTemplate?.name || "";
+      const selectedTemplate = templates.find(t => t.id.toString() === activeTemplate);
+      const templateName = selectedTemplate?.name || "";
       const url = templateName ? `/api/upgrades?template=${templateName}` : "/api/upgrades";
       const response = await fetch(url);
       if (!response.ok) {
@@ -66,7 +66,7 @@ export default function PurchaseOrder() {
       }
       return response.json();
     },
-    enabled: !!currentTemplate,
+    enabled: !!templates.length && !!activeTemplate,
   });
 
   // Mutations
@@ -113,12 +113,9 @@ export default function PurchaseOrder() {
   });
 
   const sortedUpgrades = sortUpgrades(filteredUpgrades);
-  const groupedUpgrades = groupUpgradesByCategory(sortedUpgrades);
-  const selectedUpgradeItems = upgrades.filter(upgrade => selectedUpgrades.has(upgrade.id));
+  // groupedUpgrades defined later in component
 
-  // Get unique categories and locations for filter dropdowns
-  const uniqueCategories = Array.from(new Set(upgrades.map(u => u.category))).sort();
-  const uniqueLocations = Array.from(new Set(upgrades.map(u => u.location))).sort();
+  // Unique categories and locations defined later in component
 
   // Handlers
   const handleTemplateChange = (templateId: string) => {
@@ -185,28 +182,7 @@ export default function PurchaseOrder() {
     setSelectedUpgrades(newSelected);
   };
 
-  const handleCostToggle = (checked: boolean) => {
-    if (checked) {
-      setShowPasswordDialog(true);
-    } else {
-      setShowCostColumns(false);
-    }
-  };
-
-  const handleCostAuthenticated = () => {
-    setShowCostColumns(true);
-    toast({
-      title: "Cost View Enabled",
-      description: "Builder costs and margins are now visible.",
-    });
-  };
-
-  const handleSaveDraft = () => {
-    toast({
-      title: "Draft Saved",
-      description: "Your proposal draft has been saved.",
-    });
-  };
+  // Duplicate functions removed - using async versions below
 
   const handlePreview = () => {
     // Create a preview window with the purchase order details
@@ -313,10 +289,10 @@ export default function PurchaseOrder() {
     });
   };
 
-  const handleExportExcelBROKEN = async () => {
+  const handleExportExcel = async () => {
     if (!currentTemplate) {
       toast({
-        title: "Export Failed",
+        title: "Export Failed", 
         description: "Please select a template.",
         variant: "destructive"
       });
@@ -328,9 +304,9 @@ export default function PurchaseOrder() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Order Summary');
 
-    const selectedUpgradeItems = upgrades?.filter(upgrade => selectedUpgrades.has(upgrade.id)) || [];
+    // selectedUpgradeItems already defined in component scope
     
-    // Set column widths to match template
+    // Set column widths to match template exactly
     worksheet.columns = [
       { width: 15 }, // A - Option
       { width: 15 }, // B - Form labels  
@@ -339,20 +315,21 @@ export default function PurchaseOrder() {
       { width: 20 }, // E - Description start
       { width: 20 }, // F
       { width: 20 }, // G  
-      { width: 20 }, // H
-      { width: 15 }  // I - Subtotal
+      { width: 20 }, // H - Summary labels
+      { width: 15 }  // I - Subtotal/Values
     ];
     
-    // Title with blue background and white text
+    // Title: A1:I1 - "PROPOSAL" - Blue background, white text, centered, bold, 16pt Calibri
     const titleCell = worksheet.getCell('A1');
     titleCell.value = 'PROPOSAL';
-    titleCell.font = { bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
+    titleCell.font = { name: 'Calibri', bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
     titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     worksheet.mergeCells('A1:I1');
     worksheet.getRow(1).height = 30;
     
-    // Company info with light blue background
+    // Company Name: A3:I3 - "• BEECHEN & DILL HOMES •" - Light blue background, dark blue text, centered, bold, 14pt Calibri
     const companyCell = worksheet.getCell('A3');
     companyCell.value = '• BEECHEN & DILL HOMES •';
     companyCell.font = { bold: true, size: 14, color: { argb: 'FF366092' } };
@@ -439,8 +416,7 @@ export default function PurchaseOrder() {
     // Track current row for upgrades
     let currentRow = 20;
     
-    // Group and sort upgrades by category and location
-    const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
+    // Group and sort upgrades by category and location (using component-level groupedUpgrades)
     
     Object.entries(groupedUpgrades).forEach(([category, locations]) => {
       // Category Header with exact mapping - Blue background, white text, bold, borders spanning full row
@@ -461,7 +437,7 @@ export default function PurchaseOrder() {
       }
       currentRow++;
       
-      Object.entries(locations).forEach(([location, upgrades]) => {
+      Object.entries(locations).forEach(([location, parentSelections]) => {
         // Location Header (if not N/A) with exact mapping - Light gray background, italic, bold, borders spanning full row
         if (location !== "N/A") {
           const locationRow = worksheet.getRow(currentRow);
@@ -482,8 +458,30 @@ export default function PurchaseOrder() {
           currentRow++;
         }
         
-        // Upgrade Items with exact mapping - Alternating row colors, borders, aligned
-        upgrades.forEach((upgrade, upgradeIndex) => {
+        // Iterate through parent selections and their upgrades
+        Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
+          // Parent Selection header (if meaningful and different from location)
+          if (parentSelection !== "N/A" && parentSelection !== location && parentSelection.trim() !== "") {
+            const parentRow = worksheet.getRow(currentRow);
+            const parentCell = parentRow.getCell(1);
+            parentCell.value = `  ${parentSelection}`;
+            parentCell.font = { name: 'Calibri', bold: true, italic: true };
+            parentCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } };
+            parentCell.alignment = { horizontal: 'left', vertical: 'middle' };
+            parentCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+            
+            // Fill remaining cells in parent selection row
+            for (let col = 2; col <= 9; col++) {
+              const cell = parentRow.getCell(col);
+              cell.font = { name: 'Calibri', bold: true, italic: true };
+              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } };
+              cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+            }
+            currentRow++;
+          }
+          
+          // Upgrade Items with exact mapping - Alternating row colors, borders, aligned
+          upgrades.forEach((upgrade, upgradeIndex) => {
           const row = worksheet.getRow(currentRow);
           const isEvenRow = upgradeIndex % 2 === 0;
           const bgColor = isEvenRow ? 'FFF8F9FA' : 'FFFFFFFF';
@@ -514,6 +512,7 @@ export default function PurchaseOrder() {
           }
           
           currentRow++;
+          });
         });
       });
     });
@@ -669,880 +668,432 @@ export default function PurchaseOrder() {
     });
   };
 
-  const handleExportExcel = async () => {
-    if (!currentTemplate) {
+  const handleSaveDraft = async () => {
+    if (!currentTemplate) return;
+    
+    const proposalData = {
+      templateId: currentTemplate.id,
+      buyerLastName: formData.buyerLastName,
+      community: formData.community,
+      lotNumber: formData.lotNumber,
+      lotAddress: formData.lotAddress,
+      lotPremium: formData.lotPremium,
+      salesIncentive: formData.salesIncentive,
+      designStudioAllowance: formData.designStudioAllowance,
+      selectedUpgrades: Array.from(selectedUpgrades),
+      isDraft: true
+    };
+
+    try {
+      await apiRequest('/api/proposals', {
+        method: 'POST',
+        body: JSON.stringify(proposalData)
+      });
+      
       toast({
-        title: "Export Failed",
-        description: "Please select a template.",
+        title: "Draft Saved",
+        description: "Your proposal has been saved as a draft.",
+      });
+    } catch (error) {
+      toast({
+        title: "Save Failed",
+        description: "Failed to save draft. Please try again.",
         variant: "destructive"
       });
-      return;
     }
-
-    // Use ExcelJS for proper styling support
-    const ExcelJS = (await import('exceljs')).default;
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Order Summary');
-
-    const selectedUpgradeItems = upgrades?.filter(upgrade => selectedUpgrades.has(upgrade.id)) || [];
-    
-    // Set column widths to match template exactly
-    worksheet.columns = [
-      { width: 15 }, // A - Option
-      { width: 15 }, // B - Form labels  
-      { width: 5 },  // C - Spacer
-      { width: 15 }, // D - Form data
-      { width: 20 }, // E - Description start
-      { width: 20 }, // F
-      { width: 20 }, // G  
-      { width: 20 }, // H - Summary labels
-      { width: 15 }  // I - Subtotal/Values
-    ];
-    
-    // Title: A1:I1 - "PROPOSAL" - Blue background, white text, centered, bold, 16pt Calibri
-    const titleCell = worksheet.getCell('A1');
-    titleCell.value = 'PROPOSAL';
-    titleCell.font = { name: 'Calibri', bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
-    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
-    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    titleCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    worksheet.mergeCells('A1:I1');
-    worksheet.getRow(1).height = 30;
-    
-    // Company Name: A3:I3 - "• BEECHEN & DILL HOMES •" - Light blue background, dark blue text, centered, bold, 14pt Calibri
-    const companyCell = worksheet.getCell('A3');
-    companyCell.value = '• BEECHEN & DILL HOMES •';
-    companyCell.font = { name: 'Calibri', bold: true, size: 14, color: { argb: 'FF366092' } };
-    companyCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE7F3FF' } };
-    companyCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    companyCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    worksheet.mergeCells('A3:I3');
-    worksheet.getRow(3).height = 25;
-    
-    // Company Address: A7:I7 - Full address with bullets - centered
-    const addressCell = worksheet.getCell('A7');
-    addressCell.value = '565 Village Center Dr • Burr Ridge, IL 60527-4516 • Phone: (630) 920-9430';
-    addressCell.font = { name: 'Calibri' };
-    addressCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    addressCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    worksheet.mergeCells('A7:I7');
-    
-    // Form data section with gray labels
-    const formLabels = [
-      ['B9', 'Date', 'E9', new Date().toLocaleDateString()],
-      ['B10', "Buyer's Last Name", 'E10', formData.buyerLastName || ''],
-      ['B11', 'Community', 'E11', formData.community || ''],
-      ['B12', 'Lot Number', 'E12', formData.lotNumber || ''],
-      ['B13', 'Lot Address', 'E13', formData.lotAddress || ''],
-      ['B14', 'House Plan', 'E14', currentTemplate.name]
-    ];
-    
-    formLabels.forEach(([labelCell, labelText, valueCell, valueText]) => {
-      const label = worksheet.getCell(labelCell);
-      label.value = labelText;
-      label.font = { bold: true };
-      label.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
-      
-      const value = worksheet.getCell(valueCell);
-      value.value = valueText;
-    });
-    
-    // Base pricing with light blue background
-    const basePriceLabel = worksheet.getCell('E16');
-    basePriceLabel.value = `${currentTemplate.name} Base Price`;
-    basePriceLabel.font = { bold: true };
-    basePriceLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1ECF1' } };
-    
-    const basePriceValue = worksheet.getCell('I16');
-    basePriceValue.value = parseInt(currentTemplate.basePrice);
-    basePriceValue.numFmt = '"$"#,##0';
-    basePriceValue.font = { bold: true };
-    basePriceValue.alignment = { horizontal: 'right' };
-    
-    const lotPremiumLabel = worksheet.getCell('E17');
-    lotPremiumLabel.value = 'Lot Premium';
-    lotPremiumLabel.font = { bold: true };
-    lotPremiumLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1ECF1' } };
-    
-    const lotPremiumValue = worksheet.getCell('I17');
-    lotPremiumValue.value = parseInt(formData.lotPremium || "0");
-    lotPremiumValue.numFmt = '"$"#,##0';
-    lotPremiumValue.font = { bold: true };
-    lotPremiumValue.alignment = { horizontal: 'right' };
-    
-    // Headers with blue background and white text
-    const headerStyle = {
-      font: { bold: true, color: { argb: 'FFFFFFFF' } },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } },
-      alignment: { horizontal: 'center', vertical: 'middle' }
-    };
-    
-    const optionHeader = worksheet.getCell('A19');
-    optionHeader.value = 'Option';
-    Object.assign(optionHeader, headerStyle);
-    worksheet.mergeCells('A19:D19');
-    
-    const descHeader = worksheet.getCell('E19');
-    descHeader.value = 'Description/Notes';
-    Object.assign(descHeader, headerStyle);
-    worksheet.mergeCells('E19:H19');
-    
-    const subtotalHeader = worksheet.getCell('I19');
-    subtotalHeader.value = 'Subtotal';
-    Object.assign(subtotalHeader, headerStyle);
-    
-    worksheet.getRow(19).height = 20;
-    
-    // Track current row for upgrades
-    let currentRow = 20;
-    
-    // Group and sort upgrades by category and location
-    const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
-    
-    Object.entries(groupedUpgrades).forEach(([category, locations]) => {
-      // Category header with blue background
-      const categoryRow = worksheet.getRow(currentRow);
-      categoryRow.getCell(1).value = category;
-      
-      for (let col = 1; col <= 9; col++) {
-        const cell = categoryRow.getCell(col);
-        cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
-        cell.alignment = { horizontal: 'left', vertical: 'middle' };
-      }
-      currentRow++;
-      
-      Object.entries(locations).forEach(([location, upgrades]) => {
-        // Location header (if not N/A)
-        if (location !== "N/A") {
-          const locationRow = worksheet.getRow(currentRow);
-          locationRow.getCell(1).value = location;
-          
-          for (let col = 1; col <= 9; col++) {
-            const cell = locationRow.getCell(col);
-            cell.font = { bold: true, italic: true };
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE9ECEF' } };
-            cell.alignment = { horizontal: 'left', vertical: 'middle' };
-          }
-          currentRow++;
-        }
-        
-        // Upgrade Items with exact mapping - Alternating row colors, borders, aligned
-        upgrades.forEach((upgrade, upgradeIndex) => {
-          const row = worksheet.getRow(currentRow);
-          const isEvenRow = upgradeIndex % 2 === 0;
-          const bgColor = isEvenRow ? 'FFF8F9FA' : 'FFFFFFFF';
-          
-          // Upgrade Item: Choice Title Column A - Alternating row colors, borders, left aligned
-          const titleCell = row.getCell(1);
-          titleCell.value = upgrade.choiceTitle;
-          titleCell.font = { name: 'Calibri' };
-          titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-          titleCell.alignment = { horizontal: 'left', vertical: 'middle' };
-          titleCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-          
-          // Upgrade Item: Price Column I - Alternating row colors, borders, right aligned, currency format
-          const priceCell = row.getCell(9);
-          priceCell.value = parseInt(upgrade.clientPrice);
-          priceCell.numFmt = '"$"#,##0';
-          priceCell.font = { name: 'Calibri' };
-          priceCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-          priceCell.alignment = { horizontal: 'right', vertical: 'middle' };
-          priceCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-          
-          // Upgrade Item: Spacer Columns B-H - Empty cells with background, borders
-          for (let col = 2; col <= 8; col++) {
-            const cell = row.getCell(col);
-            cell.font = { name: 'Calibri' };
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-          }
-          
-          currentRow++;
-        });
-      });
-    });
-    
-    // Grand Total with exact mapping - Blue background, white text, bold, currency format, right aligned, borders
-    const grandTotalRow = worksheet.getRow(currentRow);
-    
-    // Grand Total Label Column A - Blue background, white text, bold, borders
-    const grandTotalLabelCell = grandTotalRow.getCell(1);
-    grandTotalLabelCell.value = 'Grand Total';
-    grandTotalLabelCell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
-    grandTotalLabelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
-    grandTotalLabelCell.alignment = { horizontal: 'left', vertical: 'middle' };
-    grandTotalLabelCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    
-    // Grand Total Value Column I - Blue background, white text, bold, currency format, right aligned, borders
-    const grandTotalCell = grandTotalRow.getCell(9);
-    grandTotalCell.value = { formula: `SUM(I16:I${currentRow - 1})` };
-    grandTotalCell.numFmt = '"$"#,##0';
-    grandTotalCell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
-    grandTotalCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
-    grandTotalCell.alignment = { horizontal: 'right', vertical: 'middle' };
-    grandTotalCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    
-    // Fill remaining cells in Grand Total row
-    for (let col = 2; col <= 8; col++) {
-      const cell = grandTotalRow.getCell(col);
-      cell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
-      cell.alignment = { horizontal: 'left', vertical: 'middle' };
-      cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    }
-    
-    currentRow += 2; // Add space before signature section
-    
-    // Signature Section as per mapping
-    // Signature Text: Full Row - Merge cells A:I, normal text
-    const signatureTextRow = worksheet.getRow(currentRow);
-    const signatureTextCell = signatureTextRow.getCell(1);
-    signatureTextCell.value = 'By signing below, both parties agree to the terms and total amount shown above.';
-    signatureTextCell.font = { name: 'Calibri' };
-    signatureTextCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
-    
-    currentRow += 2;
-    
-    // Buyer Signature section
-    const buyerSigRow = worksheet.getRow(currentRow);
-    buyerSigRow.getCell(2).value = 'Buyer Signature:';
-    buyerSigRow.getCell(2).font = { name: 'Calibri', bold: true };
-    buyerSigRow.getCell(2).border = { bottom: {style:'thin'} }; // Signature line
-    
-    buyerSigRow.getCell(6).value = 'Date:';
-    buyerSigRow.getCell(6).font = { name: 'Calibri', bold: true };
-    buyerSigRow.getCell(7).border = { bottom: {style:'thin'} }; // Signature line
-    
-    currentRow += 2;
-    
-    // Company Signature section
-    const companySigRow = worksheet.getRow(currentRow);
-    companySigRow.getCell(2).value = 'Company Representative:';
-    companySigRow.getCell(2).font = { name: 'Calibri', bold: true };
-    companySigRow.getCell(2).border = { bottom: {style:'thin'} }; // Signature line
-    
-    companySigRow.getCell(6).value = 'Date:';
-    companySigRow.getCell(6).font = { name: 'Calibri', bold: true };
-    companySigRow.getCell(7).border = { bottom: {style:'thin'} }; // Signature line
-    
-    // Generate filename with buyer name and date
-    const buyerName = formData.buyerLastName || 'Customer';
-    const dateStr = new Date().toISOString().split('T')[0];
-    const fileName = `Proposal_${currentTemplate.name}_${buyerName}_${dateStr}.xlsx`;
-    
-    // Generate buffer and download
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = window.URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Excel Export Complete",
-      description: `Proposal exported as ${fileName}`
-    });
   };
 
-  const handleGeneratePO = () => {
+  const handleGeneratePO = async () => {
     if (!currentTemplate) return;
-
-    // Create PDF
-    const pdf = new jsPDF();
     
-    // Add Logo (centered at top)
-    const logoImg = new Image();
-    logoImg.onload = () => {
-      // Logo - centered and properly sized
-      pdf.addImage(logoImg, 'PNG', 85, 10, 40, 20);
-      
-      // Company contact info
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      pdf.setTextColor(100, 100, 100);
-      pdf.text("565 Village Center Dr  •  Burr Ridge, IL 60527-4516  •  Phone: 6309209430", 105, 35, { align: "center" });
-      
-      // Add subtle line separator
-      pdf.setDrawColor(66, 139, 202);
-      pdf.setLineWidth(0.5);
-      pdf.line(20, 45, 190, 45);
-      
-      // Job Address Section (left side)
-      pdf.setFontSize(11);
-      pdf.setFont("helvetica", "bold");
-      pdf.setTextColor(0, 0, 0);
-      pdf.text("DESIGNER HOME", 20, 60);
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(10);
-      pdf.text("Job Address:", 20, 70);
-      pdf.text("16520 Kayla Drive", 20, 78);
-      pdf.text("Lemont, IL 60439", 20, 86);
-      
-      // Purchase Order Title (right side)
-      pdf.setFontSize(18);
-      pdf.setFont("helvetica", "bold");
-      pdf.setTextColor(66, 139, 202);
-      pdf.text("PURCHASE ORDER", 140, 65);
-      pdf.setTextColor(0, 0, 0);
-      
-      // Buyer Information Section
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("BUYER INFORMATION", 20, 105);
-      
-      // Add background for buyer info
-      pdf.setFillColor(248, 249, 250);
-      pdf.rect(20, 110, 170, 35, 'F');
-      
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(10);
-      let yPos = 120;
-      pdf.text(`Date: ${formData.todaysDate}`, 25, yPos);
-      pdf.text(`Buyer Name: ${formData.buyerLastName}`, 110, yPos);
-      yPos += 8;
-      pdf.text(`Community: ${formData.community}`, 25, yPos);
-      pdf.text(`Lot Number: ${formData.lotNumber}`, 110, yPos);
-      yPos += 8;
-      pdf.text(`Lot Address: ${formData.lotAddress}`, 25, yPos);
-      yPos = 155;
-    
-      // Home Template Information
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("HOME TEMPLATE", 20, yPos);
-      yPos += 5;
-      
-      // Template info background
-      pdf.setFillColor(248, 249, 250);
-      pdf.rect(20, yPos, 85, 25, 'F');
-      
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(10);
-      yPos += 8;
-      pdf.text(`Model: ${currentTemplate.name}`, 25, yPos);
-      yPos += 8;
-      pdf.text(`Base Price: $${parseInt(currentTemplate.basePrice).toLocaleString()}`, 25, yPos);
-      if (formData.lotPremium && parseInt(formData.lotPremium) > 0) {
-        yPos += 8;
-        pdf.text(`Lot Premium: $${parseInt(formData.lotPremium).toLocaleString()}`, 25, yPos);
-      }
-      yPos += 20;
-      
-      // Selected Upgrades Table
-      if (selectedUpgradeItems.length > 0) {
-        pdf.setFontSize(12);
-        pdf.setFont("helvetica", "bold");
-        pdf.text("SELECTED UPGRADES", 20, yPos);
-        yPos += 10;
-        
-        const upgradeTableData = selectedUpgradeItems.map(upgrade => [
-          upgrade.choiceTitle,
-          upgrade.category,
-          upgrade.location,
-          `$${parseInt(upgrade.clientPrice).toLocaleString()}`
-        ]);
-        
-        autoTable(pdf, {
-          startY: yPos,
-          head: [['Choice Title', 'Category', 'Location', 'Price']],
-          body: upgradeTableData,
-          theme: 'striped',
-          headStyles: { 
-            fillColor: [66, 139, 202],
-            textColor: 255,
-            fontSize: 10,
-            fontStyle: 'bold'
-          },
-          styles: { 
-            fontSize: 9,
-            cellPadding: 4
-          },
-          alternateRowStyles: {
-            fillColor: [248, 249, 250]
-          },
-          columnStyles: {
-            0: { cellWidth: 75 },
-            1: { cellWidth: 40 },
-            2: { cellWidth: 35 },
-            3: { cellWidth: 30, halign: 'right' }
-          }
-        });
-        
-        yPos = (pdf as any).lastAutoTable.finalY + 15;
-      }
-      
-      // Pricing Summary
-      const basePrice = parseInt(currentTemplate.basePrice);
-      const lotPremium = parseInt(formData.lotPremium || "0");
-      const upgradesTotal = selectedUpgradeItems.reduce((sum, u) => sum + parseInt(u.clientPrice), 0);
-      const grandTotal = basePrice + lotPremium + upgradesTotal;
-      
-      // Position pricing summary on the right side or below upgrades
-      let summaryX = selectedUpgradeItems.length > 0 ? 120 : 20;
-      let summaryY = selectedUpgradeItems.length > 0 && yPos < 200 ? 155 : yPos;
-      
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("PRICING SUMMARY", summaryX, summaryY);
-      
-      // Pricing summary background
-      pdf.setFillColor(66, 139, 202);
-      pdf.setTextColor(255, 255, 255);
-      pdf.rect(summaryX, summaryY + 5, 70, 35, 'F');
-      
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(10);
-      summaryY += 15;
-      pdf.text(`Base Price:`, summaryX + 5, summaryY);
-      pdf.text(`$${basePrice.toLocaleString()}`, summaryX + 65, summaryY, { align: "right" });
-      summaryY += 8;
-      
-      if (lotPremium > 0) {
-        pdf.text(`Lot Premium:`, summaryX + 5, summaryY);
-        pdf.text(`$${lotPremium.toLocaleString()}`, summaryX + 65, summaryY, { align: "right" });
-        summaryY += 8;
-      }
-      
-      if (upgradesTotal > 0) {
-        pdf.text(`Upgrades Total:`, summaryX + 5, summaryY);
-        pdf.text(`$${upgradesTotal.toLocaleString()}`, summaryX + 65, summaryY, { align: "right" });
-        summaryY += 8;
-      }
-      
-      // Grand Total
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(11);
-      pdf.text(`TOTAL: $${grandTotal.toLocaleString()}`, summaryX + 5, summaryY);
-      
-      pdf.setTextColor(0, 0, 0);
-      yPos = Math.max(yPos, summaryY + 25);
-      
-      // Signature Section
-      if (yPos > 230) {
-        pdf.addPage();
-        pdf.addImage(logoImg, 'PNG', 85, 10, 40, 20);
-        yPos = 50;
-      }
-      
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("SIGNATURES", 20, yPos);
-      yPos += 15;
-      
-      // Signature boxes
-      pdf.setDrawColor(200, 200, 200);
-      pdf.setLineWidth(0.5);
-      
-      // Buyer Signature
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(10);
-      pdf.text("Buyer Signature:", 20, yPos);
-      pdf.text("Date:", 120, yPos);
-      pdf.rect(20, yPos + 5, 80, 20);
-      pdf.rect(120, yPos + 5, 50, 20);
-      yPos += 35;
-      
-      // Company Representative Signature
-      pdf.text("Beechen & Dill Homes Representative:", 20, yPos);
-      pdf.text("Date:", 120, yPos);
-      pdf.rect(20, yPos + 5, 80, 20);
-      pdf.rect(120, yPos + 5, 50, 20);
-      
-      // Footer
-      pdf.setFontSize(8);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text("This proposal constitutes the complete agreement between the parties.", 105, 280, { align: "center" });
-      
-      // Save PDF
-      const filename = `Proposal_${formData.buyerLastName || 'Buyer'}_${formData.todaysDate.replace(/-/g, '')}.pdf`;
-      pdf.save(filename);
+    const proposalData = {
+      templateId: currentTemplate.id,
+      buyerLastName: formData.buyerLastName,
+      community: formData.community,
+      lotNumber: formData.lotNumber,
+      lotAddress: formData.lotAddress,
+      lotPremium: formData.lotPremium,
+      salesIncentive: formData.salesIncentive,
+      designStudioAllowance: formData.designStudioAllowance,
+      selectedUpgrades: Array.from(selectedUpgrades),
+      isDraft: false
+    };
 
-      // Also save to database
-      const proposalData = {
-        ...formData,
-        housePlan: currentTemplate.name,
-        basePrice: currentTemplate.basePrice,
-        lotPremium: formData.lotPremium || "0",
-        selectedUpgrades: Array.from(selectedUpgrades).map(String),
-        totalPrice: grandTotal.toString(),
-      };
-
-      createProposalMutation.mutate(proposalData);
-
+    try {
+      await apiRequest('/api/proposals', {
+        method: 'POST',
+        body: JSON.stringify(proposalData)
+      });
+      
       toast({
         title: "Proposal Generated",
-        description: `PDF generated: ${filename}`,
+        description: "Your proposal has been generated successfully.",
       });
-    };
-    
-    logoImg.src = logoPath;
+    } catch (error) {
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate proposal. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  if (templatesLoading || upgradesLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  const handleCostToggle = (checked: boolean) => {
+    if (checked) {
+      setShowPasswordDialog(true);
+    } else {
+      setShowCostColumns(false);
+    }
+  };
+
+  const handleCostAuthenticated = () => {
+    setShowCostColumns(true);
+    setShowPasswordDialog(false);
+    toast({
+      title: "Cost View Enabled",
+      description: "Builder costs and margins are now visible.",
+    });
+  };
+
+  if (templatesLoading) {
+    return <div className="flex justify-center items-center h-64">Loading templates...</div>;
   }
+
+  if (!templates?.length) {
+    return <div className="flex justify-center items-center h-64">No templates available</div>;
+  }
+
+  const currentTemplate = templates.find(t => t.id === selectedTemplateId) || templates[0];
+  const selectedUpgradeItems = upgrades?.filter(upgrade => selectedUpgrades.has(upgrade.id)) || [];
+  
+  // Group and filter upgrades
+  const groupedUpgrades = groupUpgradesByCategory(
+    upgrades?.filter(upgrade => {
+      const matchesSearch = searchTerm === "" || 
+        upgrade.choiceTitle.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = categoryFilter === "all" || upgrade.category === categoryFilter;
+      const matchesLocation = locationFilter === "all" || upgrade.location === locationFilter;
+      return matchesSearch && matchesCategory && matchesLocation;
+    }) || []
+  );
+
+  // Get unique categories and locations for filters
+  const uniqueCategories = Array.from(new Set(upgrades?.map(u => u.category) || [])).sort();
+  const uniqueLocations = Array.from(new Set(upgrades?.map(u => u.location) || [])).sort();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Proposal Generator</h1>
-              <p className="text-sm text-gray-600">Create and manage custom home proposals</p>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <Label htmlFor="cost-toggle" className="text-sm text-gray-700 font-medium">
-                Show Builder Cost & Margin
-              </Label>
-              <Switch
-                id="cost-toggle"
-                checked={showCostColumns}
-                onCheckedChange={handleCostToggle}
-              />
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Proposal Generator</h1>
+          <p className="text-gray-600">Create detailed proposals with home templates and upgrades</p>
         </div>
-      </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Template Tabs */}
+        {/* Template Selection */}
         <Card className="mb-6">
-          <Tabs value={activeTemplate} onValueChange={handleTemplateChange}>
-            <TabsList className="grid w-full grid-cols-3">
-              {templates.map((template) => (
-                <TabsTrigger key={template.id} value={template.id.toString()}>
-                  {template.name}
-                  <span className="ml-2 text-xs text-gray-400">
-                    ${parseFloat(template.basePrice).toLocaleString()}
-                  </span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {templates.map((template) => (
-              <TabsContent key={template.id} value={template.id.toString()}>
-                <CardContent className="p-6">
-                  {/* Form Inputs */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                    <div>
-                      <Label htmlFor="todays-date">Today's Date</Label>
-                      <Input
-                        id="todays-date"
-                        type="date"
-                        value={formData.todaysDate}
-                        onChange={(e) => setFormData({ ...formData, todaysDate: e.target.value })}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="buyer-name">Buyer's Last Name</Label>
-                      <Input
-                        id="buyer-name"
-                        placeholder="Enter last name"
-                        value={formData.buyerLastName}
-                        onChange={(e) => setFormData({ ...formData, buyerLastName: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="community">Community</Label>
-                      <Select value={formData.community} onValueChange={(value) => setFormData({ ...formData, community: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Community" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="rolling-meadows">Rolling Meadows</SelectItem>
-                          <SelectItem value="cooper-ridge">Cooper Ridge</SelectItem>
-                          <SelectItem value="marble-landing">Marble Landing</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="lot-number">Lot Number</Label>
-                      <Input
-                        id="lot-number"
-                        placeholder="Enter lot number"
-                        value={formData.lotNumber}
-                        onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="lot-address">Lot Address</Label>
-                      <Input
-                        id="lot-address"
-                        placeholder="Enter lot address"
-                        value={formData.lotAddress}
-                        onChange={(e) => setFormData({ ...formData, lotAddress: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="house-plan">House Plan</Label>
-                      <Input
-                        id="house-plan"
-                        value={template.name}
-                        readOnly
-                        className="bg-gray-50"
-                      />
-                    </div>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Select Home Template</h2>
+              <div className="flex items-center space-x-3">
+                <Label htmlFor="cost-toggle" className="text-sm text-gray-700 font-medium">
+                  Show Builder Cost & Margin
+                </Label>
+                <Switch
+                  id="cost-toggle"
+                  checked={showCostColumns}
+                  onCheckedChange={handleCostToggle}
+                />
+                {salesIncentiveEnabled && (
+                  <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    SA
                   </div>
+                )}
+              </div>
+            </div>
 
-                  {/* Base Price Editor */}
-                  <Card className="mb-6 bg-blue-50 border-blue-200">
+            <Tabs 
+              value={selectedTemplateId?.toString() || templates[0]?.id.toString()}
+              onValueChange={(value) => setSelectedTemplateId(parseInt(value))}
+            >
+              <TabsList className="grid w-full grid-cols-3">
+                {templates.map((template) => (
+                  <TabsTrigger key={template.id} value={template.id.toString()}>
+                    {template.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              
+              {templates.map((template) => (
+                <TabsContent key={template.id} value={template.id.toString()}>
+                  <Card className="bg-blue-50 border-blue-200">
                     <CardContent className="pt-6">
-                      <div className="flex items-center justify-between">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {template.name} Pricing
-                          </h3>
-                          <p className="text-sm text-gray-600">Base pricing for this home template</p>
-                        </div>
-                        <div className="flex items-center space-x-6">
-                          {showCostColumns && (
-                            <div className="flex items-center space-x-2">
-                              <Label htmlFor="base-cost" className="text-sm font-medium text-gray-700">Cost $</Label>
-                              <Input
-                                id="base-cost"
-                                type="text"
-                                className="w-40"
-                                value={formatNumberWithCommas(template.baseCost || "0")}
-                                onChange={(e) => handleNumberInputChange(e.target.value, handleBaseCostUpdate)}
-                              />
-                            </div>
-                          )}
-                          <div className="flex items-center space-x-2">
-                            <Label htmlFor="base-price" className="text-sm font-medium text-gray-700">Price $</Label>
-                            <Input
-                              id="base-price"
-                              type="text"
-                              className="w-40 font-semibold"
-                              value={formatNumberWithCommas(template.basePrice)}
-                              onChange={(e) => handleNumberInputChange(e.target.value, handleBasePriceUpdate)}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Lot Premium */}
-                  <Card className="mb-6 bg-green-50 border-green-200">
-                    <CardContent className="pt-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">Lot Premium</h3>
-                          <p className="text-sm text-gray-600">Additional cost for lot selection</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Label htmlFor="lot-premium" className="text-sm font-medium text-gray-700">Premium $</Label>
+                          <Label htmlFor="buyer-name">Buyer's Last Name</Label>
                           <Input
-                            id="lot-premium"
-                            type="text"
-                            className="w-40 font-semibold"
-                            placeholder="0"
-                            value={formatNumberWithCommas(formData.lotPremium)}
-                            onChange={(e) => handleNumberInputChange(e.target.value, (value) => setFormData({ ...formData, lotPremium: value }))}
+                            id="buyer-name"
+                            placeholder="Enter buyer's last name"
+                            value={formData.buyerLastName}
+                            onChange={(e) => setFormData({ ...formData, buyerLastName: e.target.value })}
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="community">Community</Label>
+                          <Select 
+                            value={formData.community} 
+                            onValueChange={(value) => setFormData({ ...formData, community: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select community" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="sorrento">Sorrento</SelectItem>
+                              <SelectItem value="ravello">Ravello</SelectItem>
+                              <SelectItem value="verona">Verona</SelectItem>
+                              <SelectItem value="cooper-ridge">Cooper Ridge</SelectItem>
+                              <SelectItem value="marble-landing">Marble Landing</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="lot-number">Lot Number</Label>
+                          <Input
+                            id="lot-number"
+                            placeholder="Enter lot number"
+                            value={formData.lotNumber}
+                            onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value })}
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="lot-address">Lot Address</Label>
+                          <Input
+                            id="lot-address"
+                            placeholder="Enter lot address"
+                            value={formData.lotAddress}
+                            onChange={(e) => setFormData({ ...formData, lotAddress: e.target.value })}
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="house-plan">House Plan</Label>
+                          <Input
+                            id="house-plan"
+                            value={template.name}
+                            readOnly
+                            className="bg-gray-50"
                           />
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
 
-                  {/* Sales Incentive - Hidden Toggle */}
-                  <div className="mb-6">
-                    <div className="flex items-center justify-end mb-2">
-                      <div 
-                        className="flex items-center space-x-2 cursor-pointer opacity-50 hover:opacity-80 transition-opacity p-1 rounded"
-                        onClick={() => {
-                          setSalesIncentiveEnabled(!salesIncentiveEnabled);
-                          if (salesIncentiveEnabled) {
-                            setFormData({ ...formData, salesIncentive: "0" });
-                          }
-                        }}
-                        title="Sales Adjustment"
-                      >
-                        <span className={`text-sm font-medium ${salesIncentiveEnabled ? 'text-red-600' : 'text-gray-500'}`}>SA</span>
-                        <div className={`w-3 h-3 rounded-full border-2 ${salesIncentiveEnabled ? 'bg-red-500 border-red-500' : 'bg-white border-gray-400'}`}></div>
-                      </div>
-                    </div>
-                    {salesIncentiveEnabled && (
-                      <Card className="bg-red-50 border-red-200">
+                      {/* Base Price Editor */}
+                      <Card className="mb-6 bg-blue-50 border-blue-200">
                         <CardContent className="pt-6">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h3 className="text-lg font-semibold text-gray-900">Sales Adjustment</h3>
-                              <p className="text-sm text-gray-600">Price adjustment for this proposal</p>
+                              <h3 className="text-lg font-semibold text-gray-900">
+                                {template.name} Pricing
+                              </h3>
+                              <p className="text-sm text-gray-600">Base pricing for this home template</p>
                             </div>
+                            <div className="flex items-center space-x-6">
+                              {showCostColumns && (
+                                <div className="flex items-center space-x-2">
+                                  <Label htmlFor="base-cost" className="text-sm font-medium text-gray-700">Cost $</Label>
+                                  <Input
+                                    id="base-cost"
+                                    type="text"
+                                    className="w-40"
+                                    value={formatNumberWithCommas(template.baseCost || "0")}
+                                    onChange={(e) => handleNumberInputChange(e.target.value, handleBaseCostUpdate)}
+                                  />
+                                </div>
+                              )}
+                              <div className="flex items-center space-x-2">
+                                <Label htmlFor="base-price" className="text-sm font-medium text-gray-700">Price $</Label>
+                                <Input
+                                  id="base-price"
+                                  type="text"
+                                  className="w-40 font-semibold"
+                                  value={formatNumberWithCommas(template.basePrice)}
+                                  onChange={(e) => handleNumberInputChange(e.target.value, handleBasePriceUpdate)}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Additional Pricing Fields */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                             <div className="flex items-center space-x-2">
-                              <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Adjustment $</Label>
+                              <Label htmlFor="lot-premium" className="text-sm font-medium text-gray-700">Lot Premium $</Label>
+                              <Input
+                                id="lot-premium"
+                                type="text"
+                                className="w-32"
+                                placeholder="0"
+                                value={formatNumberWithCommas(formData.lotPremium)}
+                                onChange={(e) => handleNumberInputChange(e.target.value, (value) => setFormData({ ...formData, lotPremium: value }))}
+                              />
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Sales Incentive $</Label>
                               <Input
                                 id="sales-incentive"
                                 type="text"
-                                className="w-40 font-semibold"
+                                className="w-32"
                                 placeholder="0"
-                                value={formData.salesIncentive === "0" ? "" : `-${formatNumberWithCommas(formData.salesIncentive.replace('-', ''))}`}
+                                value={formatNumberWithCommas(formData.salesIncentive)}
                                 onChange={(e) => {
-                                  let value = e.target.value.replace(/[^0-9,]/g, '').replace(/,/g, '');
-                                  if (value === "") value = "0";
-                                  // Ensure the value is stored as negative
-                                  const negativeValue = value === "0" ? "0" : `-${value}`;
-                                  setFormData({ ...formData, salesIncentive: negativeValue });
+                                  handleNumberInputChange(e.target.value, (value) => {
+                                    setFormData({ ...formData, salesIncentive: value });
+                                    setSalesIncentiveEnabled(value !== "0" && value !== "");
+                                  });
                                 }}
+                              />
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <Label htmlFor="design-studio-allowance" className="text-sm font-medium text-gray-700">Design Studio Allowance $</Label>
+                              <Input
+                                id="design-studio-allowance"
+                                type="text"
+                                className="w-32"
+                                placeholder="0"
+                                value={formatNumberWithCommas(formData.designStudioAllowance)}
+                                onChange={(e) => handleNumberInputChange(e.target.value, (value) => setFormData({ ...formData, designStudioAllowance: value }))}
                               />
                             </div>
                           </div>
                         </CardContent>
                       </Card>
-                    )}
-                  </div>
-
-                  {/* Design Studio Allowance */}
-                  <Card className="mb-6 bg-purple-50 border-purple-200">
-                    <CardContent className="pt-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">Design Studio Allowance</h3>
-                          <p className="text-sm text-gray-600">Allowance for design studio selections and upgrades</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Label htmlFor="design-studio-allowance" className="text-sm font-medium text-gray-700">Allowance $</Label>
-                          <Input
-                            id="design-studio-allowance"
-                            type="text"
-                            className="w-40 font-semibold"
-                            placeholder="0"
-                            value={formatNumberWithCommas(formData.designStudioAllowance)}
-                            onChange={(e) => handleNumberInputChange(e.target.value, (value) => setFormData({ ...formData, designStudioAllowance: value }))}
-                          />
-                        </div>
-                      </div>
                     </CardContent>
                   </Card>
-                </CardContent>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </Card>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </CardContent>
+          </Card>
 
-        {/* Search and Filter Controls */}
-        <Card className="mb-4">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-4 items-end">
-              <div className="flex-1">
-                <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
-                  Search Upgrades
-                </Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    id="search"
-                    type="text"
-                    placeholder="Search by choice title..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+            {/* Search and Filter Controls */}
+            <Card className="mb-4">
+              <CardContent className="pt-6">
+                <div className="flex flex-col md:flex-row gap-4 items-end">
+                  <div className="flex-1">
+                    <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
+                      Search Upgrades
+                    </Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        id="search"
+                        type="text"
+                        placeholder="Search by choice title..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <div>
+                      <Label htmlFor="category-filter" className="text-sm font-medium text-gray-700 mb-2 block">
+                        Category
+                      </Label>
+                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Filter by category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Categories</SelectItem>
+                          {uniqueCategories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="location-filter" className="text-sm font-medium text-gray-700 mb-2 block">
+                        Location
+                      </Label>
+                      <Select value={locationFilter} onValueChange={setLocationFilter}>
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Filter by location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Locations</SelectItem>
+                          {uniqueLocations.map((location) => (
+                            <SelectItem key={location} value={location}>
+                              {location}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-end">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setSearchTerm("");
+                          setCategoryFilter("all");
+                          setLocationFilter("all");
+                        }}
+                        className="h-10"
+                      >
+                        Clear Filters
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Upgrades Table */}
+            <Card>
+              <CardContent>
+                <UpgradeTable
+                  groupedUpgrades={groupedUpgrades}
+                  selectedUpgrades={selectedUpgrades}
+                  showCostColumns={showCostColumns}
+                  onUpgradeToggle={handleUpgradeToggle}
+                  onSelectAll={handleSelectAll}
+                  onExpandCollapseAll={handleExpandCollapseAll}
+                />
+
+                {/* Order Summary */}
+                {currentTemplate && (
+                  <OrderSummary
+                    basePrice={currentTemplate.basePrice}
+                    baseCost={currentTemplate.baseCost || "0"}
+                    lotPremium={formData.lotPremium}
+                    salesIncentive={formData.salesIncentive}
+                    salesIncentiveEnabled={salesIncentiveEnabled}
+                    designStudioAllowance={formData.designStudioAllowance}
+                    selectedUpgrades={selectedUpgradeItems}
+                    showCostColumns={showCostColumns}
+                    onSaveDraft={handleSaveDraft}
+                    onPreview={handlePreview}
+                    onExportExcel={handleExportExcel}
+                    onGenerateProposal={handleGeneratePO}
                   />
-                </div>
-              </div>
-              
-              <div className="flex gap-4">
-                <div>
-                  <Label htmlFor="category-filter" className="text-sm font-medium text-gray-700 mb-2 block">
-                    Category
-                  </Label>
-                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {uniqueCategories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                )}
 
-                <div>
-                  <Label htmlFor="location-filter" className="text-sm font-medium text-gray-700 mb-2 block">
-                    Location
-                  </Label>
-                  <Select value={locationFilter} onValueChange={setLocationFilter}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Locations</SelectItem>
-                      {uniqueLocations.map((location) => (
-                        <SelectItem key={location} value={location}>
-                          {location}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-            
-            {/* Results count */}
-            <div className="mt-4 text-sm text-gray-600">
-              Showing {filteredUpgrades.length} of {upgrades.length} upgrades
-              {searchTerm && ` matching "${searchTerm}"`}
-              {categoryFilter !== "all" && ` in ${categoryFilter}`}
-              {locationFilter !== "all" && ` at ${locationFilter}`}
-            </div>
+                {/* Cost Toggle Password Dialog */}
+                <CostTogglePassword
+                  isOpen={showPasswordDialog}
+                  onClose={() => setShowPasswordDialog(false)}
+                  onAuthenticated={handleCostAuthenticated}
+                />
           </CardContent>
         </Card>
-
-        {/* Upgrades Table */}
-        <div className="mb-6">
-          <UpgradeTable
-            groupedUpgrades={groupedUpgrades}
-            selectedUpgrades={selectedUpgrades}
-            showCostColumns={showCostColumns}
-            onUpgradeToggle={handleUpgradeToggle}
-            onSelectAll={handleSelectAll}
-          />
-        </div>
-
-        {/* Order Summary */}
-        {currentTemplate && (
-          <OrderSummary
-            basePrice={currentTemplate.basePrice}
-            baseCost={currentTemplate.baseCost || "0"}
-            lotPremium={formData.lotPremium}
-            salesIncentive={formData.salesIncentive}
-            salesIncentiveEnabled={salesIncentiveEnabled}
-            designStudioAllowance={formData.designStudioAllowance}
-            selectedUpgrades={selectedUpgradeItems}
-            showCostColumns={showCostColumns}
-            onSaveDraft={handleSaveDraft}
-            onPreview={handlePreview}
-            onExportExcel={handleExportExcel}
-            onGenerateProposal={handleGeneratePO}
-          />
-        )}
-
-        {/* Cost Toggle Password Dialog */}
-        <CostTogglePassword
-          isOpen={showPasswordDialog}
-          onClose={() => setShowPasswordDialog(false)}
-          onAuthenticated={handleCostAuthenticated}
-        />
       </div>
     </div>
   );
