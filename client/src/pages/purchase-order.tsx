@@ -730,208 +730,35 @@ export default function PurchaseOrder() {
   };
 
   const handleGeneratePO = async () => {
-    if (!currentTemplate) {
-      toast({
-        title: "PDF Generation Failed", 
-        description: "Please select a template.",
-        variant: "destructive"
-      });
-      return;
-    }
+    if (!currentTemplate) return;
+    
+    const proposalData = {
+      templateId: currentTemplate.id,
+      buyerLastName: formData.buyerLastName,
+      community: formData.community,
+      lotNumber: formData.lotNumber,
+      lotAddress: formData.lotAddress,
+      lotPremium: formData.lotPremium,
+      salesIncentive: formData.salesIncentive,
+      designStudioAllowance: formData.designStudioAllowance,
+      selectedUpgrades: Array.from(selectedUpgrades),
+      isDraft: false
+    };
 
     try {
-      // Import jsPDF dynamically
-      const { jsPDF } = await import('jspdf');
-      const doc = new jsPDF();
-      
-      // Page margins and dimensions
-      const margin = 20;
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const maxWidth = pageWidth - (margin * 2);
-      let yPosition = margin;
-      
-      // Helper function to add text with automatic page breaks
-      const addText = (text: string, x: number, y: number, options: any = {}) => {
-        if (y > pageHeight - 30) {
-          doc.addPage();
-          yPosition = margin;
-          y = yPosition;
-        }
-        doc.text(text, x, y, options);
-        return y;
-      };
-      
-      // Title
-      doc.setFontSize(18);
-      doc.setFont('helvetica', 'bold');
-      yPosition = addText('HOME PROPOSAL', margin, yPosition);
-      yPosition += 10;
-      
-      // Date
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      yPosition = addText(`Date: ${formData.todaysDate}`, margin, yPosition);
-      yPosition += 15;
-      
-      // Customer Information Section
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      yPosition = addText('CUSTOMER INFORMATION', margin, yPosition);
-      yPosition += 8;
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      yPosition = addText(`Buyer: ${formData.buyerLastName}`, margin, yPosition);
-      yPosition += 5;
-      yPosition = addText(`Community: ${formData.community}`, margin, yPosition);
-      yPosition += 5;
-      yPosition = addText(`Lot Number: ${formData.lotNumber}`, margin, yPosition);
-      yPosition += 5;
-      yPosition = addText(`Lot Address: ${formData.lotAddress}`, margin, yPosition);
-      yPosition += 15;
-      
-      // Home Template Section
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      yPosition = addText('HOME TEMPLATE', margin, yPosition);
-      yPosition += 8;
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      yPosition = addText(`Model: ${currentTemplate.name}`, margin, yPosition);
-      yPosition += 15;
-      
-      // Pricing Breakdown Section
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      yPosition = addText('PRICING BREAKDOWN', margin, yPosition);
-      yPosition += 8;
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      
-      // Base pricing items
-      const baseItems = [
-        [`${currentTemplate.name} Base Price`, currentTemplate.basePrice],
-        ['Lot Premium', formData.lotPremium || "0"],
-        ['Design Studio Allowance', formData.designStudioAllowance || "0"]
-      ];
-      
-      // Add Sales Incentive if enabled
-      if (salesIncentiveEnabled && formData.salesIncentive !== '0') {
-        baseItems.push(['Sales Incentive', formData.salesIncentive]);
-      }
-      
-      baseItems.forEach(([label, amount]) => {
-        yPosition = addText(label, margin, yPosition);
-        yPosition = addText(`$${parseInt(amount).toLocaleString()}`, pageWidth - margin - 50, yPosition - 5);
-        yPosition += 5;
+      await apiRequest('/api/proposals', {
+        method: 'POST',
+        body: JSON.stringify(proposalData)
       });
       
-      yPosition += 5;
-      
-      // Selected Upgrades Section
-      if (selectedUpgradeItems.length > 0) {
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        yPosition = addText('SELECTED UPGRADES', margin, yPosition);
-        yPosition += 8;
-        
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        
-        const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
-        
-        Object.entries(groupedUpgrades).forEach(([category, locations]) => {
-          // Category header
-          doc.setFont('helvetica', 'bold');
-          yPosition = addText(category, margin, yPosition);
-          yPosition += 5;
-          
-          Object.entries(locations).forEach(([location, parentSelections]) => {
-            // Location header
-            doc.setFont('helvetica', 'normal');
-            yPosition = addText(`  ${location}`, margin, yPosition);
-            yPosition += 5;
-            
-            Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
-              upgrades.forEach((upgrade) => {
-                const upgradeText = `    ${upgrade.choiceTitle}`;
-                const priceText = `$${parseInt(upgrade.clientPrice).toLocaleString()}`;
-                
-                // Check if text fits on current line
-                if (yPosition > pageHeight - 30) {
-                  doc.addPage();
-                  yPosition = margin;
-                }
-                
-                doc.text(upgradeText, margin, yPosition);
-                doc.text(priceText, pageWidth - margin - 50, yPosition);
-                yPosition += 5;
-              });
-            });
-          });
-          yPosition += 5;
-        });
-      }
-      
-      yPosition += 10;
-      
-      // Summary Section
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      yPosition = addText('TOTAL SUMMARY', margin, yPosition);
-      yPosition += 8;
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      
-      // Base Subtotal
-      const baseSubtotal = parseInt(currentTemplate.basePrice) + parseInt(formData.lotPremium || "0") + parseInt(formData.designStudioAllowance || "0") + (salesIncentiveEnabled ? parseInt(formData.salesIncentive || "0") : 0);
-      yPosition = addText('Base Subtotal:', margin, yPosition);
-      yPosition = addText(`$${baseSubtotal.toLocaleString()}`, pageWidth - margin - 50, yPosition - 5);
-      yPosition += 5;
-      
-      // Upgrades Subtotal
-      const upgradesSubtotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseInt(upgrade.clientPrice), 0);
-      yPosition = addText('Upgrades Subtotal:', margin, yPosition);
-      yPosition = addText(`$${upgradesSubtotal.toLocaleString()}`, pageWidth - margin - 50, yPosition - 5);
-      yPosition += 5;
-      
-      // Grand Total
-      const grandTotal = baseSubtotal + upgradesSubtotal;
-      doc.setFontSize(12);
-      yPosition = addText('GRAND TOTAL:', margin, yPosition);
-      yPosition = addText(`$${grandTotal.toLocaleString()}`, pageWidth - margin - 50, yPosition - 5);
-      yPosition += 20;
-      
-      // Signature Section
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'italic');
-      yPosition = addText('By signing below, both parties agree to the terms and total amount shown above.', margin, yPosition);
-      yPosition += 15;
-      
-      doc.setFont('helvetica', 'normal');
-      yPosition = addText('Customer Signature: ____________________________', margin, yPosition);
-      yPosition += 10;
-      yPosition = addText('Date: ___________', margin, yPosition);
-      yPosition += 15;
-      yPosition = addText('Sales Representative: ____________________________', margin, yPosition);
-      yPosition += 10;
-      yPosition = addText('Date: ___________', margin, yPosition);
-      
-      // Save the PDF
-      doc.save(`${formData.buyerLastName || 'Customer'}_Proposal_${new Date().toISOString().split('T')[0]}.pdf`);
-      
       toast({
-        title: "PDF Generated",
-        description: "Proposal PDF has been generated successfully.",
+        title: "Proposal Generated",
+        description: "Your proposal has been generated successfully.",
       });
     } catch (error) {
       toast({
-        title: "PDF Generation Failed",
-        description: "Failed to generate PDF. Please try again.",
+        title: "Generation Failed",
+        description: "Failed to generate proposal. Please try again.",
         variant: "destructive"
       });
     }
