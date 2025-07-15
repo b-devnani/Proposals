@@ -930,10 +930,19 @@ export default function PurchaseOrder() {
                             </div>
                           </div>
 
-                          {/* Additional Pricing Fields */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                        </CardContent>
+                      </Card>
+
+                      {/* Lot Premium */}
+                      <Card className="mb-4 bg-white border-gray-200">
+                        <CardContent className="pt-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="text-md font-medium text-gray-900">Lot Premium</h4>
+                              <p className="text-sm text-gray-600">Additional cost for lot location</p>
+                            </div>
                             <div className="flex items-center space-x-2">
-                              <Label htmlFor="lot-premium" className="text-sm font-medium text-gray-700">Lot Premium $</Label>
+                              <Label htmlFor="lot-premium" className="text-sm font-medium text-gray-700">Amount $</Label>
                               <Input
                                 id="lot-premium"
                                 type="text"
@@ -943,9 +952,20 @@ export default function PurchaseOrder() {
                                 onChange={(e) => handleNumberInputChange(e.target.value, (value) => setFormData({ ...formData, lotPremium: value }))}
                               />
                             </div>
-                            
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Sales Incentive */}
+                      <Card className="mb-4 bg-white border-gray-200">
+                        <CardContent className="pt-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="text-md font-medium text-gray-900">Sales Incentive</h4>
+                              <p className="text-sm text-gray-600">Promotional discount or credit</p>
+                            </div>
                             <div className="flex items-center space-x-2">
-                              <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Sales Incentive $</Label>
+                              <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Amount $</Label>
                               <Input
                                 id="sales-incentive"
                                 type="text"
@@ -960,9 +980,20 @@ export default function PurchaseOrder() {
                                 }}
                               />
                             </div>
-                            
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Design Studio Allowance */}
+                      <Card className="mb-4 bg-white border-gray-200">
+                        <CardContent className="pt-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="text-md font-medium text-gray-900">Design Studio Allowance</h4>
+                              <p className="text-sm text-gray-600">Credit for design studio selections</p>
+                            </div>
                             <div className="flex items-center space-x-2">
-                              <Label htmlFor="design-studio-allowance" className="text-sm font-medium text-gray-700">Design Studio Allowance $</Label>
+                              <Label htmlFor="design-studio-allowance" className="text-sm font-medium text-gray-700">Amount $</Label>
                               <Input
                                 id="design-studio-allowance"
                                 type="text"
