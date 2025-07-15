@@ -1009,7 +1009,7 @@ export default function PurchaseOrder() {
                           }}
                           title="Click to add sales incentive"
                         >
-                          <div className="opacity-30 group-hover:opacity-60 transition-opacity duration-200 text-xs text-gray-400 select-none">
+                          <div className="opacity-60 group-hover:opacity-90 transition-opacity duration-200 text-lg text-gray-600 select-none font-bold">
                             ···
                           </div>
                         </div>
