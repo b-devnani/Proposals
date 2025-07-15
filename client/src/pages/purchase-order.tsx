@@ -311,15 +311,15 @@ export default function PurchaseOrder() {
 
     // Set optimal column widths for readability
     worksheet.columns = [
-      { width: 30 }, // A - Description/Option
-      { width: 5 },  // B - Spacer
-      { width: 5 },  // C - Spacer
-      { width: 5 },  // D - Spacer
-      { width: 5 },  // E - Spacer
-      { width: 5 },  // F - Spacer
-      { width: 5 },  // G - Spacer
-      { width: 5 },  // H - Spacer
-      { width: 15 }  // I - Amount
+      { width: 50 }, // A - Description/Label
+      { width: 20 }, // B - Value/Amount
+      { width: 10 }, // C - Spacer
+      { width: 10 }, // D - Spacer
+      { width: 10 }, // E - Spacer
+      { width: 10 }, // F - Spacer
+      { width: 10 }, // G - Spacer
+      { width: 10 }, // H - Spacer
+      { width: 15 }  // I - Secondary Amount
     ];
     
     // Modern Header Design
@@ -329,9 +329,8 @@ export default function PurchaseOrder() {
     headerCell.value = 'HOME CONSTRUCTION PROPOSAL';
     headerCell.font = { name: 'Calibri', bold: true, size: 18, color: { argb: 'FFFFFFFF' } };
     headerCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
-    headerCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerCell.alignment = { horizontal: 'left', vertical: 'middle' };
     headerCell.border = { top: {style:'medium'}, left: {style:'medium'}, bottom: {style:'medium'}, right: {style:'medium'} };
-    worksheet.mergeCells('A1:I1');
     
     // Company Information
     const companyRow = worksheet.getRow(2);
@@ -340,8 +339,7 @@ export default function PurchaseOrder() {
     companyCell.value = 'BEECHEN & DILL HOMES';
     companyCell.font = { name: 'Calibri', bold: true, size: 14, color: { argb: 'FF2E5C8A' } };
     companyCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8F9FA' } };
-    companyCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.mergeCells('A2:I2');
+    companyCell.alignment = { horizontal: 'left', vertical: 'middle' };
     
     // Contact Information
     const contactRow = worksheet.getRow(3);
@@ -349,8 +347,7 @@ export default function PurchaseOrder() {
     const contactCell = worksheet.getCell('A3');
     contactCell.value = '565 Village Center Dr • Burr Ridge, IL 60527-4516 • Phone: (630) 920-9430';
     contactCell.font = { name: 'Calibri', size: 10, color: { argb: 'FF666666' } };
-    contactCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.mergeCells('A3:I3');
+    contactCell.alignment = { horizontal: 'left', vertical: 'middle' };
     
     // Spacer
     worksheet.getRow(4).height = 15;
@@ -362,9 +359,8 @@ export default function PurchaseOrder() {
     customerHeaderCell.value = 'CUSTOMER INFORMATION';
     customerHeaderCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
     customerHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
-    customerHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    customerHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
     customerHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    worksheet.mergeCells('A5:I5');
     
     // Customer details with clean layout
     const customerDetails = [
@@ -387,14 +383,12 @@ export default function PurchaseOrder() {
       labelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } };
       labelCell.alignment = { horizontal: 'left', vertical: 'middle' };
       labelCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-      worksheet.mergeCells(`A${currentRow}:E${currentRow}`);
       
-      const valueCell = worksheet.getCell(`F${currentRow}`);
+      const valueCell = worksheet.getCell(`B${currentRow}`);
       valueCell.value = value;
       valueCell.font = { name: 'Calibri', size: 10 };
       valueCell.alignment = { horizontal: 'left', vertical: 'middle' };
       valueCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-      worksheet.mergeCells(`F${currentRow}:I${currentRow}`);
       
       currentRow++;
     });
@@ -409,9 +403,8 @@ export default function PurchaseOrder() {
     pricingHeaderCell.value = 'PRICING BREAKDOWN';
     pricingHeaderCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
     pricingHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
-    pricingHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    pricingHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
     pricingHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
     
     currentRow++;
     
@@ -437,9 +430,8 @@ export default function PurchaseOrder() {
       labelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F4FD' } };
       labelCell.alignment = { horizontal: 'left', vertical: 'middle' };
       labelCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-      worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
       
-      const amountCell = worksheet.getCell(`I${currentRow}`);
+      const amountCell = worksheet.getCell(`B${currentRow}`);
       amountCell.value = parseInt(amount);
       amountCell.numFmt = '"$"#,##0';
       amountCell.font = { name: 'Calibri', bold: true, size: 11 };
@@ -460,9 +452,8 @@ export default function PurchaseOrder() {
     upgradesHeaderCell.value = 'SELECTED UPGRADES';
     upgradesHeaderCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
     upgradesHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
-    upgradesHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    upgradesHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
     upgradesHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
     
     currentRow++;
     
@@ -474,15 +465,14 @@ export default function PurchaseOrder() {
     optionHeaderCell.value = 'Upgrade Description';
     optionHeaderCell.font = { name: 'Calibri', bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
     optionHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
-    optionHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    optionHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
     optionHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
     
-    const priceHeaderCell = worksheet.getCell(`I${currentRow}`);
+    const priceHeaderCell = worksheet.getCell(`B${currentRow}`);
     priceHeaderCell.value = 'Price';
     priceHeaderCell.font = { name: 'Calibri', bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
     priceHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
-    priceHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    priceHeaderCell.alignment = { horizontal: 'right', vertical: 'middle' };
     priceHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     
     currentRow++;
@@ -499,9 +489,8 @@ export default function PurchaseOrder() {
       categoryCell.value = category.toUpperCase();
       categoryCell.font = { name: 'Calibri', bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
       categoryCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
-      categoryCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      categoryCell.alignment = { horizontal: 'left', vertical: 'middle' };
       categoryCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-      worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
       
       currentRow++;
       
@@ -523,10 +512,9 @@ export default function PurchaseOrder() {
             descCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
             descCell.alignment = { horizontal: 'left', vertical: 'middle' };
             descCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-            worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
             
             // Price
-            const priceCell = worksheet.getCell(`I${currentRow}`);
+            const priceCell = worksheet.getCell(`B${currentRow}`);
             priceCell.value = parseInt(upgrade.clientPrice);
             priceCell.numFmt = '"$"#,##0';
             priceCell.font = { name: 'Calibri', size: 10 };
@@ -550,9 +538,8 @@ export default function PurchaseOrder() {
     summaryHeaderCell.value = 'TOTAL SUMMARY';
     summaryHeaderCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
     summaryHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
-    summaryHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    summaryHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
     summaryHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
     
     currentRow++;
     
@@ -565,9 +552,8 @@ export default function PurchaseOrder() {
     baseSubtotalLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } };
     baseSubtotalLabel.alignment = { horizontal: 'right', vertical: 'middle' };
     baseSubtotalLabel.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
     
-    const baseSubtotalValue = worksheet.getCell(`I${currentRow}`);
+    const baseSubtotalValue = worksheet.getCell(`B${currentRow}`);
     const baseSubtotal = parseInt(currentTemplate.basePrice) + parseInt(formData.lotPremium || "0") + parseInt(formData.designStudioAllowance || "0") + (salesIncentiveEnabled ? parseInt(formData.salesIncentive || "0") : 0);
     baseSubtotalValue.value = baseSubtotal;
     baseSubtotalValue.numFmt = '"$"#,##0';
@@ -587,9 +573,8 @@ export default function PurchaseOrder() {
     upgradesSubtotalLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } };
     upgradesSubtotalLabel.alignment = { horizontal: 'right', vertical: 'middle' };
     upgradesSubtotalLabel.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
     
-    const upgradesSubtotalValue = worksheet.getCell(`I${currentRow}`);
+    const upgradesSubtotalValue = worksheet.getCell(`B${currentRow}`);
     const upgradesSubtotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseInt(upgrade.clientPrice), 0);
     upgradesSubtotalValue.value = upgradesSubtotal;
     upgradesSubtotalValue.numFmt = '"$"#,##0';
@@ -609,9 +594,8 @@ export default function PurchaseOrder() {
     grandTotalLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
     grandTotalLabel.alignment = { horizontal: 'right', vertical: 'middle' };
     grandTotalLabel.border = { top: {style:'medium'}, left: {style:'medium'}, bottom: {style:'medium'}, right: {style:'medium'} };
-    worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
     
-    const grandTotalValue = worksheet.getCell(`I${currentRow}`);
+    const grandTotalValue = worksheet.getCell(`B${currentRow}`);
     const grandTotal = baseSubtotal + upgradesSubtotal;
     grandTotalValue.value = grandTotal;
     grandTotalValue.numFmt = '"$"#,##0';
@@ -629,7 +613,6 @@ export default function PurchaseOrder() {
     signatureCell.value = 'By signing below, both parties agree to the terms and total amount shown above.';
     signatureCell.font = { name: 'Calibri', size: 10, italic: true };
     signatureCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
     
     currentRow += 2;
     
@@ -640,24 +623,26 @@ export default function PurchaseOrder() {
     customerSigLabel.value = 'Customer Signature:';
     customerSigLabel.font = { name: 'Calibri', bold: true, size: 10 };
     customerSigLabel.alignment = { horizontal: 'left', vertical: 'middle' };
-    worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
     
-    const customerSigLine = worksheet.getCell(`D${currentRow}`);
+    const customerSigLine = worksheet.getCell(`B${currentRow}`);
     customerSigLine.value = '____________________________';
     customerSigLine.font = { name: 'Calibri', size: 10 };
     customerSigLine.alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.mergeCells(`D${currentRow}:F${currentRow}`);
     
-    const customerDateLabel = worksheet.getCell(`G${currentRow}`);
+    currentRow += 2;
+    
+    // Customer Date Line
+    const customerDateRow = worksheet.getRow(currentRow);
+    customerDateRow.height = 25;
+    const customerDateLabel = worksheet.getCell(`A${currentRow}`);
     customerDateLabel.value = 'Date:';
     customerDateLabel.font = { name: 'Calibri', bold: true, size: 10 };
     customerDateLabel.alignment = { horizontal: 'left', vertical: 'middle' };
     
-    const customerDateLine = worksheet.getCell(`H${currentRow}`);
+    const customerDateLine = worksheet.getCell(`B${currentRow}`);
     customerDateLine.value = '___________';
     customerDateLine.font = { name: 'Calibri', size: 10 };
     customerDateLine.alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.mergeCells(`H${currentRow}:I${currentRow}`);
     
     currentRow += 2;
     
@@ -668,24 +653,26 @@ export default function PurchaseOrder() {
     salesSigLabel.value = 'Sales Representative:';
     salesSigLabel.font = { name: 'Calibri', bold: true, size: 10 };
     salesSigLabel.alignment = { horizontal: 'left', vertical: 'middle' };
-    worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
     
-    const salesSigLine = worksheet.getCell(`D${currentRow}`);
+    const salesSigLine = worksheet.getCell(`B${currentRow}`);
     salesSigLine.value = '____________________________';
     salesSigLine.font = { name: 'Calibri', size: 10 };
     salesSigLine.alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.mergeCells(`D${currentRow}:F${currentRow}`);
     
-    const salesDateLabel = worksheet.getCell(`G${currentRow}`);
+    currentRow += 2;
+    
+    // Sales Representative Date Line
+    const salesDateRow = worksheet.getRow(currentRow);
+    salesDateRow.height = 25;
+    const salesDateLabel = worksheet.getCell(`A${currentRow}`);
     salesDateLabel.value = 'Date:';
     salesDateLabel.font = { name: 'Calibri', bold: true, size: 10 };
     salesDateLabel.alignment = { horizontal: 'left', vertical: 'middle' };
     
-    const salesDateLine = worksheet.getCell(`H${currentRow}`);
+    const salesDateLine = worksheet.getCell(`B${currentRow}`);
     salesDateLine.value = '___________';
     salesDateLine.font = { name: 'Calibri', size: 10 };
     salesDateLine.alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.mergeCells(`H${currentRow}:I${currentRow}`);
     
     // Save the workbook
     workbook.xlsx.writeBuffer().then((buffer) => {
