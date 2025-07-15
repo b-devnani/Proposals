@@ -149,37 +149,73 @@ export default function PurchaseOrder() {
   };
 
   const handleUpgradeToggle = (upgradeId: number) => {
+    const upgrade = upgrades.find(u => u.id === upgradeId);
+    if (!upgrade) return;
+    
     const newSelected = new Set(selectedUpgrades);
+    
     if (newSelected.has(upgradeId)) {
+      // If already selected, just remove it
       newSelected.delete(upgradeId);
     } else {
+      // If not selected, first remove any other selections from the same parent selection group
+      const sameParentSelectionUpgrades = upgrades.filter(u => 
+        u.category === upgrade.category && 
+        u.location === upgrade.location && 
+        u.parentSelection === upgrade.parentSelection
+      );
+      
+      // Remove all other selections from the same parent selection group
+      sameParentSelectionUpgrades.forEach(u => {
+        if (u.id !== upgradeId) {
+          newSelected.delete(u.id);
+        }
+      });
+      
+      // Add the new selection
       newSelected.add(upgradeId);
     }
+    
     setSelectedUpgrades(newSelected);
   };
 
   const handleSelectAll = (category: string, location: string, parentSelection?: string) => {
-    let upgradesToToggle: Upgrade[] = [];
+    const newSelected = new Set(selectedUpgrades);
     
     if (parentSelection) {
-      // Select all upgrades in a specific parent selection
-      upgradesToToggle = groupedUpgrades[category]?.[location]?.[parentSelection] || [];
+      // For parent selection groups, only allow one selection at a time
+      // So "select all" doesn't make sense - we'll clear all selections in this group
+      const upgradesToClear = groupedUpgrades[category]?.[location]?.[parentSelection] || [];
+      upgradesToClear.forEach(upgrade => {
+        newSelected.delete(upgrade.id);
+      });
     } else {
-      // Select all upgrades in a location (all parent selections)
+      // For location-level "select all", select one item from each parent selection group
       const locationData = groupedUpgrades[category]?.[location] || {};
-      upgradesToToggle = Object.values(locationData).flat();
+      
+      // Check if we have any selections in this location
+      const hasAnySelection = Object.values(locationData).some(parentUpgrades => 
+        parentUpgrades.some(upgrade => selectedUpgrades.has(upgrade.id))
+      );
+      
+      if (hasAnySelection) {
+        // If we have selections, clear all selections in this location
+        Object.values(locationData).forEach(parentUpgrades => {
+          parentUpgrades.forEach(upgrade => {
+            newSelected.delete(upgrade.id);
+          });
+        });
+      } else {
+        // If no selections, select the first item from each parent selection group
+        Object.values(locationData).forEach(parentUpgrades => {
+          if (parentUpgrades.length > 0) {
+            // Select the first upgrade in each parent selection group
+            newSelected.add(parentUpgrades[0].id);
+          }
+        });
+      }
     }
     
-    const allSelected = upgradesToToggle.every(upgrade => selectedUpgrades.has(upgrade.id));
-    
-    const newSelected = new Set(selectedUpgrades);
-    upgradesToToggle.forEach(upgrade => {
-      if (allSelected) {
-        newSelected.delete(upgrade.id);
-      } else {
-        newSelected.add(upgrade.id);
-      }
-    });
     setSelectedUpgrades(newSelected);
   };
 
