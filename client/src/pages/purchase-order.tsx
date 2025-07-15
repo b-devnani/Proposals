@@ -189,110 +189,7 @@ export default function PurchaseOrder() {
     console.log(`${isExpanded ? 'Expanding' : 'Collapsing'} all categories`);
   };
 
-  const handlePreview = () => {
-    // Create a preview window with the purchase order details
-    const orderData = {
-      template: currentTemplate,
-      buyer: {
-        lastName: formData.buyerLastName,
-      },
-      community: formData.community,
-      lot: {
-        address: formData.lotAddress,
-        premium: formData.lotPremium || "0",
-      },
-      upgrades: selectedUpgradeItems,
-      totals: {
-        basePrice: currentTemplate?.basePrice || "0",
-        lotPremium: formData.lotPremium || "0",
-        upgradesTotal: selectedUpgradeItems.reduce((sum, upgrade) => sum + parseInt(upgrade.clientPrice), 0),
-        grandTotal: parseInt(currentTemplate?.basePrice || "0") + 
-                   parseInt(formData.lotPremium || "0") + 
-                   selectedUpgradeItems.reduce((sum, upgrade) => sum + parseInt(upgrade.clientPrice), 0)
-      }
-    };
 
-    // Open preview in new window
-    const previewWindow = window.open('', '_blank', 'width=800,height=600');
-    if (previewWindow) {
-      previewWindow.document.write(`
-        <html>
-          <head>
-            <title>Purchase Order Preview</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; }
-              .header { text-align: center; margin-bottom: 30px; }
-              .section { margin-bottom: 20px; }
-              .section h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-              .row { display: flex; justify-content: space-between; margin: 5px 0; }
-              .total { font-weight: bold; font-size: 1.2em; }
-              table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-              th { background-color: #f2f2f2; }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h1>Purchase Order Preview</h1>
-              <p>Date: ${formData.todaysDate}</p>
-            </div>
-            
-            <div class="section">
-              <h3>Buyer Information</h3>
-              <div class="row"><span>Name:</span><span>${orderData.buyer.lastName}</span></div>
-              <div class="row"><span>Community:</span><span>${orderData.community}</span></div>
-              <div class="row"><span>Lot Address:</span><span>${orderData.lot.address}</span></div>
-            </div>
-
-            <div class="section">
-              <h3>Home Template</h3>
-              <div class="row"><span>Model:</span><span>${orderData.template?.name}</span></div>
-              <div class="row"><span>Base Price:</span><span>$${parseInt(orderData.totals.basePrice).toLocaleString()}</span></div>
-              <div class="row"><span>Lot Premium:</span><span>$${parseInt(orderData.lot.premium).toLocaleString()}</span></div>
-            </div>
-
-            <div class="section">
-              <h3>Selected Upgrades</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Choice Title</th>
-                    <th>Category</th>
-                    <th>Location</th>
-                    <th>Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${orderData.upgrades.map(upgrade => `
-                    <tr>
-                      <td>${upgrade.choiceTitle}</td>
-                      <td>${upgrade.category}</td>
-                      <td>${upgrade.location}</td>
-                      <td>$${parseInt(upgrade.clientPrice).toLocaleString()}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-
-            <div class="section">
-              <h3>Total Summary</h3>
-              <div class="row"><span>Base Price:</span><span>$${parseInt(orderData.totals.basePrice).toLocaleString()}</span></div>
-              <div class="row"><span>Lot Premium:</span><span>$${parseInt(orderData.lot.premium).toLocaleString()}</span></div>
-              <div class="row"><span>Upgrades Total:</span><span>$${orderData.totals.upgradesTotal.toLocaleString()}</span></div>
-              <div class="row total"><span>Grand Total:</span><span>$${orderData.totals.grandTotal.toLocaleString()}</span></div>
-            </div>
-          </body>
-        </html>
-      `);
-      previewWindow.document.close();
-    }
-
-    toast({
-      title: "Preview Generated",
-      description: "Proposal preview opened in new window.",
-    });
-  };
 
   const handleExportExcel = async () => {
     if (!currentTemplate) {
@@ -1268,7 +1165,6 @@ export default function PurchaseOrder() {
                     selectedUpgrades={selectedUpgradeItems}
                     showCostColumns={showCostColumns}
                     onSaveDraft={handleSaveDraft}
-                    onPreview={handlePreview}
                     onExportExcel={handleExportExcel}
                     onGenerateProposal={handleGeneratePO}
                   />

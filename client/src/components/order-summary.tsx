@@ -1,4 +1,4 @@
-import { Save, Eye, FileText, Download } from "lucide-react";
+import { Save, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/lib/upgrade-data";
@@ -14,7 +14,6 @@ interface OrderSummaryProps {
   selectedUpgrades: Upgrade[];
   showCostColumns: boolean;
   onSaveDraft: () => void;
-  onPreview: () => void;
   onGenerateProposal: () => void;
   onExportExcel: () => void;
 }
@@ -29,7 +28,6 @@ export function OrderSummary({
   selectedUpgrades,
   showCostColumns,
   onSaveDraft,
-  onPreview,
   onGenerateProposal,
   onExportExcel,
 }: OrderSummaryProps) {
@@ -162,10 +160,6 @@ export function OrderSummary({
             <Button variant="outline" size="sm" onClick={onSaveDraft}>
               <Save className="w-3 h-3 mr-1" />
               Save Draft
-            </Button>
-            <Button variant="secondary" size="sm" onClick={onPreview}>
-              <Eye className="w-3 h-3 mr-1" />
-              Preview
             </Button>
             <Button variant="outline" size="sm" onClick={onExportExcel}>
               <Download className="w-3 h-3 mr-1" />
