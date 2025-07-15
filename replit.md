@@ -104,6 +104,11 @@ Three main entities:
 - July 06, 2025. Fixed Excel formatting issue by replacing XLSX library with ExcelJS for proper styling support
 - July 06, 2025. Successfully implemented blue headers, gray labels, currency formatting, and professional Excel styling
 - July 11, 2025. Completed comprehensive rename from "Purchase Order Generator" to "Proposal Generator" across entire application including UI text, API endpoints, function names, file exports, and documentation
+- July 15, 2025. Implemented sneaky Sales Incentive toggle with subtle "SA" indicator for sales staff discretion
+- July 15, 2025. Restructured Order Summary to three-column layout with Base Subtotal, Upgrades Subtotal, and Grand Total
+- July 15, 2025. Replaced placeholder data with actual Sorrento selections from Excel file (31,599 upgrade options)
+- July 15, 2025. Created dynamic Excel import system for weekly data updates - supports Sorrento, Ravello, and Verona templates
+- July 15, 2025. Added Excel validation script and caching system for efficient data loading
 
 ## User Preferences
 

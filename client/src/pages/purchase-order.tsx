@@ -24,7 +24,7 @@ export default function PurchaseOrder() {
   const queryClient = useQueryClient();
   
   // State
-  const [activeTemplate, setActiveTemplate] = useState<string>("1"); // Ravello ID
+  const [activeTemplate, setActiveTemplate] = useState<string>("2"); // Sorrento ID (now has real data)
   const [showCostColumns, setShowCostColumns] = useState(true);
   const [selectedUpgrades, setSelectedUpgrades] = useState<Set<number>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,8 +50,21 @@ export default function PurchaseOrder() {
     queryKey: ["/api/templates"],
   });
 
+  // Get current template
+  const currentTemplate = templates.find(t => t.id.toString() === activeTemplate);
+
   const { data: upgrades = [], isLoading: upgradesLoading } = useQuery<Upgrade[]>({
-    queryKey: ["/api/upgrades"],
+    queryKey: ["/api/upgrades", currentTemplate?.name || ""],
+    queryFn: async () => {
+      const templateName = currentTemplate?.name || "";
+      const url = templateName ? `/api/upgrades?template=${templateName}` : "/api/upgrades";
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch upgrades");
+      }
+      return response.json();
+    },
+    enabled: !!currentTemplate,
   });
 
   // Mutations
@@ -79,9 +92,6 @@ export default function PurchaseOrder() {
       });
     },
   });
-
-  // Get current template
-  const currentTemplate = templates.find(t => t.id.toString() === activeTemplate);
   
   // Process upgrades with search and filters
   const filteredUpgrades = upgrades.filter(upgrade => {
@@ -112,6 +122,12 @@ export default function PurchaseOrder() {
   const handleTemplateChange = (templateId: string) => {
     setActiveTemplate(templateId);
     setSelectedUpgrades(new Set()); // Reset selections when switching templates
+    
+    // Invalidate upgrades query to fetch new template data
+    const newTemplate = templates.find(t => t.id.toString() === templateId);
+    if (newTemplate) {
+      queryClient.invalidateQueries({ queryKey: ["/api/upgrades", newTemplate.name] });
+    }
   };
 
   const handleBasePriceUpdate = (price: string) => {

@@ -44,8 +44,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Upgrades
   app.get("/api/upgrades", async (req, res) => {
     try {
-      const upgrades = await storage.getUpgrades();
-      res.json(upgrades);
+      const template = req.query.template as string;
+      if (template) {
+        const upgrades = await storage.getUpgradesByTemplate(template);
+        res.json(upgrades);
+      } else {
+        const upgrades = await storage.getUpgrades();
+        res.json(upgrades);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch upgrades" });
     }
