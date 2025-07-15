@@ -112,6 +112,7 @@ Three main entities:
 - July 15, 2025. Implemented expand all/collapse all functionality with categories expanded by default and collapse only affecting locations
 - July 15, 2025. Added custom category sorting order: Structural Options, Flooring, Cabinetry Options, Countertops, Plumbing Trim, Plumbing Options, HVAC Options, Electrical, Light Fixtures, Smart Home, Fireplace, Millwork, Interior Trim, Appliances, Paint, Roofing, Mirrors/Medicine Cabinets & Accessories
 - July 15, 2025. Added custom location sorting order: 01 - Elevations, 02 - Backyard, Main Living Area, Family Room, Kitchen, Owner's Bath, Bath 2, Owner's Suite, Bedroom 2, Dining Room, Bedroom 3, Laundry Room, Mudroom, Foyer, Whole House, Unassigned, Garage, Basement
+- July 15, 2025. Added password protection to website access - requires password "7879" to enter application, with localStorage persistence for user session
 
 ## User Preferences
 
