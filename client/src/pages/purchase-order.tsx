@@ -957,38 +957,27 @@ export default function PurchaseOrder() {
                         </CardContent>
                       </Card>
 
-                      {/* Sales Incentive */}
-                      <Card className="mb-4 bg-white border-gray-200">
-                        <CardContent className="pt-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <h4 className="text-md font-medium text-gray-900">Sales Incentive</h4>
-                              {salesIncentiveEnabled && (
+                      {/* Sales Incentive - Hidden by default */}
+                      {salesIncentiveEnabled ? (
+                        <Card className="mb-4 bg-white border-gray-200">
+                          <CardContent className="pt-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <h4 className="text-md font-medium text-gray-900">Sales Incentive</h4>
                                 <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">SA</span>
-                              )}
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  if (salesIncentiveEnabled) {
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
                                     setFormData({ ...formData, salesIncentive: "0" });
                                     setSalesIncentiveEnabled(false);
-                                  } else {
-                                    setFormData({ ...formData, salesIncentive: "-0" });
-                                    setSalesIncentiveEnabled(true);
-                                  }
-                                }}
-                                className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
-                              >
-                                {salesIncentiveEnabled ? (
+                                  }}
+                                  className="h-5 w-5 p-0 text-gray-400 hover:text-gray-600"
+                                >
                                   <Minus className="h-3 w-3" />
-                                ) : (
-                                  <Plus className="h-3 w-3" />
-                                )}
-                              </Button>
-                            </div>
-                            {salesIncentiveEnabled && (
+                                </Button>
+                              </div>
                               <div className="flex items-center space-x-2">
                                 <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Amount $</Label>
                                 <Input
@@ -1007,13 +996,24 @@ export default function PurchaseOrder() {
                                   }}
                                 />
                               </div>
-                            )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        // Ultra-subtle activation area - looks like empty space
+                        <div 
+                          className="mb-4 h-3 cursor-pointer group"
+                          onClick={() => {
+                            setFormData({ ...formData, salesIncentive: "-0" });
+                            setSalesIncentiveEnabled(true);
+                          }}
+                          title="Click to add sales incentive"
+                        >
+                          <div className="opacity-0 group-hover:opacity-20 transition-opacity duration-300 text-xs text-gray-400 text-center">
+                            ···
                           </div>
-                          {!salesIncentiveEnabled && (
-                            <p className="text-sm text-gray-600 mt-1">Promotional discount (negative amount)</p>
-                          )}
-                        </CardContent>
-                      </Card>
+                        </div>
+                      )}
 
                       {/* Design Studio Allowance */}
                       <Card className="mb-4 bg-white border-gray-200">
