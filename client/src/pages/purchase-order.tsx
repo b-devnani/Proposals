@@ -730,6 +730,151 @@ export default function PurchaseOrder() {
     }
   };
 
+  const generatePDF = async () => {
+    if (!currentTemplate) return;
+    
+    const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
+    const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
+    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal;
+    
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("HOME CONSTRUCTION PROPOSAL", 20, 20);
+    
+    // Customer Information
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("CUSTOMER INFORMATION", 20, 40);
+    
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    const customerInfo = [
+      `Date: ${new Date().toLocaleDateString()}`,
+      `Customer Name: ${formData.buyerLastName || 'Not specified'}`,
+      `Community: ${formData.community || 'Not specified'}`,
+      `Lot Number: ${formData.lotNumber || 'TBD'}`,
+      `Lot Address: ${formData.lotAddress || 'TBD'}`,
+      `Home Plan: ${currentTemplate.name}`
+    ];
+    
+    let yPos = 50;
+    customerInfo.forEach(info => {
+      doc.text(info, 20, yPos);
+      yPos += 8;
+    });
+    
+    // Base Pricing
+    yPos += 10;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("BASE PRICING", 20, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    const basePricing = [
+      [`Base Price:`, `$${parseInt(currentTemplate.basePrice).toLocaleString()}`],
+      [`Lot Premium:`, `$${parseInt(formData.lotPremium || "0").toLocaleString()}`],
+    ];
+    
+    if (salesIncentiveEnabled) {
+      basePricing.push([`Sales Adjustment:`, `$${parseInt(formData.salesIncentive || "0").toLocaleString()}`]);
+    }
+    
+    basePricing.push([`Design Studio Allowance:`, `$${parseInt(formData.designStudioAllowance || "0").toLocaleString()}`]);
+    
+    basePricing.forEach(([label, value]) => {
+      doc.text(label, 20, yPos);
+      doc.text(value, 120, yPos);
+      yPos += 8;
+    });
+    
+    // Base Subtotal
+    yPos += 5;
+    doc.setFont("helvetica", "bold");
+    doc.text("Base Subtotal:", 20, yPos);
+    doc.text(`$${baseSubtotal.toLocaleString()}`, 120, yPos);
+    yPos += 15;
+    
+    // Upgrades
+    if (selectedUpgradeItems.length > 0) {
+      doc.setFontSize(14);
+      doc.text("SELECTED UPGRADES", 20, yPos);
+      yPos += 10;
+      
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      
+      const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
+      
+      Object.entries(groupedUpgrades).forEach(([category, locations]) => {
+        doc.setFont("helvetica", "bold");
+        doc.text(category.toUpperCase(), 20, yPos);
+        yPos += 6;
+        
+        Object.entries(locations).forEach(([location, parentSelections]) => {
+          doc.setFont("helvetica", "italic");
+          doc.text(`  ${location}`, 25, yPos);
+          yPos += 5;
+          
+          Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
+            upgrades.forEach((upgrade) => {
+              if (yPos > 270) { // Add new page if needed
+                doc.addPage();
+                yPos = 20;
+              }
+              
+              doc.setFont("helvetica", "normal");
+              const upgradeText = `    ${upgrade.choiceTitle}`;
+              const price = `$${parseInt(upgrade.clientPrice).toLocaleString()}`;
+              
+              doc.text(upgradeText.substring(0, 70), 30, yPos);
+              doc.text(price, 160, yPos);
+              yPos += 5;
+            });
+          });
+        });
+        yPos += 5;
+      });
+      
+      // Upgrades Subtotal
+      yPos += 5;
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Upgrades Subtotal:", 20, yPos);
+      doc.text(`$${upgradesTotal.toLocaleString()}`, 120, yPos);
+      yPos += 15;
+    }
+    
+    // Grand Total
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("GRAND TOTAL:", 20, yPos);
+    doc.text(`$${totalPrice.toLocaleString()}`, 120, yPos);
+    yPos += 20;
+    
+    // Signature Section
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    doc.text("By signing below, both parties agree to the terms and total amount shown above.", 20, yPos);
+    yPos += 20;
+    
+    doc.setFont("helvetica", "normal");
+    doc.text("Customer Signature: ____________________________", 20, yPos);
+    yPos += 10;
+    doc.text("Date: ____________________________", 20, yPos);
+    yPos += 15;
+    doc.text("Sales Representative: ____________________________", 20, yPos);
+    yPos += 10;
+    doc.text("Date: ____________________________", 20, yPos);
+    
+    // Save PDF
+    doc.save(`${formData.buyerLastName || 'Customer'}_Proposal_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   const handleGeneratePO = async () => {
     if (!currentTemplate) return;
     
@@ -751,11 +896,15 @@ export default function PurchaseOrder() {
     };
 
     try {
+      // Save to database
       await apiRequest('POST', '/api/proposals', proposalData);
+      
+      // Generate PDF
+      await generatePDF();
       
       toast({
         title: "Proposal Generated",
-        description: "Your proposal has been generated successfully.",
+        description: "Your proposal PDF has been generated and downloaded.",
       });
     } catch (error) {
       toast({
