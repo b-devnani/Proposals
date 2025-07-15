@@ -29,9 +29,36 @@ const CATEGORY_ORDER = [
   "Mirrors, Medicine Cabinets & Accessories"
 ];
 
+// Custom location sorting order
+const LOCATION_ORDER = [
+  "01 - Elevations",
+  "02 - Backyard",
+  "Main Living Area",
+  "Family Room",
+  "Kitchen",
+  "Owner's Bath",
+  "Bath 2",
+  "Owner's Suite",
+  "Bedroom 2",
+  "Dining Room",
+  "Bedroom 3",
+  "Laundry Room",
+  "Mudroom",
+  "Foyer",
+  "Whole House",
+  "Unassigned",
+  "Garage",
+  "Basement"
+];
+
 function getCategoryOrder(category: string): number {
   const index = CATEGORY_ORDER.indexOf(category);
   return index === -1 ? 999 : index; // Unknown categories go to end
+}
+
+function getLocationOrder(location: string): number {
+  const index = LOCATION_ORDER.indexOf(location);
+  return index === -1 ? 999 : index; // Unknown locations go to end
 }
 
 export function groupUpgradesByCategory(upgrades: Upgrade[]): GroupedUpgrades {
@@ -70,7 +97,12 @@ export function groupUpgradesByCategory(upgrades: Upgrade[]): GroupedUpgrades {
   const categoryKeys = Object.keys(grouped).sort((a, b) => getCategoryOrder(a) - getCategoryOrder(b));
   
   categoryKeys.forEach(category => {
-    sortedGrouped[category] = grouped[category];
+    sortedGrouped[category] = {};
+    const locationKeys = Object.keys(grouped[category]).sort((a, b) => getLocationOrder(a) - getLocationOrder(b));
+    
+    locationKeys.forEach(location => {
+      sortedGrouped[category][location] = grouped[category][location];
+    });
   });
 
   return sortedGrouped;
@@ -82,9 +114,9 @@ export function sortUpgrades(upgrades: Upgrade[]): Upgrade[] {
     if (a.category !== b.category) {
       return getCategoryOrder(a.category) - getCategoryOrder(b.category);
     }
-    // Secondary sort by location
+    // Secondary sort by location using custom order
     if (a.location !== b.location) {
-      return a.location.localeCompare(b.location);
+      return getLocationOrder(a.location) - getLocationOrder(b.location);
     }
     // Tertiary sort by parent selection
     if (a.parentSelection !== b.parentSelection) {
