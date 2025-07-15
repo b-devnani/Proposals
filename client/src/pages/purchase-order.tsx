@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -763,7 +764,7 @@ export default function PurchaseOrder() {
     return <div className="flex justify-center items-center h-64">No templates available</div>;
   }
 
-  const currentTemplate = templates.find(t => t.id === selectedTemplateId) || templates[0];
+  const currentTemplate = templates.find(t => t.id.toString() === activeTemplate) || templates[0];
   const selectedUpgradeItems = upgrades?.filter(upgrade => selectedUpgrades.has(upgrade.id)) || [];
   
   // Group and filter upgrades
@@ -813,8 +814,8 @@ export default function PurchaseOrder() {
             </div>
 
             <Tabs 
-              value={selectedTemplateId?.toString() || templates[0]?.id.toString()}
-              onValueChange={(value) => setSelectedTemplateId(parseInt(value))}
+              value={activeTemplate || templates[0]?.id.toString()}
+              onValueChange={(value) => setActiveTemplate(value)}
             >
               <TabsList className="grid w-full grid-cols-3">
                 {templates.map((template) => (
