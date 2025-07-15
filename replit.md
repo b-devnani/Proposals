@@ -121,6 +121,8 @@ Three main entities:
 - July 15, 2025. Fixed Excel export signature text alignment to left-aligned and ensured complete color consistency across all header rows in both columns A and B
 - July 15, 2025. Updated Excel export to use SUM formulas instead of hardcoded values for Base Subtotal, Upgrades Subtotal, and Grand Total calculations
 - July 15, 2025. Added standardized print settings to Excel export: narrow margins, custom scaling (1 page wide x 2 pages tall), horizontal centering, and optimized column A width for better scaling
+- July 15, 2025. Removed Preview button from interface for cleaner UX
+- July 15, 2025. Updated Generate Proposal button to create PDF version of Excel export instead of database storage - now generates professional PDF with same structure and formatting as Excel export
 
 ## User Preferences
 
