@@ -421,9 +421,10 @@ export default function PurchaseOrder() {
     // Track current row for upgrades
     let currentRow = 20;
     
-    // Group and sort upgrades by category and location (using component-level groupedUpgrades)
+    // Group only selected upgrades by category and location
+    const selectedGroupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
     
-    Object.entries(groupedUpgrades).forEach(([category, locations]) => {
+    Object.entries(selectedGroupedUpgrades).forEach(([category, locations]) => {
       // Category Header with exact mapping - Blue background, white text, bold, borders spanning full row
       const categoryRow = worksheet.getRow(currentRow);
       const categoryCell = categoryRow.getCell(1);
