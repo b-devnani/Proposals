@@ -116,6 +116,7 @@ Three main entities:
 - July 15, 2025. Added password protection to "Show Builder Cost & Margin" toggle - now off by default and requires password "8582" to enable cost view
 - July 15, 2025. Fixed Excel export functionality that was broken by hierarchical upgrade structure changes - resolved duplicate declarations and updated data processing for three-level hierarchy
 - July 15, 2025. Removed ALL merged cells from Excel export per user request - replaced with proper column width adjustments for clean formatting without cell merging
+- July 15, 2025. Updated Excel export formatting with consistent right alignment for customer information, pricing breakdown, and signatures sections, plus matching cell colors across columns A and B
 
 ## User Preferences
 

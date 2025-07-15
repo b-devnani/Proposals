@@ -381,13 +381,14 @@ export default function PurchaseOrder() {
       labelCell.value = label;
       labelCell.font = { name: 'Calibri', bold: true, size: 10 };
       labelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } };
-      labelCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      labelCell.alignment = { horizontal: 'right', vertical: 'middle' };
       labelCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
       
       const valueCell = worksheet.getCell(`B${currentRow}`);
       valueCell.value = value;
       valueCell.font = { name: 'Calibri', size: 10 };
-      valueCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      valueCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } };
+      valueCell.alignment = { horizontal: 'right', vertical: 'middle' };
       valueCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
       
       currentRow++;
@@ -428,7 +429,7 @@ export default function PurchaseOrder() {
       labelCell.value = label;
       labelCell.font = { name: 'Calibri', bold: true, size: 11 };
       labelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F4FD' } };
-      labelCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      labelCell.alignment = { horizontal: 'right', vertical: 'middle' };
       labelCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
       
       const amountCell = worksheet.getCell(`B${currentRow}`);
@@ -622,12 +623,14 @@ export default function PurchaseOrder() {
     const customerSigLabel = worksheet.getCell(`A${currentRow}`);
     customerSigLabel.value = 'Customer Signature:';
     customerSigLabel.font = { name: 'Calibri', bold: true, size: 10 };
-    customerSigLabel.alignment = { horizontal: 'left', vertical: 'middle' };
+    customerSigLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+    customerSigLabel.alignment = { horizontal: 'right', vertical: 'middle' };
     
     const customerSigLine = worksheet.getCell(`B${currentRow}`);
     customerSigLine.value = '____________________________';
     customerSigLine.font = { name: 'Calibri', size: 10 };
-    customerSigLine.alignment = { horizontal: 'center', vertical: 'middle' };
+    customerSigLine.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+    customerSigLine.alignment = { horizontal: 'right', vertical: 'middle' };
     
     currentRow += 2;
     
@@ -637,12 +640,14 @@ export default function PurchaseOrder() {
     const customerDateLabel = worksheet.getCell(`A${currentRow}`);
     customerDateLabel.value = 'Date:';
     customerDateLabel.font = { name: 'Calibri', bold: true, size: 10 };
-    customerDateLabel.alignment = { horizontal: 'left', vertical: 'middle' };
+    customerDateLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+    customerDateLabel.alignment = { horizontal: 'right', vertical: 'middle' };
     
     const customerDateLine = worksheet.getCell(`B${currentRow}`);
     customerDateLine.value = '___________';
     customerDateLine.font = { name: 'Calibri', size: 10 };
-    customerDateLine.alignment = { horizontal: 'center', vertical: 'middle' };
+    customerDateLine.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+    customerDateLine.alignment = { horizontal: 'right', vertical: 'middle' };
     
     currentRow += 2;
     
@@ -652,12 +657,14 @@ export default function PurchaseOrder() {
     const salesSigLabel = worksheet.getCell(`A${currentRow}`);
     salesSigLabel.value = 'Sales Representative:';
     salesSigLabel.font = { name: 'Calibri', bold: true, size: 10 };
-    salesSigLabel.alignment = { horizontal: 'left', vertical: 'middle' };
+    salesSigLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+    salesSigLabel.alignment = { horizontal: 'right', vertical: 'middle' };
     
     const salesSigLine = worksheet.getCell(`B${currentRow}`);
     salesSigLine.value = '____________________________';
     salesSigLine.font = { name: 'Calibri', size: 10 };
-    salesSigLine.alignment = { horizontal: 'center', vertical: 'middle' };
+    salesSigLine.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+    salesSigLine.alignment = { horizontal: 'right', vertical: 'middle' };
     
     currentRow += 2;
     
@@ -667,12 +674,14 @@ export default function PurchaseOrder() {
     const salesDateLabel = worksheet.getCell(`A${currentRow}`);
     salesDateLabel.value = 'Date:';
     salesDateLabel.font = { name: 'Calibri', bold: true, size: 10 };
-    salesDateLabel.alignment = { horizontal: 'left', vertical: 'middle' };
+    salesDateLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+    salesDateLabel.alignment = { horizontal: 'right', vertical: 'middle' };
     
     const salesDateLine = worksheet.getCell(`B${currentRow}`);
     salesDateLine.value = '___________';
     salesDateLine.font = { name: 'Calibri', size: 10 };
-    salesDateLine.alignment = { horizontal: 'center', vertical: 'middle' };
+    salesDateLine.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+    salesDateLine.alignment = { horizontal: 'right', vertical: 'middle' };
     
     // Save the workbook
     workbook.xlsx.writeBuffer().then((buffer) => {
