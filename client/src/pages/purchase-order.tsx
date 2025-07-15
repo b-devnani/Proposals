@@ -855,11 +855,9 @@ export default function PurchaseOrder() {
                               <SelectValue placeholder="Select community" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="sorrento">Sorrento</SelectItem>
-                              <SelectItem value="ravello">Ravello</SelectItem>
-                              <SelectItem value="verona">Verona</SelectItem>
-                              <SelectItem value="cooper-ridge">Cooper Ridge</SelectItem>
+                              <SelectItem value="rolling-meadows">Rolling Meadows</SelectItem>
                               <SelectItem value="marble-landing">Marble Landing</SelectItem>
+                              <SelectItem value="copper-ridge">Copper Ridge</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
