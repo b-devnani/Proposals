@@ -715,10 +715,7 @@ export default function PurchaseOrder() {
     };
 
     try {
-      await apiRequest('/api/proposals', {
-        method: 'POST',
-        body: JSON.stringify(proposalData)
-      });
+      await apiRequest('POST', '/api/proposals', proposalData);
       
       toast({
         title: "Draft Saved",
@@ -754,10 +751,7 @@ export default function PurchaseOrder() {
     };
 
     try {
-      await apiRequest('/api/proposals', {
-        method: 'POST',
-        body: JSON.stringify(proposalData)
-      });
+      await apiRequest('POST', '/api/proposals', proposalData);
       
       toast({
         title: "Proposal Generated",
