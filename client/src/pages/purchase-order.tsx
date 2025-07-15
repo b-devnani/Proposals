@@ -513,7 +513,6 @@ export default function PurchaseOrder() {
     const selectedGroupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
     let upgradeRowIndex = 0;
     const upgradeStartRow = currentRow;
-    let upgradeRows = [];
     
     Object.entries(selectedGroupedUpgrades).forEach(([category, locations]) => {
       // Category Header
@@ -582,9 +581,6 @@ export default function PurchaseOrder() {
             priceCell.alignment = { horizontal: 'right', vertical: 'middle' };
             priceCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
             
-            // Track this row as containing upgrade pricing data
-            upgradeRows.push(currentRow);
-            
             currentRow++;
             upgradeRowIndex++;
           });
@@ -645,10 +641,11 @@ export default function PurchaseOrder() {
     upgradesSubtotalLabel.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     
     const upgradesSubtotalValue = worksheet.getCell(`B${currentRow}`);
-    // Create SUM formula for upgrade rows if there are any upgrades
-    if (upgradeRows.length > 0) {
-      const upgradeRowsFormula = upgradeRows.map(row => `B${row}`).join('+');
-      upgradesSubtotalValue.value = { formula: upgradeRowsFormula };
+    // Create SUM formula for upgrade rows - from upgrade header + 1 to current row - 2
+    const upgradeStartFormula = upgradeStartRow;
+    const upgradeEndFormula = currentRow - 2;
+    if (upgradeStartFormula <= upgradeEndFormula) {
+      upgradesSubtotalValue.value = { formula: `SUM(B${upgradeStartFormula}:B${upgradeEndFormula})` };
     } else {
       upgradesSubtotalValue.value = 0;
     }
