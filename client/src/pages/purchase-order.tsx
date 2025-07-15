@@ -738,204 +738,138 @@ export default function PurchaseOrder() {
     const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal;
     
     const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.width;
-    const pageHeight = doc.internal.pageSize.height;
     
-    // Colors
-    const primaryColor = [74, 144, 226]; // Blue
-    const darkGray = [60, 60, 60];
-    const lightGray = [120, 120, 120];
-    
-    // Header with elegant styling
-    doc.setFillColor(...primaryColor);
-    doc.rect(0, 0, pageWidth, 35, 'F');
-    
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
+    // Title
+    doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.text("HOME CONSTRUCTION PROPOSAL", 20, 25);
+    doc.text("HOME CONSTRUCTION PROPOSAL", 20, 20);
     
-    let yPos = 55;
-    
-    // Customer Information with clean card design
-    doc.setTextColor(...darkGray);
+    // Customer Information
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("Customer Information", 20, yPos);
+    doc.text("CUSTOMER INFORMATION", 20, 40);
     
-    // Light background box for customer info
-    doc.setFillColor(248, 249, 250);
-    doc.rect(20, yPos + 5, pageWidth - 40, 50, 'F');
-    
-    yPos += 15;
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
-    
     const customerInfo = [
-      [`Date:`, new Date().toLocaleDateString()],
-      [`Customer:`, formData.buyerLastName || 'Not specified'],
-      [`Community:`, formData.community || 'Not specified'],
-      [`Lot:`, formData.lotNumber || 'TBD'],
-      [`Address:`, formData.lotAddress || 'TBD'],
-      [`Home Plan:`, currentTemplate.name]
+      `Date: ${new Date().toLocaleDateString()}`,
+      `Customer Name: ${formData.buyerLastName || 'Not specified'}`,
+      `Community: ${formData.community || 'Not specified'}`,
+      `Lot Number: ${formData.lotNumber || 'TBD'}`,
+      `Lot Address: ${formData.lotAddress || 'TBD'}`,
+      `Home Plan: ${currentTemplate.name}`
     ];
     
-    customerInfo.forEach(([label, value]) => {
-      doc.setFont("helvetica", "bold");
-      doc.text(label, 30, yPos);
-      doc.setFont("helvetica", "normal");
-      doc.text(value, 80, yPos);
-      yPos += 7;
-    });
-    
-    yPos += 20;
-    
-    // Base Pricing Section
-    doc.setTextColor(...darkGray);
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Base Pricing", 20, yPos);
-    yPos += 15;
-    
-    doc.setFontSize(11);
-    const basePricing = [
-      [`Base Price`, `$${parseInt(currentTemplate.basePrice).toLocaleString()}`],
-      [`Lot Premium`, `$${parseInt(formData.lotPremium || "0").toLocaleString()}`],
-    ];
-    
-    if (salesIncentiveEnabled) {
-      basePricing.push([`Sales Adjustment`, `$${parseInt(formData.salesIncentive || "0").toLocaleString()}`]);
-    }
-    
-    basePricing.push([`Design Studio Allowance`, `$${parseInt(formData.designStudioAllowance || "0").toLocaleString()}`]);
-    
-    basePricing.forEach(([label, value]) => {
-      doc.setFont("helvetica", "normal");
-      doc.text(label, 30, yPos);
-      doc.setFont("helvetica", "bold");
-      doc.text(value, 130, yPos);
+    let yPos = 50;
+    customerInfo.forEach(info => {
+      doc.text(info, 20, yPos);
       yPos += 8;
     });
     
-    // Base Subtotal with highlight
-    yPos += 5;
-    doc.setFillColor(...primaryColor);
-    doc.rect(20, yPos - 5, pageWidth - 40, 15, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(12);
+    // Base Pricing
+    yPos += 10;
+    doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("Base Subtotal", 30, yPos + 5);
-    doc.text(`$${baseSubtotal.toLocaleString()}`, 130, yPos + 5);
-    yPos += 25;
+    doc.text("BASE PRICING", 20, yPos);
+    yPos += 10;
     
-    // Upgrades Section
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    const basePricing = [
+      [`Base Price:`, `$${parseInt(currentTemplate.basePrice).toLocaleString()}`],
+      [`Lot Premium:`, `$${parseInt(formData.lotPremium || "0").toLocaleString()}`],
+    ];
+    
+    if (salesIncentiveEnabled) {
+      basePricing.push([`Sales Adjustment:`, `$${parseInt(formData.salesIncentive || "0").toLocaleString()}`]);
+    }
+    
+    basePricing.push([`Design Studio Allowance:`, `$${parseInt(formData.designStudioAllowance || "0").toLocaleString()}`]);
+    
+    basePricing.forEach(([label, value]) => {
+      doc.text(label, 20, yPos);
+      doc.text(value, 120, yPos);
+      yPos += 8;
+    });
+    
+    // Base Subtotal
+    yPos += 5;
+    doc.setFont("helvetica", "bold");
+    doc.text("Base Subtotal:", 20, yPos);
+    doc.text(`$${baseSubtotal.toLocaleString()}`, 120, yPos);
+    yPos += 15;
+    
+    // Upgrades
     if (selectedUpgradeItems.length > 0) {
-      doc.setTextColor(...darkGray);
       doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text("Selected Upgrades", 20, yPos);
-      yPos += 15;
+      doc.text("SELECTED UPGRADES", 20, yPos);
+      yPos += 10;
       
-      doc.setFontSize(10);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      
       const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
       
       Object.entries(groupedUpgrades).forEach(([category, locations]) => {
-        if (yPos > 250) {
-          doc.addPage();
-          yPos = 30;
-        }
-        
-        // Category header
-        doc.setTextColor(...primaryColor);
         doc.setFont("helvetica", "bold");
-        doc.text(category, 30, yPos);
-        yPos += 8;
+        doc.text(category.toUpperCase(), 20, yPos);
+        yPos += 6;
         
         Object.entries(locations).forEach(([location, parentSelections]) => {
-          // Location subheader
-          doc.setTextColor(...lightGray);
           doc.setFont("helvetica", "italic");
-          doc.text(location, 35, yPos);
-          yPos += 6;
+          doc.text(`  ${location}`, 25, yPos);
+          yPos += 5;
           
           Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
             upgrades.forEach((upgrade) => {
-              if (yPos > 270) {
+              if (yPos > 270) { // Add new page if needed
                 doc.addPage();
-                yPos = 30;
+                yPos = 20;
               }
               
-              doc.setTextColor(...darkGray);
               doc.setFont("helvetica", "normal");
-              const upgradeText = upgrade.choiceTitle;
+              const upgradeText = `    ${upgrade.choiceTitle}`;
               const price = `$${parseInt(upgrade.clientPrice).toLocaleString()}`;
               
-              // Truncate long upgrade names
-              const maxLength = 55;
-              const displayText = upgradeText.length > maxLength ? 
-                upgradeText.substring(0, maxLength) + '...' : upgradeText;
-              
-              doc.text(displayText, 40, yPos);
-              doc.setFont("helvetica", "bold");
-              doc.text(price, 150, yPos);
-              yPos += 6;
+              doc.text(upgradeText.substring(0, 70), 30, yPos);
+              doc.text(price, 160, yPos);
+              yPos += 5;
             });
           });
         });
-        yPos += 8;
+        yPos += 5;
       });
       
       // Upgrades Subtotal
       yPos += 5;
-      doc.setFillColor(248, 249, 250);
-      doc.rect(20, yPos - 5, pageWidth - 40, 15, 'F');
-      doc.setTextColor(...darkGray);
-      doc.setFontSize(12);
+      doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text("Upgrades Subtotal", 30, yPos + 5);
-      doc.text(`$${upgradesTotal.toLocaleString()}`, 130, yPos + 5);
-      yPos += 25;
+      doc.text("Upgrades Subtotal:", 20, yPos);
+      doc.text(`$${upgradesTotal.toLocaleString()}`, 120, yPos);
+      yPos += 15;
     }
     
-    // Grand Total with emphasis
-    doc.setFillColor(...darkGray);
-    doc.rect(20, yPos - 5, pageWidth - 40, 20, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(16);
+    // Grand Total
+    doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("GRAND TOTAL", 30, yPos + 8);
-    doc.text(`$${totalPrice.toLocaleString()}`, 130, yPos + 8);
-    yPos += 40;
+    doc.text("GRAND TOTAL:", 20, yPos);
+    doc.text(`$${totalPrice.toLocaleString()}`, 120, yPos);
+    yPos += 20;
     
-    // Signature Section with elegant spacing
-    doc.setTextColor(...lightGray);
+    // Signature Section
     doc.setFontSize(10);
     doc.setFont("helvetica", "italic");
     doc.text("By signing below, both parties agree to the terms and total amount shown above.", 20, yPos);
-    yPos += 25;
+    yPos += 20;
     
-    doc.setTextColor(...darkGray);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    
-    // Two column signature layout
-    const leftCol = 30;
-    const rightCol = 120;
-    
-    doc.text("Customer Signature", leftCol, yPos);
-    doc.text("Sales Representative", rightCol, yPos);
-    yPos += 5;
-    
-    doc.line(leftCol, yPos, leftCol + 60, yPos);
-    doc.line(rightCol, yPos, rightCol + 60, yPos);
+    doc.text("Customer Signature: ____________________________", 20, yPos);
+    yPos += 10;
+    doc.text("Date: ____________________________", 20, yPos);
     yPos += 15;
-    
-    doc.text("Date", leftCol, yPos);
-    doc.text("Date", rightCol, yPos);
-    yPos += 5;
-    
-    doc.line(leftCol, yPos, leftCol + 60, yPos);
-    doc.line(rightCol, yPos, rightCol + 60, yPos);
+    doc.text("Sales Representative: ____________________________", 20, yPos);
+    yPos += 10;
+    doc.text("Date: ____________________________", 20, yPos);
     
     // Save PDF
     doc.save(`${formData.buyerLastName || 'Customer'}_Proposal_${new Date().toISOString().split('T')[0]}.pdf`);
