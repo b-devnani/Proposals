@@ -79,8 +79,9 @@ export function formatCurrency(amount: string | number): string {
 
 export function formatMargin(margin: string | number): { value: string; isPositive: boolean } {
   const num = typeof margin === "string" ? parseFloat(margin) : margin;
+  const percentage = num * 100;
   return {
-    value: `${num >= 0 ? "+" : ""}${num.toFixed(1)}%`,
-    isPositive: num >= 0,
+    value: `${percentage >= 0 ? "+" : ""}${percentage.toFixed(1)}%`,
+    isPositive: percentage >= 0,
   };
 }
