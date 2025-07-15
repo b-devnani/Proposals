@@ -119,6 +119,7 @@ Three main entities:
 - July 15, 2025. Updated Excel export formatting with consistent right alignment for customer information, pricing breakdown, and signatures sections, plus matching cell colors across columns A and B
 - July 15, 2025. Enhanced Excel export with location sub-groups displayed as separate rows (instead of in brackets) and fixed inconsistent cell colors across columns A and B for all header rows
 - July 15, 2025. Fixed Excel export signature text alignment to left-aligned and ensured complete color consistency across all header rows in both columns A and B
+- July 15, 2025. Updated Excel export to use SUM formulas instead of hardcoded values for Base Subtotal, Upgrades Subtotal, and Grand Total calculations
 
 ## User Preferences
 

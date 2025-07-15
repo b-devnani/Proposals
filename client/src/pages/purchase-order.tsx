@@ -444,6 +444,7 @@ export default function PurchaseOrder() {
       baseItems.push(['Sales Incentive', formData.salesIncentive]);
     }
     
+    const basePricingStartRow = currentRow;
     baseItems.forEach(([label, amount]) => {
       const row = worksheet.getRow(currentRow);
       row.height = 22;
@@ -465,6 +466,7 @@ export default function PurchaseOrder() {
       
       currentRow++;
     });
+    const basePricingEndRow = currentRow - 1;
     
     // Spacer
     currentRow++;
@@ -510,6 +512,8 @@ export default function PurchaseOrder() {
     // Add upgrades with clean formatting
     const selectedGroupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
     let upgradeRowIndex = 0;
+    const upgradeStartRow = currentRow;
+    let upgradeRows = [];
     
     Object.entries(selectedGroupedUpgrades).forEach(([category, locations]) => {
       // Category Header
@@ -578,6 +582,9 @@ export default function PurchaseOrder() {
             priceCell.alignment = { horizontal: 'right', vertical: 'middle' };
             priceCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
             
+            // Track this row as containing upgrade pricing data
+            upgradeRows.push(currentRow);
+            
             currentRow++;
             upgradeRowIndex++;
           });
@@ -617,13 +624,13 @@ export default function PurchaseOrder() {
     baseSubtotalLabel.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     
     const baseSubtotalValue = worksheet.getCell(`B${currentRow}`);
-    const baseSubtotal = parseInt(currentTemplate.basePrice) + parseInt(formData.lotPremium || "0") + parseInt(formData.designStudioAllowance || "0") + (salesIncentiveEnabled ? parseInt(formData.salesIncentive || "0") : 0);
-    baseSubtotalValue.value = baseSubtotal;
+    baseSubtotalValue.value = { formula: `SUM(B${basePricingStartRow}:B${basePricingEndRow})` };
     baseSubtotalValue.numFmt = '"$"#,##0';
     baseSubtotalValue.font = { name: 'Calibri', bold: true, size: 11 };
     baseSubtotalValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } };
     baseSubtotalValue.alignment = { horizontal: 'right', vertical: 'middle' };
     baseSubtotalValue.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    const baseSubtotalRowNum = currentRow;
     
     currentRow++;
     
@@ -638,13 +645,19 @@ export default function PurchaseOrder() {
     upgradesSubtotalLabel.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     
     const upgradesSubtotalValue = worksheet.getCell(`B${currentRow}`);
-    const upgradesSubtotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseInt(upgrade.clientPrice), 0);
-    upgradesSubtotalValue.value = upgradesSubtotal;
+    // Create SUM formula for upgrade rows if there are any upgrades
+    if (upgradeRows.length > 0) {
+      const upgradeRowsFormula = upgradeRows.map(row => `B${row}`).join('+');
+      upgradesSubtotalValue.value = { formula: upgradeRowsFormula };
+    } else {
+      upgradesSubtotalValue.value = 0;
+    }
     upgradesSubtotalValue.numFmt = '"$"#,##0';
     upgradesSubtotalValue.font = { name: 'Calibri', bold: true, size: 11 };
     upgradesSubtotalValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } };
     upgradesSubtotalValue.alignment = { horizontal: 'right', vertical: 'middle' };
     upgradesSubtotalValue.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    const upgradesSubtotalRowNum = currentRow;
     
     currentRow++;
     
@@ -659,8 +672,7 @@ export default function PurchaseOrder() {
     grandTotalLabel.border = { top: {style:'medium'}, left: {style:'medium'}, bottom: {style:'medium'}, right: {style:'medium'} };
     
     const grandTotalValue = worksheet.getCell(`B${currentRow}`);
-    const grandTotal = baseSubtotal + upgradesSubtotal;
-    grandTotalValue.value = grandTotal;
+    grandTotalValue.value = { formula: `B${baseSubtotalRowNum}+B${upgradesSubtotalRowNum}` };
     grandTotalValue.numFmt = '"$"#,##0';
     grandTotalValue.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
     grandTotalValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
