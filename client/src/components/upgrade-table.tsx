@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { ChevronDown, ChevronRight, MapPin, Package } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Package, Expand, Shrink } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Upgrade } from "@shared/schema";
 import { GroupedUpgrades, formatCurrency, formatMargin } from "@/lib/upgrade-data";
 
@@ -11,6 +12,7 @@ interface UpgradeTableProps {
   showCostColumns: boolean;
   onUpgradeToggle: (upgradeId: number) => void;
   onSelectAll: (category: string, location: string, parentSelection?: string) => void;
+  onExpandCollapseAll?: (isExpanded: boolean) => void;
 }
 
 export function UpgradeTable({
@@ -20,10 +22,28 @@ export function UpgradeTable({
   onUpgradeToggle,
   onSelectAll,
 }: UpgradeTableProps) {
+  // Generate all possible location keys for default expansion
+  const getAllLocationKeys = () => {
+    const keys: string[] = [];
+    Object.entries(groupedUpgrades).forEach(([category, locations]) => {
+      Object.keys(locations).forEach(location => {
+        keys.push(`${category}-${location}`);
+      });
+    });
+    return keys;
+  };
+
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(Object.keys(groupedUpgrades))
   );
-  const [expandedLocations, setExpandedLocations] = useState<Set<string>>(new Set());
+  const [expandedLocations, setExpandedLocations] = useState<Set<string>>(
+    new Set(getAllLocationKeys())
+  );
+
+  // Update expanded locations when data changes
+  React.useEffect(() => {
+    setExpandedLocations(new Set(getAllLocationKeys()));
+  }, [groupedUpgrades]);
 
   const toggleCategory = (category: string) => {
     const newExpanded = new Set(expandedCategories);
@@ -43,6 +63,16 @@ export function UpgradeTable({
       newExpanded.add(key);
     }
     setExpandedLocations(newExpanded);
+  };
+
+  const expandAll = () => {
+    setExpandedCategories(new Set(Object.keys(groupedUpgrades)));
+    setExpandedLocations(new Set(getAllLocationKeys()));
+  };
+
+  const collapseAll = () => {
+    setExpandedCategories(new Set());
+    setExpandedLocations(new Set());
   };
 
   const getCategoryUpgradeCount = (category: string): number => {
@@ -70,11 +100,36 @@ export function UpgradeTable({
     return Object.values(parentSelections).every(upgrades => areAllSelected(upgrades));
   };
 
+  const areAllExpanded = expandedCategories.size === Object.keys(groupedUpgrades).length && 
+                       expandedLocations.size === getAllLocationKeys().length;
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Available Upgrades</h2>
-        <p className="text-sm text-gray-600">Select upgrades to add to your proposal</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Available Upgrades</h2>
+            <p className="text-sm text-gray-600">Select upgrades to add to your proposal</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={areAllExpanded ? collapseAll : expandAll}
+            className="flex items-center gap-2"
+          >
+            {areAllExpanded ? (
+              <>
+                <Shrink className="h-4 w-4" />
+                Collapse All
+              </>
+            ) : (
+              <>
+                <Expand className="h-4 w-4" />
+                Expand All
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
