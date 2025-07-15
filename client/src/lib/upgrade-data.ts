@@ -2,7 +2,9 @@ import { Upgrade } from "@shared/schema";
 
 export interface GroupedUpgrades {
   [category: string]: {
-    [location: string]: Upgrade[];
+    [location: string]: {
+      [parentSelection: string]: Upgrade[];
+    };
   };
 }
 
@@ -12,9 +14,12 @@ export function groupUpgradesByCategory(upgrades: Upgrade[]): GroupedUpgrades {
       acc[upgrade.category] = {};
     }
     if (!acc[upgrade.category][upgrade.location]) {
-      acc[upgrade.category][upgrade.location] = [];
+      acc[upgrade.category][upgrade.location] = {};
     }
-    acc[upgrade.category][upgrade.location].push(upgrade);
+    if (!acc[upgrade.category][upgrade.location][upgrade.parentSelection]) {
+      acc[upgrade.category][upgrade.location][upgrade.parentSelection] = [];
+    }
+    acc[upgrade.category][upgrade.location][upgrade.parentSelection].push(upgrade);
     return acc;
   }, {} as GroupedUpgrades);
 }
@@ -29,12 +34,12 @@ export function sortUpgrades(upgrades: Upgrade[]): Upgrade[] {
     if (a.location !== b.location) {
       return a.location.localeCompare(b.location);
     }
-    // Tertiary sort by selection ID
-    if (a.selectionId !== b.selectionId) {
-      return a.selectionId.localeCompare(b.selectionId);
+    // Tertiary sort by parent selection
+    if (a.parentSelection !== b.parentSelection) {
+      return a.parentSelection.localeCompare(b.parentSelection);
     }
-    // Quaternary sort by choice ID
-    return a.choiceId.localeCompare(b.choiceId);
+    // Quaternary sort by choice title
+    return a.choiceTitle.localeCompare(b.choiceTitle);
   });
 }
 

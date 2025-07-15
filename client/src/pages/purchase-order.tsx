@@ -158,12 +158,22 @@ export default function PurchaseOrder() {
     setSelectedUpgrades(newSelected);
   };
 
-  const handleSelectAll = (category: string, location: string) => {
-    const locationUpgrades = groupedUpgrades[category]?.[location] || [];
-    const allSelected = locationUpgrades.every(upgrade => selectedUpgrades.has(upgrade.id));
+  const handleSelectAll = (category: string, location: string, parentSelection?: string) => {
+    let upgradesToToggle: Upgrade[] = [];
+    
+    if (parentSelection) {
+      // Select all upgrades in a specific parent selection
+      upgradesToToggle = groupedUpgrades[category]?.[location]?.[parentSelection] || [];
+    } else {
+      // Select all upgrades in a location (all parent selections)
+      const locationData = groupedUpgrades[category]?.[location] || {};
+      upgradesToToggle = Object.values(locationData).flat();
+    }
+    
+    const allSelected = upgradesToToggle.every(upgrade => selectedUpgrades.has(upgrade.id));
     
     const newSelected = new Set(selectedUpgrades);
-    locationUpgrades.forEach(upgrade => {
+    upgradesToToggle.forEach(upgrade => {
       if (allSelected) {
         newSelected.delete(upgrade.id);
       } else {
