@@ -332,6 +332,12 @@ export default function PurchaseOrder() {
     headerCell.alignment = { horizontal: 'left', vertical: 'middle' };
     headerCell.border = { top: {style:'medium'}, left: {style:'medium'}, bottom: {style:'medium'}, right: {style:'medium'} };
     
+    const headerCellB = worksheet.getCell('B1');
+    headerCellB.font = { name: 'Calibri', bold: true, size: 18, color: { argb: 'FFFFFFFF' } };
+    headerCellB.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
+    headerCellB.alignment = { horizontal: 'right', vertical: 'middle' };
+    headerCellB.border = { top: {style:'medium'}, left: {style:'medium'}, bottom: {style:'medium'}, right: {style:'medium'} };
+    
     // Company Information
     const companyRow = worksheet.getRow(2);
     companyRow.height = 25;
@@ -340,6 +346,11 @@ export default function PurchaseOrder() {
     companyCell.font = { name: 'Calibri', bold: true, size: 14, color: { argb: 'FF2E5C8A' } };
     companyCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8F9FA' } };
     companyCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    
+    const companyCellB = worksheet.getCell('B2');
+    companyCellB.font = { name: 'Calibri', bold: true, size: 14, color: { argb: 'FF2E5C8A' } };
+    companyCellB.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8F9FA' } };
+    companyCellB.alignment = { horizontal: 'right', vertical: 'middle' };
     
     // Contact Information
     const contactRow = worksheet.getRow(3);
@@ -361,6 +372,12 @@ export default function PurchaseOrder() {
     customerHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
     customerHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
     customerHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    
+    const customerHeaderCellB = worksheet.getCell('B5');
+    customerHeaderCellB.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    customerHeaderCellB.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
+    customerHeaderCellB.alignment = { horizontal: 'right', vertical: 'middle' };
+    customerHeaderCellB.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     
     // Customer details with clean layout
     const customerDetails = [
@@ -461,6 +478,12 @@ export default function PurchaseOrder() {
     upgradesHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
     upgradesHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
     upgradesHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    
+    const upgradesHeaderCellB = worksheet.getCell(`B${currentRow}`);
+    upgradesHeaderCellB.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    upgradesHeaderCellB.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
+    upgradesHeaderCellB.alignment = { horizontal: 'right', vertical: 'middle' };
+    upgradesHeaderCellB.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     
     currentRow++;
     
@@ -652,7 +675,7 @@ export default function PurchaseOrder() {
     const signatureCell = worksheet.getCell(`A${currentRow}`);
     signatureCell.value = 'By signing below, both parties agree to the terms and total amount shown above.';
     signatureCell.font = { name: 'Calibri', size: 10, italic: true };
-    signatureCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    signatureCell.alignment = { horizontal: 'left', vertical: 'middle' };
     
     currentRow += 2;
     
