@@ -307,370 +307,402 @@ export default function PurchaseOrder() {
     // Use ExcelJS for proper styling support
     const ExcelJS = (await import('exceljs')).default;
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Order Summary');
+    const worksheet = workbook.addWorksheet('Home Proposal');
 
-    // selectedUpgradeItems already defined in component scope
-    
-    // Set column widths to match template exactly
+    // Set optimal column widths for readability
     worksheet.columns = [
-      { width: 15 }, // A - Option
-      { width: 15 }, // B - Form labels  
+      { width: 30 }, // A - Description/Option
+      { width: 5 },  // B - Spacer
       { width: 5 },  // C - Spacer
-      { width: 15 }, // D - Form data
-      { width: 20 }, // E - Description start
-      { width: 20 }, // F
-      { width: 20 }, // G  
-      { width: 20 }, // H - Summary labels
-      { width: 15 }  // I - Subtotal/Values
+      { width: 5 },  // D - Spacer
+      { width: 5 },  // E - Spacer
+      { width: 5 },  // F - Spacer
+      { width: 5 },  // G - Spacer
+      { width: 5 },  // H - Spacer
+      { width: 15 }  // I - Amount
     ];
     
-    // Title: A1:I1 - "PROPOSAL" - Blue background, white text, centered, bold, 16pt Calibri
-    const titleCell = worksheet.getCell('A1');
-    titleCell.value = 'PROPOSAL';
-    titleCell.font = { name: 'Calibri', bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
-    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
-    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    titleCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    // Modern Header Design
+    const headerRow = worksheet.getRow(1);
+    headerRow.height = 40;
+    const headerCell = worksheet.getCell('A1');
+    headerCell.value = 'HOME CONSTRUCTION PROPOSAL';
+    headerCell.font = { name: 'Calibri', bold: true, size: 18, color: { argb: 'FFFFFFFF' } };
+    headerCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
+    headerCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerCell.border = { top: {style:'medium'}, left: {style:'medium'}, bottom: {style:'medium'}, right: {style:'medium'} };
     worksheet.mergeCells('A1:I1');
-    worksheet.getRow(1).height = 30;
     
-    // Company Name: A3:I3 - "• BEECHEN & DILL HOMES •" - Light blue background, dark blue text, centered, bold, 14pt Calibri
-    const companyCell = worksheet.getCell('A3');
-    companyCell.value = '• BEECHEN & DILL HOMES •';
-    companyCell.font = { bold: true, size: 14, color: { argb: 'FF366092' } };
-    companyCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE7F3FF' } };
+    // Company Information
+    const companyRow = worksheet.getRow(2);
+    companyRow.height = 25;
+    const companyCell = worksheet.getCell('A2');
+    companyCell.value = 'BEECHEN & DILL HOMES';
+    companyCell.font = { name: 'Calibri', bold: true, size: 14, color: { argb: 'FF2E5C8A' } };
+    companyCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8F9FA' } };
     companyCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.mergeCells('A3:I3');
-    worksheet.getRow(3).height = 25;
+    worksheet.mergeCells('A2:I2');
     
-    // Address line
-    worksheet.getCell('A7').value = '565 Village Center Dr';
-    worksheet.getCell('C7').value = '•';
-    worksheet.getCell('D7').value = 'Burr Ridge, IL 60527-4516';
-    worksheet.getCell('G7').value = '•';
-    worksheet.getCell('H7').value = 'Phone: (630) 920-9430';
-    worksheet.mergeCells('A7:I7');
-
-
-    // Form data section with gray labels
-    const formLabels = [
-      ['B9', 'Date', 'E9', new Date().toLocaleDateString()],
-      ['B10', "Buyer's Last Name", 'E10', formData.buyerLastName || ''],
-      ['B11', 'Community', 'E11', formData.community || ''],
-      ['B12', 'Lot Number', 'E12', formData.lotNumber || ''],
-      ['B13', 'Lot Address', 'E13', formData.lotAddress || ''],
-      ['B14', 'House Plan', 'E14', currentTemplate.name]
+    // Contact Information
+    const contactRow = worksheet.getRow(3);
+    contactRow.height = 20;
+    const contactCell = worksheet.getCell('A3');
+    contactCell.value = '565 Village Center Dr • Burr Ridge, IL 60527-4516 • Phone: (630) 920-9430';
+    contactCell.font = { name: 'Calibri', size: 10, color: { argb: 'FF666666' } };
+    contactCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells('A3:I3');
+    
+    // Spacer
+    worksheet.getRow(4).height = 15;
+    
+    // Customer Information Section
+    const customerHeaderRow = worksheet.getRow(5);
+    customerHeaderRow.height = 25;
+    const customerHeaderCell = worksheet.getCell('A5');
+    customerHeaderCell.value = 'CUSTOMER INFORMATION';
+    customerHeaderCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    customerHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
+    customerHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    customerHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    worksheet.mergeCells('A5:I5');
+    
+    // Customer details with clean layout
+    const customerDetails = [
+      ['Date:', new Date().toLocaleDateString()],
+      ['Customer Name:', formData.buyerLastName || 'Not specified'],
+      ['Community:', formData.community || 'Not specified'],
+      ['Lot Number:', formData.lotNumber || 'TBD'],
+      ['Lot Address:', formData.lotAddress || 'TBD'],
+      ['Home Plan:', currentTemplate.name]
     ];
     
-    formLabels.forEach(([labelCell, labelText, valueCell, valueText]) => {
-      const label = worksheet.getCell(labelCell);
-      label.value = labelText;
-      label.font = { bold: true };
-      label.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
+    let currentRow = 6;
+    customerDetails.forEach(([label, value]) => {
+      const row = worksheet.getRow(currentRow);
+      row.height = 20;
       
-      const value = worksheet.getCell(valueCell);
-      value.value = valueText;
+      const labelCell = worksheet.getCell(`A${currentRow}`);
+      labelCell.value = label;
+      labelCell.font = { name: 'Calibri', bold: true, size: 10 };
+      labelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } };
+      labelCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      labelCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      worksheet.mergeCells(`A${currentRow}:E${currentRow}`);
+      
+      const valueCell = worksheet.getCell(`F${currentRow}`);
+      valueCell.value = value;
+      valueCell.font = { name: 'Calibri', size: 10 };
+      valueCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      valueCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      worksheet.mergeCells(`F${currentRow}:I${currentRow}`);
+      
+      currentRow++;
     });
     
-    // Base pricing with light blue background
-    const basePriceLabel = worksheet.getCell('E16');
-    basePriceLabel.value = `${currentTemplate.name} Base Price`;
-    basePriceLabel.font = { bold: true };
-    basePriceLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1ECF1' } };
+    // Spacer
+    currentRow++;
     
-    const basePriceValue = worksheet.getCell('I16');
-    basePriceValue.value = parseInt(currentTemplate.basePrice);
-    basePriceValue.numFmt = '"$"#,##0';
-    basePriceValue.font = { bold: true };
-    basePriceValue.alignment = { horizontal: 'right' };
+    // Pricing Section Header
+    const pricingHeaderRow = worksheet.getRow(currentRow);
+    pricingHeaderRow.height = 25;
+    const pricingHeaderCell = worksheet.getCell(`A${currentRow}`);
+    pricingHeaderCell.value = 'PRICING BREAKDOWN';
+    pricingHeaderCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    pricingHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
+    pricingHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    pricingHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
     
-    const lotPremiumLabel = worksheet.getCell('E17');
-    lotPremiumLabel.value = 'Lot Premium';
-    lotPremiumLabel.font = { bold: true };
-    lotPremiumLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1ECF1' } };
+    currentRow++;
     
-    const lotPremiumValue = worksheet.getCell('I17');
-    lotPremiumValue.value = parseInt(formData.lotPremium || "0");
-    lotPremiumValue.numFmt = '"$"#,##0';
-    lotPremiumValue.font = { bold: true };
-    lotPremiumValue.alignment = { horizontal: 'right' };
+    // Base pricing items
+    const baseItems = [
+      [`${currentTemplate.name} Base Price`, currentTemplate.basePrice],
+      ['Lot Premium', formData.lotPremium || "0"],
+      ['Design Studio Allowance', formData.designStudioAllowance || "0"]
+    ];
     
-    // Headers with blue background and white text
-    const headerStyle = {
-      font: { bold: true, color: { argb: 'FFFFFFFF' } },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } },
-      alignment: { horizontal: 'center', vertical: 'middle' }
-    };
+    // Add Sales Incentive if enabled
+    if (salesIncentiveEnabled && formData.salesIncentive !== '0') {
+      baseItems.push(['Sales Incentive', formData.salesIncentive]);
+    }
     
-    const optionHeader = worksheet.getCell('A19');
-    optionHeader.value = 'Option';
-    Object.assign(optionHeader, headerStyle);
-    worksheet.mergeCells('A19:D19');
+    baseItems.forEach(([label, amount]) => {
+      const row = worksheet.getRow(currentRow);
+      row.height = 22;
+      
+      const labelCell = worksheet.getCell(`A${currentRow}`);
+      labelCell.value = label;
+      labelCell.font = { name: 'Calibri', bold: true, size: 11 };
+      labelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F4FD' } };
+      labelCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      labelCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+      
+      const amountCell = worksheet.getCell(`I${currentRow}`);
+      amountCell.value = parseInt(amount);
+      amountCell.numFmt = '"$"#,##0';
+      amountCell.font = { name: 'Calibri', bold: true, size: 11 };
+      amountCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F4FD' } };
+      amountCell.alignment = { horizontal: 'right', vertical: 'middle' };
+      amountCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      
+      currentRow++;
+    });
     
-    const descHeader = worksheet.getCell('E19');
-    descHeader.value = 'Description/Notes';
-    Object.assign(descHeader, headerStyle);
-    worksheet.mergeCells('E19:H19');
+    // Spacer
+    currentRow++;
     
-    const subtotalHeader = worksheet.getCell('I19');
-    subtotalHeader.value = 'Subtotal';
-    Object.assign(subtotalHeader, headerStyle);
+    // Upgrades Section Header
+    const upgradesHeaderRow = worksheet.getRow(currentRow);
+    upgradesHeaderRow.height = 25;
+    const upgradesHeaderCell = worksheet.getCell(`A${currentRow}`);
+    upgradesHeaderCell.value = 'SELECTED UPGRADES';
+    upgradesHeaderCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    upgradesHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
+    upgradesHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    upgradesHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
     
-    worksheet.getRow(19).height = 20;
+    currentRow++;
     
-    // Track current row for upgrades
-    let currentRow = 20;
+    // Column headers for upgrades
+    const upgradeHeaderRow = worksheet.getRow(currentRow);
+    upgradeHeaderRow.height = 20;
     
-    // Group only selected upgrades by category and location
+    const optionHeaderCell = worksheet.getCell(`A${currentRow}`);
+    optionHeaderCell.value = 'Upgrade Description';
+    optionHeaderCell.font = { name: 'Calibri', bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
+    optionHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
+    optionHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    optionHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+    
+    const priceHeaderCell = worksheet.getCell(`I${currentRow}`);
+    priceHeaderCell.value = 'Price';
+    priceHeaderCell.font = { name: 'Calibri', bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
+    priceHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
+    priceHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    priceHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    
+    currentRow++;
+    
+    // Add upgrades with clean formatting
     const selectedGroupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
     
     Object.entries(selectedGroupedUpgrades).forEach(([category, locations]) => {
-      // Category Header with exact mapping - Blue background, white text, bold, borders spanning full row
+      // Category Header
       const categoryRow = worksheet.getRow(currentRow);
-      const categoryCell = categoryRow.getCell(1);
-      categoryCell.value = category;
-      categoryCell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
-      categoryCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
-      categoryCell.alignment = { horizontal: 'left', vertical: 'middle' };
-      categoryCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      categoryRow.height = 25;
       
-      // Fill remaining cells in category row with same styling
-      for (let col = 2; col <= 9; col++) {
-        const cell = categoryRow.getCell(col);
-        cell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
-        cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-      }
+      const categoryCell = worksheet.getCell(`A${currentRow}`);
+      categoryCell.value = category.toUpperCase();
+      categoryCell.font = { name: 'Calibri', bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
+      categoryCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
+      categoryCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      categoryCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
+      
       currentRow++;
       
       Object.entries(locations).forEach(([location, parentSelections]) => {
-        // Location Header (if not N/A) with exact mapping - Light gray background, italic, bold, borders spanning full row
-        if (location !== "N/A") {
-          const locationRow = worksheet.getRow(currentRow);
-          const locationCell = locationRow.getCell(1);
-          locationCell.value = location;
-          locationCell.font = { name: 'Calibri', bold: true, italic: true };
-          locationCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE9ECEF' } };
-          locationCell.alignment = { horizontal: 'left', vertical: 'middle' };
-          locationCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-          
-          // Fill remaining cells in location row with same styling
-          for (let col = 2; col <= 9; col++) {
-            const cell = locationRow.getCell(col);
-            cell.font = { name: 'Calibri', bold: true, italic: true };
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE9ECEF' } };
-            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-          }
-          currentRow++;
-        }
-        
-        // Iterate through parent selections and their upgrades
         Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
-          // Parent Selection header (if meaningful and different from location)
-          if (parentSelection !== "N/A" && parentSelection !== location && parentSelection.trim() !== "") {
-            const parentRow = worksheet.getRow(currentRow);
-            const parentCell = parentRow.getCell(1);
-            parentCell.value = `  ${parentSelection}`;
-            parentCell.font = { name: 'Calibri', bold: true, italic: true };
-            parentCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } };
-            parentCell.alignment = { horizontal: 'left', vertical: 'middle' };
-            parentCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+          // Add each upgrade item
+          upgrades.forEach((upgrade, index) => {
+            const row = worksheet.getRow(currentRow);
+            row.height = 20;
             
-            // Fill remaining cells in parent selection row
-            for (let col = 2; col <= 9; col++) {
-              const cell = parentRow.getCell(col);
-              cell.font = { name: 'Calibri', bold: true, italic: true };
-              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } };
-              cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-            }
+            // Clean alternating row colors
+            const isEvenRow = index % 2 === 0;
+            const bgColor = isEvenRow ? 'FFF8F9FA' : 'FFFFFFFF';
+            
+            // Upgrade description
+            const descCell = worksheet.getCell(`A${currentRow}`);
+            descCell.value = `${upgrade.choiceTitle} (${location})`;
+            descCell.font = { name: 'Calibri', size: 10 };
+            descCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+            descCell.alignment = { horizontal: 'left', vertical: 'middle' };
+            descCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+            worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+            
+            // Price
+            const priceCell = worksheet.getCell(`I${currentRow}`);
+            priceCell.value = parseInt(upgrade.clientPrice);
+            priceCell.numFmt = '"$"#,##0';
+            priceCell.font = { name: 'Calibri', size: 10 };
+            priceCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+            priceCell.alignment = { horizontal: 'right', vertical: 'middle' };
+            priceCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+            
             currentRow++;
-          }
-          
-          // Upgrade Items with exact mapping - Alternating row colors, borders, aligned
-          upgrades.forEach((upgrade, upgradeIndex) => {
-          const row = worksheet.getRow(currentRow);
-          const isEvenRow = upgradeIndex % 2 === 0;
-          const bgColor = isEvenRow ? 'FFF8F9FA' : 'FFFFFFFF';
-          
-          // Upgrade Item: Choice Title Column A - Alternating row colors, borders, left aligned
-          const titleCell = row.getCell(1);
-          titleCell.value = upgrade.choiceTitle;
-          titleCell.font = { name: 'Calibri' };
-          titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-          titleCell.alignment = { horizontal: 'left', vertical: 'middle' };
-          titleCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-          
-          // Upgrade Item: Price Column I - Alternating row colors, borders, right aligned, currency format
-          const priceCell = row.getCell(9);
-          priceCell.value = parseInt(upgrade.clientPrice);
-          priceCell.numFmt = '"$"#,##0';
-          priceCell.font = { name: 'Calibri' };
-          priceCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-          priceCell.alignment = { horizontal: 'right', vertical: 'middle' };
-          priceCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-          
-          // Upgrade Item: Spacer Columns B-H - Empty cells with background, borders
-          for (let col = 2; col <= 8; col++) {
-            const cell = row.getCell(col);
-            cell.font = { name: 'Calibri' };
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-          }
-          
-          currentRow++;
           });
         });
       });
     });
     
-    // Grand Total with styling
-    const grandTotalRow = currentRow;
-    const grandTotalRowIndex = grandTotalRow - 1;
+    // Spacer
+    currentRow += 2;
     
-    // Add proper column widths for professional appearance
-    worksheet.columns = [
-      { width: 25 }, // A - Option
-      { width: 15 }, // B 
-      { width: 15 }, // C
-      { width: 15 }, // D
-      { width: 20 }, // E - Description
-      { width: 15 }, // F
-      { width: 15 }, // G
-      { width: 15 }, // H
-      { width: 15 }  // I - Subtotal
-    ];
-    
-    currentRow += 2; // Add space before summary section
-    
-    // Summary Section as per mapping
-    const summaryHeaderCell = worksheet.getCell(`H${currentRow}`);
-    summaryHeaderCell.value = 'SUMMARY';
-    summaryHeaderCell.font = { name: 'Calibri', bold: true };
+    // Summary Section
+    const summaryHeaderRow = worksheet.getRow(currentRow);
+    summaryHeaderRow.height = 25;
+    const summaryHeaderCell = worksheet.getCell(`A${currentRow}`);
+    summaryHeaderCell.value = 'TOTAL SUMMARY';
+    summaryHeaderCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    summaryHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
     summaryHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.mergeCells(`H${currentRow}:I${currentRow}`);
+    summaryHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
     
     currentRow++;
     
-    // Base Price Summary
-    const basePriceSummaryLabel = worksheet.getCell(`H${currentRow}`);
-    basePriceSummaryLabel.value = 'Base Price:';
-    basePriceSummaryLabel.font = { name: 'Calibri', bold: true };
-    basePriceSummaryLabel.alignment = { horizontal: 'right', vertical: 'middle' };
+    // Base Subtotal
+    const baseSubtotalRow = worksheet.getRow(currentRow);
+    baseSubtotalRow.height = 22;
+    const baseSubtotalLabel = worksheet.getCell(`A${currentRow}`);
+    baseSubtotalLabel.value = 'Base Subtotal:';
+    baseSubtotalLabel.font = { name: 'Calibri', bold: true, size: 11 };
+    baseSubtotalLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } };
+    baseSubtotalLabel.alignment = { horizontal: 'right', vertical: 'middle' };
+    baseSubtotalLabel.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
     
-    const basePriceSummaryValue = worksheet.getCell(`I${currentRow}`);
-    basePriceSummaryValue.value = { formula: 'I16' };
-    basePriceSummaryValue.numFmt = '"$"#,##0';
-    basePriceSummaryValue.font = { name: 'Calibri' };
-    basePriceSummaryValue.alignment = { horizontal: 'right', vertical: 'middle' };
-    
-    currentRow++;
-    
-    // Lot Premium Summary
-    const lotPremiumSummaryLabel = worksheet.getCell(`H${currentRow}`);
-    lotPremiumSummaryLabel.value = 'Lot Premium:';
-    lotPremiumSummaryLabel.font = { name: 'Calibri', bold: true };
-    lotPremiumSummaryLabel.alignment = { horizontal: 'right', vertical: 'middle' };
-    
-    const lotPremiumSummaryValue = worksheet.getCell(`I${currentRow}`);
-    lotPremiumSummaryValue.value = { formula: 'I17' };
-    lotPremiumSummaryValue.numFmt = '"$"#,##0';
-    lotPremiumSummaryValue.font = { name: 'Calibri' };
-    lotPremiumSummaryValue.alignment = { horizontal: 'right', vertical: 'middle' };
+    const baseSubtotalValue = worksheet.getCell(`I${currentRow}`);
+    const baseSubtotal = parseInt(currentTemplate.basePrice) + parseInt(formData.lotPremium || "0") + parseInt(formData.designStudioAllowance || "0") + (salesIncentiveEnabled ? parseInt(formData.salesIncentive || "0") : 0);
+    baseSubtotalValue.value = baseSubtotal;
+    baseSubtotalValue.numFmt = '"$"#,##0';
+    baseSubtotalValue.font = { name: 'Calibri', bold: true, size: 11 };
+    baseSubtotalValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } };
+    baseSubtotalValue.alignment = { horizontal: 'right', vertical: 'middle' };
+    baseSubtotalValue.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     
     currentRow++;
     
-    // Upgrades Total Summary
-    const upgradesRowEnd = currentRow - 4; // Adjust for current position
-    const upgradesSummaryLabel = worksheet.getCell(`H${currentRow}`);
-    upgradesSummaryLabel.value = 'Upgrades Total:';
-    upgradesSummaryLabel.font = { name: 'Calibri', bold: true };
-    upgradesSummaryLabel.alignment = { horizontal: 'right', vertical: 'middle' };
+    // Upgrades Subtotal
+    const upgradesSubtotalRow = worksheet.getRow(currentRow);
+    upgradesSubtotalRow.height = 22;
+    const upgradesSubtotalLabel = worksheet.getCell(`A${currentRow}`);
+    upgradesSubtotalLabel.value = 'Upgrades Subtotal:';
+    upgradesSubtotalLabel.font = { name: 'Calibri', bold: true, size: 11 };
+    upgradesSubtotalLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } };
+    upgradesSubtotalLabel.alignment = { horizontal: 'right', vertical: 'middle' };
+    upgradesSubtotalLabel.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
     
-    const upgradesSummaryValue = worksheet.getCell(`I${currentRow}`);
-    upgradesSummaryValue.value = { formula: `SUM(I20:I${upgradesRowEnd})` };
-    upgradesSummaryValue.numFmt = '"$"#,##0';
-    upgradesSummaryValue.font = { name: 'Calibri' };
-    upgradesSummaryValue.alignment = { horizontal: 'right', vertical: 'middle' };
+    const upgradesSubtotalValue = worksheet.getCell(`I${currentRow}`);
+    const upgradesSubtotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseInt(upgrade.clientPrice), 0);
+    upgradesSubtotalValue.value = upgradesSubtotal;
+    upgradesSubtotalValue.numFmt = '"$"#,##0';
+    upgradesSubtotalValue.font = { name: 'Calibri', bold: true, size: 11 };
+    upgradesSubtotalValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } };
+    upgradesSubtotalValue.alignment = { horizontal: 'right', vertical: 'middle' };
+    upgradesSubtotalValue.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
     
     currentRow++;
     
-    // Grand Total Summary
-    const grandTotalSummaryLabel = worksheet.getCell(`H${currentRow}`);
-    grandTotalSummaryLabel.value = 'Grand Total:';
-    grandTotalSummaryLabel.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
-    grandTotalSummaryLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
-    grandTotalSummaryLabel.alignment = { horizontal: 'right', vertical: 'middle' };
-    grandTotalSummaryLabel.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    // Grand Total
+    const grandTotalRow = worksheet.getRow(currentRow);
+    grandTotalRow.height = 30;
+    const grandTotalLabel = worksheet.getCell(`A${currentRow}`);
+    grandTotalLabel.value = 'GRAND TOTAL:';
+    grandTotalLabel.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    grandTotalLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
+    grandTotalLabel.alignment = { horizontal: 'right', vertical: 'middle' };
+    grandTotalLabel.border = { top: {style:'medium'}, left: {style:'medium'}, bottom: {style:'medium'}, right: {style:'medium'} };
+    worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
     
-    const grandTotalSummaryValue = worksheet.getCell(`I${currentRow}`);
-    grandTotalSummaryValue.value = { formula: `SUM(I${currentRow-3}:I${currentRow-1})` };
-    grandTotalSummaryValue.numFmt = '"$"#,##0';
-    grandTotalSummaryValue.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
-    grandTotalSummaryValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
-    grandTotalSummaryValue.alignment = { horizontal: 'right', vertical: 'middle' };
-    grandTotalSummaryValue.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    const grandTotalValue = worksheet.getCell(`I${currentRow}`);
+    const grandTotal = baseSubtotal + upgradesSubtotal;
+    grandTotalValue.value = grandTotal;
+    grandTotalValue.numFmt = '"$"#,##0';
+    grandTotalValue.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    grandTotalValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
+    grandTotalValue.alignment = { horizontal: 'right', vertical: 'middle' };
+    grandTotalValue.border = { top: {style:'medium'}, left: {style:'medium'}, bottom: {style:'medium'}, right: {style:'medium'} };
     
-    currentRow += 3; // Add space before signature section
+    currentRow += 3;
     
-    // Signature Section as per mapping
-    // Signature Text: Full Row - Merge cells A:I, normal text
-    const signatureTextRow = worksheet.getRow(currentRow);
-    const signatureTextCell = signatureTextRow.getCell(1);
-    signatureTextCell.value = 'By signing below, both parties agree to the terms and total amount shown above.';
-    signatureTextCell.font = { name: 'Calibri' };
-    signatureTextCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    // Signature Section
+    const signatureRow = worksheet.getRow(currentRow);
+    signatureRow.height = 20;
+    const signatureCell = worksheet.getCell(`A${currentRow}`);
+    signatureCell.value = 'By signing below, both parties agree to the terms and total amount shown above.';
+    signatureCell.font = { name: 'Calibri', size: 10, italic: true };
+    signatureCell.alignment = { horizontal: 'center', vertical: 'middle' };
     worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
     
     currentRow += 2;
     
-    // Buyer Signature section
-    const buyerSigRow = worksheet.getRow(currentRow);
-    buyerSigRow.getCell(2).value = 'Buyer Signature:';
-    buyerSigRow.getCell(2).font = { name: 'Calibri', bold: true };
-    buyerSigRow.getCell(2).border = { bottom: {style:'thin'} }; // Signature line
+    // Customer Signature Line
+    const customerSigRow = worksheet.getRow(currentRow);
+    customerSigRow.height = 25;
+    const customerSigLabel = worksheet.getCell(`A${currentRow}`);
+    customerSigLabel.value = 'Customer Signature:';
+    customerSigLabel.font = { name: 'Calibri', bold: true, size: 10 };
+    customerSigLabel.alignment = { horizontal: 'left', vertical: 'middle' };
+    worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
     
-    buyerSigRow.getCell(6).value = 'Date:';
-    buyerSigRow.getCell(6).font = { name: 'Calibri', bold: true };
-    buyerSigRow.getCell(7).border = { bottom: {style:'thin'} }; // Signature line
+    const customerSigLine = worksheet.getCell(`D${currentRow}`);
+    customerSigLine.value = '____________________________';
+    customerSigLine.font = { name: 'Calibri', size: 10 };
+    customerSigLine.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells(`D${currentRow}:F${currentRow}`);
+    
+    const customerDateLabel = worksheet.getCell(`G${currentRow}`);
+    customerDateLabel.value = 'Date:';
+    customerDateLabel.font = { name: 'Calibri', bold: true, size: 10 };
+    customerDateLabel.alignment = { horizontal: 'left', vertical: 'middle' };
+    
+    const customerDateLine = worksheet.getCell(`H${currentRow}`);
+    customerDateLine.value = '___________';
+    customerDateLine.font = { name: 'Calibri', size: 10 };
+    customerDateLine.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells(`H${currentRow}:I${currentRow}`);
     
     currentRow += 2;
     
-    // Company Signature section
-    const companySigRow = worksheet.getRow(currentRow);
-    companySigRow.getCell(2).value = 'Company Representative:';
-    companySigRow.getCell(2).font = { name: 'Calibri', bold: true };
-    companySigRow.getCell(2).border = { bottom: {style:'thin'} }; // Signature line
+    // Sales Representative Signature Line
+    const salesSigRow = worksheet.getRow(currentRow);
+    salesSigRow.height = 25;
+    const salesSigLabel = worksheet.getCell(`A${currentRow}`);
+    salesSigLabel.value = 'Sales Representative:';
+    salesSigLabel.font = { name: 'Calibri', bold: true, size: 10 };
+    salesSigLabel.alignment = { horizontal: 'left', vertical: 'middle' };
+    worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
     
-    companySigRow.getCell(6).value = 'Date:';
-    companySigRow.getCell(6).font = { name: 'Calibri', bold: true };
-    companySigRow.getCell(7).border = { bottom: {style:'thin'} }; // Signature line
+    const salesSigLine = worksheet.getCell(`D${currentRow}`);
+    salesSigLine.value = '____________________________';
+    salesSigLine.font = { name: 'Calibri', size: 10 };
+    salesSigLine.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells(`D${currentRow}:F${currentRow}`);
     
-    // Generate filename with buyer name and date
-    const buyerName = formData.buyerLastName || 'Customer';
-    const dateStr = new Date().toISOString().split('T')[0];
-    const fileName = `Proposal_${currentTemplate.name}_${buyerName}_${dateStr}.xlsx`;
+    const salesDateLabel = worksheet.getCell(`G${currentRow}`);
+    salesDateLabel.value = 'Date:';
+    salesDateLabel.font = { name: 'Calibri', bold: true, size: 10 };
+    salesDateLabel.alignment = { horizontal: 'left', vertical: 'middle' };
     
-    // Generate buffer and download
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = window.URL.createObjectURL(blob);
+    const salesDateLine = worksheet.getCell(`H${currentRow}`);
+    salesDateLine.value = '___________';
+    salesDateLine.font = { name: 'Calibri', size: 10 };
+    salesDateLine.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells(`H${currentRow}:I${currentRow}`);
     
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Excel Export Complete",
-      description: "Proposal exported following exact template cell mapping with proper formatting, merged cells, borders, fonts, summary, and signatures.",
+    // Save the workbook
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${formData.buyerLastName || 'Customer'}_Proposal_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
     });
     
     toast({
       title: "Excel Export Complete",
-      description: "Proposal exported with template format and preserved formulas.",
+      description: "Proposal exported successfully.",
     });
   };
 
