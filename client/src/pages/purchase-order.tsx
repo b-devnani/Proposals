@@ -14,6 +14,7 @@ import logoPath from "@assets/logo-fullColor (1)_1751758486563.png";
 import { useToast } from "@/hooks/use-toast";
 import { UpgradeTable } from "@/components/upgrade-table";
 import { OrderSummary } from "@/components/order-summary";
+import { CostTogglePassword } from "@/components/cost-toggle-password";
 import { HomeTemplate, Upgrade } from "@shared/schema";
 import { groupUpgradesByCategory, sortUpgrades } from "@/lib/upgrade-data";
 import { apiRequest } from "@/lib/queryClient";
@@ -25,7 +26,8 @@ export default function PurchaseOrder() {
   
   // State
   const [activeTemplate, setActiveTemplate] = useState<string>("2"); // Sorrento ID (now has real data)
-  const [showCostColumns, setShowCostColumns] = useState(true);
+  const [showCostColumns, setShowCostColumns] = useState(false); // Off by default
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [selectedUpgrades, setSelectedUpgrades] = useState<Set<number>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -181,6 +183,22 @@ export default function PurchaseOrder() {
       }
     });
     setSelectedUpgrades(newSelected);
+  };
+
+  const handleCostToggle = (checked: boolean) => {
+    if (checked) {
+      setShowPasswordDialog(true);
+    } else {
+      setShowCostColumns(false);
+    }
+  };
+
+  const handleCostAuthenticated = () => {
+    setShowCostColumns(true);
+    toast({
+      title: "Cost View Enabled",
+      description: "Builder costs and margins are now visible.",
+    });
   };
 
   const handleSaveDraft = () => {
@@ -1189,7 +1207,7 @@ export default function PurchaseOrder() {
               <Switch
                 id="cost-toggle"
                 checked={showCostColumns}
-                onCheckedChange={setShowCostColumns}
+                onCheckedChange={handleCostToggle}
               />
             </div>
           </div>
@@ -1518,6 +1536,13 @@ export default function PurchaseOrder() {
             onGenerateProposal={handleGeneratePO}
           />
         )}
+
+        {/* Cost Toggle Password Dialog */}
+        <CostTogglePassword
+          isOpen={showPasswordDialog}
+          onClose={() => setShowPasswordDialog(false)}
+          onAuthenticated={handleCostAuthenticated}
+        />
       </div>
     </div>
   );
