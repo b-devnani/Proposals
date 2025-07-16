@@ -143,11 +143,29 @@ export function formatCurrency(amount: string | number): string {
   }).format(num);
 }
 
-export function formatMargin(margin: string | number): { value: string; isPositive: boolean } {
+export function formatMargin(margin: string | number): { 
+  value: string; 
+  isPositive: boolean; 
+  colorClass: string; 
+} {
   const num = typeof margin === "string" ? parseFloat(margin) : margin;
   const percentage = num * 100;
+  
+  // Determine color class based on margin ranges
+  let colorClass = "";
+  if (percentage < 0) {
+    colorClass = "text-red-600"; // Negative values - red
+  } else if (percentage >= 0 && percentage < 30) {
+    colorClass = "text-yellow-600"; // 0-30% - yellow
+  } else if (percentage >= 30 && percentage < 55) {
+    colorClass = "text-green-600"; // 30-55% - green
+  } else {
+    colorClass = "text-purple-600"; // 55% and over - purple
+  }
+  
   return {
     value: `${percentage >= 0 ? "+" : ""}${percentage.toFixed(1)}%`,
     isPositive: percentage >= 0,
+    colorClass: colorClass,
   };
 }

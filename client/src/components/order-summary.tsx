@@ -1,7 +1,7 @@
 import { Save, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { formatCurrency } from "@/lib/upgrade-data";
+import { formatCurrency, formatMargin } from "@/lib/upgrade-data";
 import { Upgrade } from "@shared/schema";
 
 interface OrderSummaryProps {
@@ -91,8 +91,8 @@ export function OrderSummary({
                 {showCostColumns && (
                   <div className="flex justify-between items-center text-xs text-gray-500">
                     <span>Margin:</span>
-                    <span className={`font-medium ${baseMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {baseMargin >= 0 ? '+' : ''}{baseMargin.toFixed(1)}%
+                    <span className={`font-medium ${formatMargin(baseMargin / 100).colorClass}`}>
+                      {formatMargin(baseMargin / 100).value}
                     </span>
                   </div>
                 )}
@@ -123,8 +123,8 @@ export function OrderSummary({
                 {showCostColumns && selectedUpgrades.length > 0 && (
                   <div className="flex justify-between items-center text-xs text-gray-500">
                     <span>Margin:</span>
-                    <span className={`font-medium ${upgradesMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {upgradesMargin >= 0 ? '+' : ''}{upgradesMargin.toFixed(1)}%
+                    <span className={`font-medium ${formatMargin(upgradesMargin / 100).colorClass}`}>
+                      {formatMargin(upgradesMargin / 100).value}
                     </span>
                   </div>
                 )}
@@ -143,8 +143,8 @@ export function OrderSummary({
                       </div>
                       <div>
                         <span>Overall Margin: </span>
-                        <span className={`font-medium ${overallMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {overallMargin >= 0 ? '+' : ''}{overallMargin.toFixed(1)}%
+                        <span className={`font-medium ${formatMargin(overallMargin / 100).colorClass}`}>
+                          {formatMargin(overallMargin / 100).value}
                         </span>
                       </div>
                     </div>
