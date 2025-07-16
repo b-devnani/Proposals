@@ -993,20 +993,20 @@ export default function PurchaseOrder() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Proposal Generator</h1>
-          <p className="text-gray-600">Create detailed proposals with home templates and upgrades</p>
+        <div className="mb-4 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Proposal Generator</h1>
+          <p className="text-sm sm:text-base text-gray-600">Create detailed proposals with home templates and upgrades</p>
         </div>
 
         {/* Template Selection */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Select Home Template</h2>
-              <div className="flex items-center space-x-3">
-                <Label htmlFor="cost-toggle" className="text-sm text-gray-700 font-medium">
+        <Card className="mb-4 sm:mb-6">
+          <CardContent className="pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Select Home Template</h2>
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <Label htmlFor="cost-toggle" className="text-xs sm:text-sm text-gray-700 font-medium">
                   Show Builder Cost & Margin
                 </Label>
                 <Switch
@@ -1026,9 +1026,9 @@ export default function PurchaseOrder() {
               value={activeTemplate || templates[0]?.id.toString()}
               onValueChange={(value) => setActiveTemplate(value)}
             >
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 h-auto sm:h-10">
                 {templates.map((template) => (
-                  <TabsTrigger key={template.id} value={template.id.toString()}>
+                  <TabsTrigger key={template.id} value={template.id.toString()} className="w-full py-3 sm:py-2">
                     {template.name}
                   </TabsTrigger>
                 ))}
@@ -1038,7 +1038,7 @@ export default function PurchaseOrder() {
                 <TabsContent key={template.id} value={template.id.toString()}>
                   <Card className="bg-blue-50 border-blue-200">
                     <CardContent className="pt-6">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         <div>
                           <Label htmlFor="buyer-name">Buyer's Last Name</Label>
                           <Input
@@ -1249,9 +1249,10 @@ export default function PurchaseOrder() {
 
             {/* Search and Filter Controls */}
             <Card className="mb-4">
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row gap-4 items-end">
-                  <div className="flex-1">
+              <CardContent className="pt-4 sm:pt-6">
+                <div className="space-y-4">
+                  {/* Search Bar */}
+                  <div>
                     <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
                       Search Upgrades
                     </Label>
@@ -1268,13 +1269,14 @@ export default function PurchaseOrder() {
                     </div>
                   </div>
                   
-                  <div className="flex gap-4">
+                  {/* Filters Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                       <Label htmlFor="category-filter" className="text-sm font-medium text-gray-700 mb-2 block">
                         Category
                       </Label>
                       <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                        <SelectTrigger className="w-48">
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Filter by category" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1293,7 +1295,7 @@ export default function PurchaseOrder() {
                         Location
                       </Label>
                       <Select value={locationFilter} onValueChange={setLocationFilter}>
-                        <SelectTrigger className="w-48">
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Filter by location" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1307,7 +1309,7 @@ export default function PurchaseOrder() {
                       </Select>
                     </div>
 
-                    <div className="flex flex-col items-center">
+                    <div>
                       <Label className="text-sm font-medium text-gray-700 mb-2 block">
                         Show Selected Only
                       </Label>
@@ -1332,7 +1334,8 @@ export default function PurchaseOrder() {
                           setLocationFilter("all");
                           setShowSelectedOnly(false);
                         }}
-                        className="h-10"
+                        className="h-10 w-full sm:w-auto"
+                        size="sm"
                       >
                         Clear Filters
                       </Button>

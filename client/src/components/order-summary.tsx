@@ -54,12 +54,12 @@ export function OrderSummary({
   const overallMargin = grandTotal > 0 ? ((grandTotal - totalCost) / grandTotal * 100) : 0;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky bottom-0">
-      <div className="px-4 py-2">
-        <div className="flex items-start justify-between">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky bottom-0 mt-4">
+      <div className="px-3 sm:px-4 py-2 sm:py-3">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
           <div className="flex-1">
-            <h3 className="text-base font-semibold text-gray-900 mb-2">Proposal Summary</h3>
-            <div className="grid grid-cols-3 gap-6 text-sm text-gray-600">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3">Proposal Summary</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 text-xs sm:text-sm text-gray-600">
               {/* Left Column - Base */}
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
@@ -133,8 +133,8 @@ export function OrderSummary({
               {/* Right Column - Grand Total */}
               <div className="flex flex-col justify-center items-center">
                 <div className="text-center">
-                  <div className="text-lg font-bold text-gray-900 mb-1">Grand Total</div>
-                  <div className="text-2xl font-bold text-blue-600">{formatCurrency(grandTotal)}</div>
+                  <div className="text-base sm:text-lg font-bold text-gray-900 mb-1">Grand Total</div>
+                  <div className="text-xl sm:text-2xl font-bold text-blue-600">{formatCurrency(grandTotal)}</div>
                   {showCostColumns && (
                     <div className="text-xs text-gray-500 mt-1 space-y-1">
                       <div>
@@ -156,16 +156,16 @@ export function OrderSummary({
 
           </div>
 
-          <div className="flex space-x-2 ml-6">
-            <Button variant="outline" size="sm" onClick={onSaveDraft}>
+          <div className="flex flex-col sm:flex-row lg:flex-col space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-0 lg:space-y-2 mt-4 lg:mt-0 lg:ml-6">
+            <Button variant="outline" size="sm" onClick={onSaveDraft} className="w-full sm:w-auto">
               <Save className="w-3 h-3 mr-1" />
               Save Draft
             </Button>
-            <Button variant="outline" size="sm" onClick={onExportExcel}>
+            <Button variant="outline" size="sm" onClick={onExportExcel} className="w-full sm:w-auto">
               <Download className="w-3 h-3 mr-1" />
               Export Excel
             </Button>
-            <Button size="sm" onClick={onGenerateProposal}>
+            <Button size="sm" onClick={onGenerateProposal} className="w-full sm:w-auto">
               <FileText className="w-3 h-3 mr-1" />
               Generate Proposal
             </Button>
