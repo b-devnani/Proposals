@@ -22,6 +22,22 @@ import { groupUpgradesByCategory, sortUpgrades } from "@/lib/upgrade-data";
 import { apiRequest } from "@/lib/queryClient";
 import { formatNumberWithCommas, handleNumberInputChange } from "@/lib/number-utils";
 
+// Rolling Meadows lot data
+const rollingMeadowsLots = {
+  "RM03": "16571 Kayla Drive",
+  "RM04": "16561 Kayla Drive", 
+  "RM05": "16551 Kayla Drive",
+  "RM06": "16541 Kayla Drive",
+  "RM25": "16520 Kayla Drive",
+  "RM26": "16530 Kayla Drive",
+  "RM27": "16540 Kayla Drive",
+  "RM28": "16550 Kayla Drive",
+  "RM29": "16560 Kayla Drive",
+  "RM30": "16570 Kayla Drive",
+  "RM31": "16580 Kayla Drive",
+  "RM32": "16590 Kayla Drive"
+};
+
 export default function PurchaseOrder() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -40,7 +56,7 @@ export default function PurchaseOrder() {
   const [formData, setFormData] = useState({
     todaysDate: new Date().toISOString().split('T')[0],
     buyerLastName: "",
-    community: "",
+    community: "rolling-meadows", // Default to Rolling Meadows
     lotNumber: "",
     lotAddress: "",
     lotPremium: "0",
@@ -49,6 +65,16 @@ export default function PurchaseOrder() {
   });
 
   const [salesIncentiveEnabled, setSalesIncentiveEnabled] = useState(false);
+  
+  // Handler for lot selection
+  const handleLotSelection = (lotNumber: string) => {
+    const address = rollingMeadowsLots[lotNumber as keyof typeof rollingMeadowsLots] || "";
+    setFormData({ 
+      ...formData, 
+      lotNumber, 
+      lotAddress: address 
+    });
+  };
 
   // Queries
   const { data: templates = [], isLoading: templatesLoading } = useQuery<HomeTemplate[]>({
@@ -1068,21 +1094,31 @@ export default function PurchaseOrder() {
 
                         <div>
                           <Label htmlFor="lot-number">Lot Number</Label>
-                          <Input
-                            id="lot-number"
-                            placeholder="Enter lot number"
-                            value={formData.lotNumber}
-                            onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value })}
-                          />
+                          <Select 
+                            value={formData.lotNumber} 
+                            onValueChange={handleLotSelection}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select lot number" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.keys(rollingMeadowsLots).map((lotNumber) => (
+                                <SelectItem key={lotNumber} value={lotNumber}>
+                                  {lotNumber}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
 
                         <div>
                           <Label htmlFor="lot-address">Lot Address</Label>
                           <Input
                             id="lot-address"
-                            placeholder="Enter lot address"
+                            placeholder="Address will auto-populate"
                             value={formData.lotAddress}
-                            onChange={(e) => setFormData({ ...formData, lotAddress: e.target.value })}
+                            readOnly
+                            className="bg-gray-50"
                           />
                         </div>
 
