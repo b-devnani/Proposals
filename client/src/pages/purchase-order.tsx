@@ -1117,6 +1117,17 @@ export default function PurchaseOrder() {
     doc.text(grandTotalValue, grandTotalX, yPos);
     yPos += 15;
     
+    // Check if we're on page 1 or if there's not enough space for signatures (need ~100pt for full signature section)
+    const currentPage = doc.getCurrentPageInfo().pageNumber;
+    const signatureSpaceNeeded = 100; // Space needed for signature section
+    const footerSpace = 30; // Space for footer
+    const availableSpace = pageHeight - footerSpace - yPos;
+    
+    if (currentPage === 1 || availableSpace < signatureSpaceNeeded) {
+      doc.addPage();
+      yPos = 50; // Start signatures well below top of new page
+    }
+    
     // Single signature line spanning most of the page width
     doc.setFont("helvetica", "normal");
     const signatureLineWidth = pageWidth - (leftMargin * 2);
