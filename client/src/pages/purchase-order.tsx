@@ -1117,8 +1117,8 @@ export default function PurchaseOrder() {
     doc.text(grandTotalValue, grandTotalX, yPos);
     yPos += 15;
     
-    // Check if there's not enough space for signatures (need ~120pt for full signature section)
-    const signatureSpaceNeeded = 120; // Space needed for signature section (increased for longer proposals)
+    // Check if there's not enough space for signatures (need ~80pt for full signature section)
+    const signatureSpaceNeeded = 80; // Space needed for signature section
     const footerSpace = 30; // Space for footer
     const availableSpace = pageHeight - footerSpace - yPos;
     
