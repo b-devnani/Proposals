@@ -38,6 +38,20 @@ const rollingMeadowsLots = {
   "RM32": "16590 Kayla Drive"
 };
 
+// Helper function to format community name
+const formatCommunityName = (communityValue: string) => {
+  switch (communityValue) {
+    case 'rolling-meadows':
+      return 'Rolling Meadows';
+    case 'marble-landing':
+      return 'Marble Landing';
+    case 'copper-ridge':
+      return 'Copper Ridge';
+    default:
+      return communityValue;
+  }
+};
+
 export default function PurchaseOrder() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -833,7 +847,7 @@ export default function PurchaseOrder() {
     const customerInfoData = [
       ['Date', new Date().toLocaleDateString()],
       ['Customer Name', formData.buyerLastName || 'Not specified'],
-      ['Community', formData.community || 'Not specified'],
+      ['Community', formatCommunityName(formData.community) || 'Not specified'],
       ['Lot Number', formData.lotNumber || 'TBD'],
       ['Lot Address', formData.lotAddress || 'TBD'],
       ['Home Plan', currentTemplate.name]
