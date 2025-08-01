@@ -1132,7 +1132,7 @@ export default function PurchaseOrder() {
     doc.setFont("helvetica", "normal");
     const signatureLineWidth = pageWidth - (leftMargin * 2);
     doc.line(leftMargin, yPos, leftMargin + signatureLineWidth, yPos);
-    yPos += 3.5; // Slightly more space
+    yPos += 8; // More space for buyer signatures
     
     // Two column layout for signatures
     const signatureColumnWidth = signatureLineWidth / 2;
@@ -1154,7 +1154,7 @@ export default function PurchaseOrder() {
     doc.text("Buyer", signatureRightX, yPos);
     doc.text(todayFormatted, signatureRightX + 60, yPos);
     
-    yPos += 25;
+    yPos += 15; // Reduced gap between buyer and acceptance signatures
     
     // Legal agreement section with two columns (50-50 split)
     doc.setFontSize(8);
