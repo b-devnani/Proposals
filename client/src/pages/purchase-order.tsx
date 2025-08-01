@@ -1146,6 +1146,36 @@ export default function PurchaseOrder() {
     doc.text("Buyer", signatureRightX, yPos);
     doc.text(todayFormatted, signatureRightX + 60, yPos);
     
+    yPos += 25;
+    
+    // Legal agreement section with two columns
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    
+    // Left column - Legal text
+    const legalText = [
+      "Once signed by Buyer and accepted by B&D Authorized Agent, this agreement will become a legal",
+      "binding agreement. Be sure that all provisions have been read and understood before signing. The",
+      "terms, conditions and provisions of the agreement are subject to acceptance by B&D Authorized Agent."
+    ];
+    
+    let legalTextY = yPos;
+    legalText.forEach(line => {
+      doc.text(line, signatureLeftX, legalTextY);
+      legalTextY += 10;
+    });
+    
+    // Right column - Acceptance signature
+    const acceptanceX = signatureRightX;
+    const acceptanceLineWidth = signatureColumnWidth - 20;
+    
+    // Signature line for acceptance
+    doc.line(acceptanceX, yPos + 10, acceptanceX + acceptanceLineWidth, yPos + 10);
+    
+    // Acceptance text below line
+    doc.text("Accepted By", acceptanceX, yPos + 18);
+    doc.text(todayFormatted, acceptanceX + 80, yPos + 18);
+    
     // Add footer to all pages
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
