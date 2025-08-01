@@ -1149,11 +1149,13 @@ export default function PurchaseOrder() {
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     
-    // Left column - Legal text (reduced line spacing)
+    // Left column - Legal text (constrained width to prevent overlap)
+    const legalTextWidth = signatureColumnWidth - 10; // Leave space for right column
     const legalText = [
-      "Once signed by Buyer and accepted by B&D Authorized Agent, this agreement will become a legal",
-      "binding agreement. Be sure that all provisions have been read and understood before signing. The",
-      "terms, conditions and provisions of the agreement are subject to acceptance by B&D Authorized Agent."
+      "Once signed by Buyer and accepted by B&D Authorized Agent, this agreement will",
+      "become a legal binding agreement. Be sure that all provisions have been read and",
+      "understood before signing. The terms, conditions and provisions of the agreement",
+      "are subject to acceptance by B&D Authorized Agent."
     ];
     
     let legalTextY = yPos;
@@ -1162,9 +1164,9 @@ export default function PurchaseOrder() {
       legalTextY += 8; // Reduced line spacing
     });
     
-    // Right column - Acceptance signature (moved further right to prevent overlap)
-    const acceptanceX = signatureRightX + 20; // More separation
-    const acceptanceLineWidth = signatureColumnWidth - 40;
+    // Right column - Acceptance signature
+    const acceptanceX = signatureRightX + 10; // Moderate separation
+    const acceptanceLineWidth = signatureColumnWidth - 30;
     
     // Signature line for acceptance
     doc.line(acceptanceX, yPos + 8, acceptanceX + acceptanceLineWidth, yPos + 8);
