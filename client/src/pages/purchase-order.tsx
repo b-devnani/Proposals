@@ -928,21 +928,26 @@ export default function PurchaseOrder() {
       doc.setFontSize(9);
       doc.setFont("helvetica", "bold");
       
-      // Table headers
+      // Table headers with enhanced styling
       const locationX = leftMargin;
-      const optionX = leftMargin + 80;
-      const subtotalX = leftMargin + 145;
+      const optionX = leftMargin + 75;
+      const subtotalX = leftMargin + 150;
       
-      doc.text("Location", locationX, yPos);
-      doc.text("Option", optionX, yPos);
-      doc.text("Subtotal", subtotalX, yPos);
-      yPos += 8;
+      // Header background (light gray)
+      doc.setFillColor(245, 245, 245);
+      doc.rect(leftMargin - 2, yPos - 4, 170, 10, 'F');
       
-      // Header underline
-      doc.setDrawColor(0, 0, 0);
-      doc.setLineWidth(0.5);
-      doc.line(leftMargin, yPos - 2, leftMargin + 165, yPos - 2);
-      yPos += 3;
+      doc.setTextColor(0, 0, 0);
+      doc.text("Location", locationX + 2, yPos + 2);
+      doc.text("Option", optionX + 2, yPos + 2);
+      doc.text("Subtotal", subtotalX + 2, yPos + 2);
+      yPos += 12;
+      
+      // Header border
+      doc.setDrawColor(150, 150, 150);
+      doc.setLineWidth(0.8);
+      doc.line(leftMargin - 2, yPos - 2, leftMargin + 168, yPos - 2);
+      yPos += 2;
       
       const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
       
@@ -957,7 +962,14 @@ export default function PurchaseOrder() {
         doc.setFont("helvetica", "normal");
         
         Object.entries(locations).forEach(([location, parentSelections], locationIndex) => {
-          let isFirstRowForLocation = true;
+          // Count total rows for this location to calculate vertical center
+          let totalRowsForLocation = 0;
+          Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
+            totalRowsForLocation += upgrades.length;
+          });
+          
+          const startYForLocation = yPos;
+          let currentRowIndex = 0;
           
           Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
             upgrades.forEach((upgrade) => {
@@ -968,39 +980,62 @@ export default function PurchaseOrder() {
                 // Repeat headers on new page
                 doc.setFontSize(9);
                 doc.setFont("helvetica", "bold");
-                doc.text("Location", locationX, yPos);
-                doc.text("Option", optionX, yPos);
-                doc.text("Subtotal", subtotalX, yPos);
-                yPos += 8;
-                doc.line(leftMargin, yPos - 2, leftMargin + 165, yPos - 2);
-                yPos += 3;
+                doc.setFillColor(245, 245, 245);
+                doc.rect(leftMargin - 2, yPos - 4, 170, 10, 'F');
+                doc.setTextColor(0, 0, 0);
+                doc.text("Location", locationX + 2, yPos + 2);
+                doc.text("Option", optionX + 2, yPos + 2);
+                doc.text("Subtotal", subtotalX + 2, yPos + 2);
+                yPos += 12;
+                doc.setDrawColor(150, 150, 150);
+                doc.line(leftMargin - 2, yPos - 2, leftMargin + 168, yPos - 2);
+                yPos += 2;
                 doc.setFont("helvetica", "normal");
               }
               
-              // Location (center-aligned, only show once per location)
-              if (isFirstRowForLocation) {
-                doc.setFont("helvetica", "normal");
-                const locationWidth = doc.getTextWidth(location);
-                const centerLocationX = locationX + (75 - locationWidth) / 2; // Center in column
-                doc.text(location, centerLocationX, yPos);
-                isFirstRowForLocation = false;
+              // Row background (alternating light gray)
+              if (currentRowIndex % 2 === 0) {
+                doc.setFillColor(250, 250, 250);
+                doc.rect(leftMargin - 2, yPos - 3, 170, 8, 'F');
               }
+              
+              // Location (center-aligned vertically and horizontally, only on middle row)
+              if (currentRowIndex === Math.floor(totalRowsForLocation / 2)) {
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(60, 60, 60);
+                const locationWidth = doc.getTextWidth(location);
+                const centerLocationX = locationX + (70 - locationWidth) / 2;
+                doc.text(location, centerLocationX, yPos);
+              }
+              
+              // Vertical separator lines
+              doc.setDrawColor(200, 200, 200);
+              doc.setLineWidth(0.3);
+              doc.line(leftMargin + 73, yPos - 3, leftMargin + 73, yPos + 5);
+              doc.line(leftMargin + 148, yPos - 3, leftMargin + 148, yPos + 5);
               
               // Option
               doc.setFont("helvetica", "normal");
-              const optionText = upgrade.choiceTitle.length > 45 ? 
-                upgrade.choiceTitle.substring(0, 42) + "..." : 
+              doc.setTextColor(0, 0, 0);
+              const optionText = upgrade.choiceTitle.length > 42 ? 
+                upgrade.choiceTitle.substring(0, 39) + "..." : 
                 upgrade.choiceTitle;
-              doc.text(optionText, optionX, yPos);
+              doc.text(optionText, optionX + 2, yPos);
               
               // Subtotal (right-aligned)
               const price = `$${parseInt(upgrade.clientPrice).toLocaleString()}`;
               const priceWidth = doc.getTextWidth(price);
-              doc.text(price, subtotalX + 20 - priceWidth, yPos);
+              doc.text(price, subtotalX + 15 - priceWidth, yPos);
               
-              yPos += 6;
+              yPos += 7;
+              currentRowIndex++;
             });
           });
+          
+          // Bottom border for location group
+          doc.setDrawColor(200, 200, 200);
+          doc.setLineWidth(0.5);
+          doc.line(leftMargin - 2, yPos - 1, leftMargin + 168, yPos - 1);
         });
         yPos += 3; // Extra space between categories
       });
