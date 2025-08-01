@@ -980,6 +980,20 @@ export default function PurchaseOrder() {
           const startYForLocation = yPos;
           let currentRowIndex = 0;
           
+          // First pass: draw location merged cell background
+          const locationCellHeight = totalRowsForLocation * rowHeight;
+          doc.setFillColor(248, 248, 248); // Slightly different shade for location cells
+          doc.setDrawColor(150, 150, 150);
+          doc.setLineWidth(0.5);
+          doc.rect(locationX, yPos - 2, locationWidth, locationCellHeight, 'FD');
+          
+          // Draw location text centered in merged cell
+          doc.setTextColor(60, 60, 60);
+          const locationTextWidth = doc.getTextWidth(location);
+          const centerLocationX = locationX + (locationWidth - locationTextWidth) / 2;
+          const centerLocationY = yPos + (locationCellHeight / 2) - 1;
+          doc.text(location, centerLocationX, centerLocationY);
+          
           Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
             upgrades.forEach((upgrade) => {
               if (yPos > pageHeight - bottomMargin - 20) { // Add new page if needed
@@ -1003,31 +1017,22 @@ export default function PurchaseOrder() {
                 doc.setFont("helvetica", "normal");
               }
               
-              // Row background (alternating light gray)
+              // Row background for option and subtotal cells only (alternating)
               if (currentRowIndex % 2 === 0) {
                 doc.setFillColor(250, 250, 250);
               } else {
                 doc.setFillColor(255, 255, 255);
               }
               
-              // Draw row with borders (no overlapping lines)
+              // Draw option cell
               doc.setDrawColor(150, 150, 150);
               doc.setLineWidth(0.5);
-              doc.rect(locationX, yPos - 2, tableWidth, rowHeight, 'FD');
+              doc.rect(optionX, yPos - 2, optionWidth, rowHeight, 'FD');
               
-              // Internal vertical borders only
-              doc.line(locationX + locationWidth, yPos - 2, locationX + locationWidth, yPos + 5);
-              doc.line(subtotalX, yPos - 2, subtotalX, yPos + 5);
+              // Draw subtotal cell
+              doc.rect(subtotalX, yPos - 2, subtotalWidth, rowHeight, 'FD');
               
-              // Location (center-aligned vertically and horizontally, only on middle row)
-              if (currentRowIndex === Math.floor(totalRowsForLocation / 2)) {
-                doc.setTextColor(60, 60, 60);
-                const locationTextWidth = doc.getTextWidth(location);
-                const centerLocationX = locationX + (locationWidth - locationTextWidth) / 2;
-                doc.text(location, centerLocationX, yPos + 1);
-              }
-              
-              // Option
+              // Option text
               doc.setTextColor(0, 0, 0);
               const optionText = upgrade.choiceTitle.length > 58 ? 
                 upgrade.choiceTitle.substring(0, 55) + "..." : 
@@ -1037,7 +1042,6 @@ export default function PurchaseOrder() {
               // Subtotal (right-aligned to match base pricing alignment)
               const price = `$${parseInt(upgrade.clientPrice).toLocaleString()}`;
               const priceWidth = doc.getTextWidth(price);
-              // Align with base pricing right column (rightColumnX + rightColumnWidth - valueWidth - 5)
               const rightAlignX = rightColumnX + rightColumnWidth - priceWidth - 5;
               doc.text(price, rightAlignX, yPos + 1);
               
