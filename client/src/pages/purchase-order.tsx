@@ -1127,7 +1127,7 @@ export default function PurchaseOrder() {
     doc.setFont("helvetica", "normal");
     const signatureLineWidth = pageWidth - (leftMargin * 2);
     doc.line(leftMargin, yPos, leftMargin + signatureLineWidth, yPos);
-    yPos += 8; // Closer to the line
+    yPos += 3; // Very close to the line
     
     // Two column layout for signatures
     const signatureColumnWidth = signatureLineWidth / 2;
