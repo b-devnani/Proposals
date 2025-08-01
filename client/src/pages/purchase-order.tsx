@@ -806,22 +806,29 @@ export default function PurchaseOrder() {
     
     const doc = new jsPDF();
     
-    // Add logo in top left corner
+    // Define consistent margins
+    const leftMargin = 15;
+    const rightMargin = 15;
+    const topMargin = 15;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const contentWidth = pageWidth - leftMargin - rightMargin;
+    
+    // Add logo in top left corner with margin
     try {
-      doc.addImage(logoPath, 'PNG', 15, 10, 40, 20); // x, y, width, height
+      doc.addImage(logoPath, 'PNG', leftMargin, topMargin, 40, 20); // x, y, width, height
     } catch (error) {
       console.log("Logo could not be added to PDF:", error);
     }
     
-    // Title - positioned to the right of the logo
+    // Title - positioned to the right of the logo with proper spacing
     doc.setFontSize(18); // 2 points smaller than original 20
     doc.setFont("helvetica", "bold");
-    doc.text("Exhibit C - New Home Pricing Proposal", 65, 22); // Positioned to right of logo
+    doc.text("Exhibit C - New Home Pricing Proposal", leftMargin + 50, topMargin + 12); // Positioned to right of logo
     
-    // Customer Information - adjusted positioning
+    // Customer Information - adjusted positioning with margins
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("CUSTOMER INFORMATION", 20, 55);
+    doc.text("CUSTOMER INFORMATION", leftMargin, topMargin + 45);
     
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
@@ -834,9 +841,9 @@ export default function PurchaseOrder() {
       `Home Plan: ${currentTemplate.name}`
     ];
     
-    let yPos = 65;
+    let yPos = topMargin + 55;
     customerInfo.forEach(info => {
-      doc.text(info, 20, yPos);
+      doc.text(info, leftMargin, yPos);
       yPos += 8;
     });
     
@@ -844,7 +851,7 @@ export default function PurchaseOrder() {
     yPos += 10;
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("BASE PRICING", 20, yPos);
+    doc.text("BASE PRICING", leftMargin, yPos);
     yPos += 10;
     
     doc.setFontSize(11);
@@ -861,22 +868,22 @@ export default function PurchaseOrder() {
     basePricing.push([`Design Studio Allowance:`, `$${parseInt(formData.designStudioAllowance || "0").toLocaleString()}`]);
     
     basePricing.forEach(([label, value]) => {
-      doc.text(label, 20, yPos);
-      doc.text(value, 120, yPos);
+      doc.text(label, leftMargin, yPos);
+      doc.text(value, leftMargin + 105, yPos);
       yPos += 8;
     });
     
     // Base Subtotal
     yPos += 5;
     doc.setFont("helvetica", "bold");
-    doc.text("Base Subtotal:", 20, yPos);
-    doc.text(`$${baseSubtotal.toLocaleString()}`, 120, yPos);
+    doc.text("Base Subtotal:", leftMargin, yPos);
+    doc.text(`$${baseSubtotal.toLocaleString()}`, leftMargin + 105, yPos);
     yPos += 15;
     
     // Selections
     if (selectedUpgradeItems.length > 0) {
       doc.setFontSize(14);
-      doc.text("SELECTED OPTIONS", 20, yPos);
+      doc.text("SELECTED OPTIONS", leftMargin, yPos);
       yPos += 10;
       
       doc.setFontSize(9);
@@ -886,27 +893,27 @@ export default function PurchaseOrder() {
       
       Object.entries(groupedUpgrades).forEach(([category, locations]) => {
         doc.setFont("helvetica", "bold");
-        doc.text(category.toUpperCase(), 20, yPos);
+        doc.text(category.toUpperCase(), leftMargin, yPos);
         yPos += 6;
         
         Object.entries(locations).forEach(([location, parentSelections]) => {
           doc.setFont("helvetica", "italic");
-          doc.text(`  ${location}`, 25, yPos);
+          doc.text(`  ${location}`, leftMargin + 10, yPos);
           yPos += 5;
           
           Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
             upgrades.forEach((upgrade) => {
               if (yPos > 270) { // Add new page if needed
                 doc.addPage();
-                yPos = 20;
+                yPos = topMargin;
               }
               
               doc.setFont("helvetica", "normal");
               const upgradeText = `    ${upgrade.choiceTitle}`;
               const price = `$${parseInt(upgrade.clientPrice).toLocaleString()}`;
               
-              doc.text(upgradeText.substring(0, 70), 30, yPos);
-              doc.text(price, 160, yPos);
+              doc.text(upgradeText.substring(0, 70), leftMargin + 15, yPos);
+              doc.text(price, leftMargin + 145, yPos);
               yPos += 5;
             });
           });
@@ -918,32 +925,32 @@ export default function PurchaseOrder() {
       yPos += 5;
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text("Selections Subtotal:", 20, yPos);
-      doc.text(`$${upgradesTotal.toLocaleString()}`, 120, yPos);
+      doc.text("Selections Subtotal:", leftMargin, yPos);
+      doc.text(`$${upgradesTotal.toLocaleString()}`, leftMargin + 105, yPos);
       yPos += 15;
     }
     
     // Grand Total
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("GRAND TOTAL:", 20, yPos);
-    doc.text(`$${totalPrice.toLocaleString()}`, 120, yPos);
+    doc.text("GRAND TOTAL:", leftMargin, yPos);
+    doc.text(`$${totalPrice.toLocaleString()}`, leftMargin + 105, yPos);
     yPos += 20;
     
     // Signature Section
     doc.setFontSize(10);
     doc.setFont("helvetica", "italic");
-    doc.text("By signing below, both parties agree to the terms and total amount shown above.", 20, yPos);
+    doc.text("By signing below, both parties agree to the terms and total amount shown above.", leftMargin, yPos);
     yPos += 20;
     
     doc.setFont("helvetica", "normal");
-    doc.text("Customer Signature: ____________________________", 20, yPos);
+    doc.text("Customer Signature: ____________________________", leftMargin, yPos);
     yPos += 10;
-    doc.text("Date: ____________________________", 20, yPos);
+    doc.text("Date: ____________________________", leftMargin, yPos);
     yPos += 15;
-    doc.text("Sales Representative: ____________________________", 20, yPos);
+    doc.text("Sales Representative: ____________________________", leftMargin, yPos);
     yPos += 10;
-    doc.text("Date: ____________________________", 20, yPos);
+    doc.text("Date: ____________________________", leftMargin, yPos);
     
     // Save PDF
     doc.save(`${formData.buyerLastName || 'Customer'}_Proposal_${new Date().toISOString().split('T')[0]}.pdf`);

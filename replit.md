@@ -133,6 +133,7 @@ Three main entities:
 - August 01, 2025. Updated PDF proposal generation with company logo placement in top left corner using updated logo asset
 - August 01, 2025. Changed all instances of "Upgrades" to "Selections" throughout the web application and PDF/Excel exports for consistent terminology
 - August 01, 2025. Updated PDF proposal header: moved title to right of logo, renamed to "Exhibit C - New Home Pricing Proposal", reduced font size by 2 points
+- August 01, 2025. Implemented consistent narrow margins (15pt) throughout entire PDF document for professional formatting
 
 ## User Preferences
 
