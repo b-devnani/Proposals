@@ -856,38 +856,38 @@ export default function PurchaseOrder() {
       ['Home Plan', currentTemplate.name]
     ];
     
+    // Two-column layout: Customer Information (left) and Base Pricing (right)
     let yPos = topMargin + 22; // Start immediately after logo/title line
+    const leftColumnX = leftMargin;
+    const rightColumnX = leftMargin + (contentWidth / 2) + 10; // Right column starts at center + spacing
+    
+    // Customer Information - Left Column
+    let leftYPos = yPos;
     customerInfoData.forEach(([label, value]) => {
       // Label - light gray, normal weight
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100, 100, 100); // Light gray
-      doc.text(label, leftMargin, yPos);
+      doc.text(label, leftColumnX, leftYPos);
       
       // Value - black, bold, aligned with spacing
       doc.setFont("helvetica", "bold");
       doc.setTextColor(0, 0, 0); // Black
-      doc.text(value, leftMargin + 80, yPos); // Aligned spacing
+      doc.text(value, leftColumnX + 80, leftYPos); // Aligned spacing
       
       // Light gray underline
       doc.setDrawColor(200, 200, 200); // Light gray
       doc.setLineWidth(0.2);
-      doc.line(leftMargin + 80, yPos + 2, leftMargin + 180, yPos + 2);
+      doc.line(leftColumnX + 80, leftYPos + 2, leftColumnX + 160, leftYPos + 2);
       
-      yPos += 7; // Reduced line spacing for compactness
+      leftYPos += 7; // Reduced line spacing for compactness
     });
     
-    // Reset text color to black for rest of document
-    doc.setTextColor(0, 0, 0);
-    
-    // Base Pricing - reduced spacing
-    yPos += 6; // Minimal space before base pricing
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("BASE PRICING", leftMargin, yPos);
-    yPos += 8; // Reduced spacing after header
-    
+    // Base Pricing - Right Column (no header)
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0); // Reset to black
+    
+    let rightYPos = yPos;
     const basePricing = [
       [`Base Price:`, `$${parseInt(currentTemplate.basePrice).toLocaleString()}`],
       [`Lot Premium:`, `$${parseInt(formData.lotPremium || "0").toLocaleString()}`],
@@ -900,17 +900,13 @@ export default function PurchaseOrder() {
     basePricing.push([`Design Studio Allowance:`, `$${parseInt(formData.designStudioAllowance || "0").toLocaleString()}`]);
     
     basePricing.forEach(([label, value]) => {
-      doc.text(label, leftMargin, yPos);
-      doc.text(value, leftMargin + 105, yPos);
-      yPos += 7; // Reduced line spacing
+      doc.text(label, rightColumnX, rightYPos);
+      doc.text(value, rightColumnX + 85, rightYPos);
+      rightYPos += 7; // Reduced line spacing
     });
     
-    // Base Subtotal
-    yPos += 3; // Reduced spacing before subtotal
-    doc.setFont("helvetica", "bold");
-    doc.text("Base Subtotal:", leftMargin, yPos);
-    doc.text(`$${baseSubtotal.toLocaleString()}`, leftMargin + 105, yPos);
-    yPos += 10; // Reduced spacing after subtotal
+    // Set yPos to the maximum of both columns for next section
+    yPos = Math.max(leftYPos, rightYPos) + 10;
     
     // Selections
     if (selectedUpgradeItems.length > 0) {
