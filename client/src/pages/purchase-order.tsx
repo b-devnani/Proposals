@@ -632,11 +632,11 @@ export default function PurchaseOrder() {
     
     currentRow++;
     
-    // Upgrades Subtotal
+    // Options Total
     const upgradesSubtotalRow = worksheet.getRow(currentRow);
     upgradesSubtotalRow.height = 22;
     const upgradesSubtotalLabel = worksheet.getCell(`A${currentRow}`);
-    upgradesSubtotalLabel.value = 'Selections Subtotal:';
+    upgradesSubtotalLabel.value = 'Options Total:';
     upgradesSubtotalLabel.font = { name: 'Calibri', bold: true, size: 11 };
     upgradesSubtotalLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } };
     upgradesSubtotalLabel.alignment = { horizontal: 'right', vertical: 'middle' };
@@ -660,11 +660,11 @@ export default function PurchaseOrder() {
     
     currentRow++;
     
-    // Grand Total
+    // Total Sales Price w/Options
     const grandTotalRow = worksheet.getRow(currentRow);
     grandTotalRow.height = 30;
     const grandTotalLabel = worksheet.getCell(`A${currentRow}`);
-    grandTotalLabel.value = 'GRAND TOTAL:';
+    grandTotalLabel.value = 'Total Sales Price w/Options:';
     grandTotalLabel.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
     grandTotalLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
     grandTotalLabel.alignment = { horizontal: 'right', vertical: 'middle' };
@@ -1087,13 +1087,13 @@ export default function PurchaseOrder() {
         });
       });
       
-      // Selections Subtotal
+      // Options Total
       yPos += 5;
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
       // Align label with options column
       const selectionsOptionX = leftMargin + 10 + 45; // rowNumWidth + locationWidth
-      doc.text("Selections Subtotal:", selectionsOptionX, yPos);
+      doc.text("Options Total:", selectionsOptionX, yPos);
       // Align value with subtotals column
       const selectionsSubtotalValue = `$${upgradesTotal.toLocaleString()}`;
       const selectionsSubtotalWidth = doc.getTextWidth(selectionsSubtotalValue);
@@ -1103,12 +1103,12 @@ export default function PurchaseOrder() {
       yPos += 8; // Reduced spacing
     }
     
-    // Grand Total
+    // Total Sales Price w/Options
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     // Align label with options column
     const grandTotalOptionX = leftMargin + 10 + 45; // rowNumWidth + locationWidth
-    doc.text("GRAND TOTAL:", grandTotalOptionX, yPos);
+    doc.text("Total Sales Price w/Options:", grandTotalOptionX, yPos);
     // Align value with subtotals column
     const grandTotalValue = `$${totalPrice.toLocaleString()}`;
     const grandTotalWidth = doc.getTextWidth(grandTotalValue);
