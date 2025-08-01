@@ -923,41 +923,86 @@ export default function PurchaseOrder() {
     // Set yPos to the maximum of both columns for next section
     yPos = Math.max(leftYPos, rightYPos) + 10;
     
-    // Selections
+    // Selections Table
     if (selectedUpgradeItems.length > 0) {
       doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
+      doc.setFont("helvetica", "bold");
+      
+      // Table headers
+      const locationX = leftMargin;
+      const optionX = leftMargin + 80;
+      const subtotalX = leftMargin + 145;
+      
+      doc.text("Location", locationX, yPos);
+      doc.text("Option", optionX, yPos);
+      doc.text("Subtotal", subtotalX, yPos);
+      yPos += 8;
+      
+      // Header underline
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.line(leftMargin, yPos - 2, leftMargin + 165, yPos - 2);
+      yPos += 3;
       
       const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
       
       Object.entries(groupedUpgrades).forEach(([category, locations]) => {
+        // Category header row
         doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
         doc.text(category.toUpperCase(), leftMargin, yPos);
-        yPos += 6;
+        yPos += 8;
         
-        Object.entries(locations).forEach(([location, parentSelections]) => {
-          doc.setFont("helvetica", "italic");
-          doc.text(`  ${location}`, leftMargin + 10, yPos);
-          yPos += 5;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        
+        Object.entries(locations).forEach(([location, parentSelections], locationIndex) => {
+          let isFirstRowForLocation = true;
           
           Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
             upgrades.forEach((upgrade) => {
               if (yPos > pageHeight - bottomMargin - 20) { // Add new page if needed
                 doc.addPage();
                 yPos = topMargin;
+                
+                // Repeat headers on new page
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "bold");
+                doc.text("Location", locationX, yPos);
+                doc.text("Option", optionX, yPos);
+                doc.text("Subtotal", subtotalX, yPos);
+                yPos += 8;
+                doc.line(leftMargin, yPos - 2, leftMargin + 165, yPos - 2);
+                yPos += 3;
+                doc.setFont("helvetica", "normal");
               }
               
-              doc.setFont("helvetica", "normal");
-              const upgradeText = `    ${upgrade.choiceTitle}`;
-              const price = `$${parseInt(upgrade.clientPrice).toLocaleString()}`;
+              // Location (center-aligned, only show once per location)
+              if (isFirstRowForLocation) {
+                doc.setFont("helvetica", "normal");
+                const locationWidth = doc.getTextWidth(location);
+                const centerLocationX = locationX + (75 - locationWidth) / 2; // Center in column
+                doc.text(location, centerLocationX, yPos);
+                isFirstRowForLocation = false;
+              }
               
-              doc.text(upgradeText.substring(0, 70), leftMargin + 15, yPos);
-              doc.text(price, leftMargin + 145, yPos);
-              yPos += 5;
+              // Option
+              doc.setFont("helvetica", "normal");
+              const optionText = upgrade.choiceTitle.length > 45 ? 
+                upgrade.choiceTitle.substring(0, 42) + "..." : 
+                upgrade.choiceTitle;
+              doc.text(optionText, optionX, yPos);
+              
+              // Subtotal (right-aligned)
+              const price = `$${parseInt(upgrade.clientPrice).toLocaleString()}`;
+              const priceWidth = doc.getTextWidth(price);
+              doc.text(price, subtotalX + 20 - priceWidth, yPos);
+              
+              yPos += 6;
             });
           });
         });
-        yPos += 5;
+        yPos += 3; // Extra space between categories
       });
       
       // Selections Subtotal
