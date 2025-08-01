@@ -920,6 +920,16 @@ export default function PurchaseOrder() {
       rightYPos += 7; // Tighter spacing to match customer info
     });
     
+    // Define table dimensions first (needed for alignment)
+    const rowNumX = leftMargin;
+    const rowNumWidth = 10;
+    const locationX = rowNumX + rowNumWidth;
+    const locationWidth = 45;
+    const optionX = locationX + locationWidth;
+    const optionWidth = 100;
+    const subtotalX = optionX + optionWidth;
+    const subtotalWidth = 30;
+    
     // Set yPos to the maximum of both columns for next section
     yPos = Math.max(leftYPos, rightYPos) + 10;
     
@@ -927,16 +937,6 @@ export default function PurchaseOrder() {
     if (selectedUpgradeItems.length > 0) {
       doc.setFontSize(8);
       doc.setFont("helvetica", "bold");
-      
-      // Table headers with proper borders and alignment
-      const rowNumX = leftMargin;
-      const rowNumWidth = 10;
-      const locationX = rowNumX + rowNumWidth;
-      const locationWidth = 45;
-      const optionX = locationX + locationWidth;
-      const optionWidth = 100;
-      const subtotalX = optionX + optionWidth;
-      const subtotalWidth = 30;
       const tableWidth = rowNumWidth + locationWidth + optionWidth + subtotalWidth;
       const rowHeight = 7;
       
