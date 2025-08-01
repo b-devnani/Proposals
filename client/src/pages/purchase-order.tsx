@@ -823,12 +823,12 @@ export default function PurchaseOrder() {
       console.log("Logo could not be added to PDF:", error);
     }
     
-    // Title - positioned to the right of the logo with reduced spacing
-    doc.setFontSize(14); // 4 points smaller (was 18, now 14)
+    // Title - positioned to the right of the logo with minimal spacing
+    doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("Exhibit C - New Home Pricing Proposal", leftMargin + 50, topMargin + 8); // Reduced vertical spacing
+    doc.text("Exhibit C - New Home Pricing Proposal", leftMargin + 50, topMargin + 5); // Minimal spacing from top
     
-    // Customer Information - positioned directly after logo
+    // Customer Information - positioned immediately after logo with no gap
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     const customerInfo = [
@@ -840,18 +840,18 @@ export default function PurchaseOrder() {
       `Home Plan: ${currentTemplate.name}`
     ];
     
-    let yPos = topMargin + 35; // Start right after logo area
+    let yPos = topMargin + 25; // Start immediately after logo with minimal gap
     customerInfo.forEach(info => {
       doc.text(info, leftMargin, yPos);
-      yPos += 8;
+      yPos += 7; // Reduced line spacing for compactness
     });
     
-    // Base Pricing
-    yPos += 10;
+    // Base Pricing - reduced spacing
+    yPos += 6; // Minimal space before base pricing
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     doc.text("BASE PRICING", leftMargin, yPos);
-    yPos += 10;
+    yPos += 8; // Reduced spacing after header
     
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
@@ -869,21 +869,21 @@ export default function PurchaseOrder() {
     basePricing.forEach(([label, value]) => {
       doc.text(label, leftMargin, yPos);
       doc.text(value, leftMargin + 105, yPos);
-      yPos += 8;
+      yPos += 7; // Reduced line spacing
     });
     
     // Base Subtotal
-    yPos += 5;
+    yPos += 3; // Reduced spacing before subtotal
     doc.setFont("helvetica", "bold");
     doc.text("Base Subtotal:", leftMargin, yPos);
     doc.text(`$${baseSubtotal.toLocaleString()}`, leftMargin + 105, yPos);
-    yPos += 15;
+    yPos += 10; // Reduced spacing after subtotal
     
     // Selections
     if (selectedUpgradeItems.length > 0) {
       doc.setFontSize(14);
       doc.text("SELECTED OPTIONS", leftMargin, yPos);
-      yPos += 10;
+      yPos += 8; // Reduced spacing after header
       
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
