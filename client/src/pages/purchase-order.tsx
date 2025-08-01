@@ -1121,7 +1121,7 @@ export default function PurchaseOrder() {
     doc.setFont("helvetica", "normal");
     const signatureLineWidth = pageWidth - (leftMargin * 2);
     doc.line(leftMargin, yPos, leftMargin + signatureLineWidth, yPos);
-    yPos += 3; // Very close to the line
+    yPos += 3.5; // Slightly more space
     
     // Two column layout for signatures
     const signatureColumnWidth = signatureLineWidth / 2;
@@ -1131,6 +1131,9 @@ export default function PurchaseOrder() {
     // Get today's date in MM/DD/YYYY format
     const today = new Date();
     const todayFormatted = `${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getDate().toString().padStart(2, '0')}/${today.getFullYear()}`;
+    
+    // Smaller font for buyer signatures
+    doc.setFontSize(9);
     
     // Left column - First Buyer
     doc.text("Buyer", signatureLeftX, yPos);
@@ -1143,10 +1146,10 @@ export default function PurchaseOrder() {
     yPos += 25;
     
     // Legal agreement section with two columns
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     
-    // Left column - Legal text
+    // Left column - Legal text (reduced line spacing)
     const legalText = [
       "Once signed by Buyer and accepted by B&D Authorized Agent, this agreement will become a legal",
       "binding agreement. Be sure that all provisions have been read and understood before signing. The",
@@ -1156,19 +1159,20 @@ export default function PurchaseOrder() {
     let legalTextY = yPos;
     legalText.forEach(line => {
       doc.text(line, signatureLeftX, legalTextY);
-      legalTextY += 10;
+      legalTextY += 8; // Reduced line spacing
     });
     
-    // Right column - Acceptance signature
-    const acceptanceX = signatureRightX;
-    const acceptanceLineWidth = signatureColumnWidth - 20;
+    // Right column - Acceptance signature (moved further right to prevent overlap)
+    const acceptanceX = signatureRightX + 20; // More separation
+    const acceptanceLineWidth = signatureColumnWidth - 40;
     
     // Signature line for acceptance
-    doc.line(acceptanceX, yPos + 10, acceptanceX + acceptanceLineWidth, yPos + 10);
+    doc.line(acceptanceX, yPos + 8, acceptanceX + acceptanceLineWidth, yPos + 8);
     
     // Acceptance text below line
-    doc.text("Accepted By", acceptanceX, yPos + 18);
-    doc.text(todayFormatted, acceptanceX + 80, yPos + 18);
+    doc.setFontSize(9);
+    doc.text("Accepted By", acceptanceX, yPos + 16);
+    doc.text(todayFormatted, acceptanceX + 60, yPos + 16);
     
     // Add footer to all pages
     const totalPages = doc.getNumberOfPages();
