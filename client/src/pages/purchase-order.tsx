@@ -925,10 +925,6 @@ export default function PurchaseOrder() {
     
     // Selections
     if (selectedUpgradeItems.length > 0) {
-      doc.setFontSize(14);
-      doc.text("SELECTED OPTIONS", leftMargin, yPos);
-      yPos += 8; // Reduced spacing after header
-      
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
       
