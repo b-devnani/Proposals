@@ -1140,11 +1140,13 @@ export default function PurchaseOrder() {
     
     // Left column - First Buyer
     doc.text("Buyer", signatureLeftX, yPos);
-    doc.text(todayFormatted, signatureLeftX + 80, yPos);
+    doc.text("Today's Date", signatureLeftX + 50, yPos);
+    doc.text(todayFormatted, signatureLeftX + 120, yPos);
     
     // Right column - Second Buyer  
     doc.text("Buyer", signatureRightX, yPos);
-    doc.text(todayFormatted, signatureRightX + 80, yPos);
+    doc.text("Today's Date", signatureRightX + 50, yPos);
+    doc.text(todayFormatted, signatureRightX + 120, yPos);
     
     // Add footer to all pages
     const totalPages = doc.getNumberOfPages();
