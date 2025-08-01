@@ -109,8 +109,8 @@ export function UpgradeTable({
       <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Available Upgrades</h2>
-            <p className="text-sm text-gray-600">Select upgrades to add to your proposal</p>
+            <h2 className="text-lg font-semibold text-gray-900">Available Selections</h2>
+            <p className="text-sm text-gray-600">Select options to add to your proposal</p>
           </div>
           <Button
             variant="outline"

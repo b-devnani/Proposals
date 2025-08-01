@@ -131,6 +131,7 @@ Three main entities:
 - August 01, 2025. Enhanced form inputs: set Rolling Meadows as default community selection
 - August 01, 2025. Implemented lot number dropdown with 12 Rolling Meadows lots (RM03-RM32) and auto-populating Kayla Drive addresses
 - August 01, 2025. Updated PDF proposal generation with company logo placement in top left corner using updated logo asset
+- August 01, 2025. Changed all instances of "Upgrades" to "Selections" throughout the web application and PDF/Excel exports for consistent terminology
 
 ## User Preferences
 

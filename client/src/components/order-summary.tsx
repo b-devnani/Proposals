@@ -105,18 +105,18 @@ export function OrderSummary({
                   <span className="font-medium text-purple-600">{formatCurrency(designStudioAllowance)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span>Upgrades ({selectedUpgrades.length}):</span>
+                  <span>Selections ({selectedUpgrades.length}):</span>
                   <span className="font-medium">{formatCurrency(upgradesTotal)}</span>
                 </div>
                 <div className="border-t pt-1 mt-1">
                   <div className="flex justify-between items-center font-semibold">
-                    <span>Upgrades Subtotal:</span>
+                    <span>Selections Subtotal:</span>
                     <span className="text-blue-600">{formatCurrency(upgradesSubtotal)}</span>
                   </div>
                 </div>
                 {showCostColumns && selectedUpgrades.length > 0 && (
                   <div className="flex justify-between items-center text-xs text-gray-500">
-                    <span>Upgrades Cost:</span>
+                    <span>Selections Cost:</span>
                     <span className="font-medium">{formatCurrency(upgradesBuilderCost)}</span>
                   </div>
                 )}

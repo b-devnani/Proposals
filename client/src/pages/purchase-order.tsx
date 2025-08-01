@@ -463,7 +463,7 @@ export default function PurchaseOrder() {
     const upgradesHeaderRow = worksheet.getRow(currentRow);
     upgradesHeaderRow.height = 25;
     const upgradesHeaderCell = worksheet.getCell(`A${currentRow}`);
-    upgradesHeaderCell.value = 'SELECTED UPGRADES';
+    upgradesHeaderCell.value = 'SELECTED OPTIONS';
     upgradesHeaderCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
     upgradesHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
     upgradesHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
@@ -482,7 +482,7 @@ export default function PurchaseOrder() {
     upgradeHeaderRow.height = 20;
     
     const optionHeaderCell = worksheet.getCell(`A${currentRow}`);
-    optionHeaderCell.value = 'Upgrade Description';
+    optionHeaderCell.value = 'Selection Description';
     optionHeaderCell.font = { name: 'Calibri', bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
     optionHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E5C8A' } };
     optionHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
@@ -622,7 +622,7 @@ export default function PurchaseOrder() {
     const upgradesSubtotalRow = worksheet.getRow(currentRow);
     upgradesSubtotalRow.height = 22;
     const upgradesSubtotalLabel = worksheet.getCell(`A${currentRow}`);
-    upgradesSubtotalLabel.value = 'Upgrades Subtotal:';
+    upgradesSubtotalLabel.value = 'Selections Subtotal:';
     upgradesSubtotalLabel.font = { name: 'Calibri', bold: true, size: 11 };
     upgradesSubtotalLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } };
     upgradesSubtotalLabel.alignment = { horizontal: 'right', vertical: 'middle' };
@@ -873,10 +873,10 @@ export default function PurchaseOrder() {
     doc.text(`$${baseSubtotal.toLocaleString()}`, 120, yPos);
     yPos += 15;
     
-    // Upgrades
+    // Selections
     if (selectedUpgradeItems.length > 0) {
       doc.setFontSize(14);
-      doc.text("SELECTED UPGRADES", 20, yPos);
+      doc.text("SELECTED OPTIONS", 20, yPos);
       yPos += 10;
       
       doc.setFontSize(9);
@@ -914,11 +914,11 @@ export default function PurchaseOrder() {
         yPos += 5;
       });
       
-      // Upgrades Subtotal
+      // Selections Subtotal
       yPos += 5;
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text("Upgrades Subtotal:", 20, yPos);
+      doc.text("Selections Subtotal:", 20, yPos);
       doc.text(`$${upgradesTotal.toLocaleString()}`, 120, yPos);
       yPos += 15;
     }
