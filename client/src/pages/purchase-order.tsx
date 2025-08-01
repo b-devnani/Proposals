@@ -820,10 +820,10 @@ export default function PurchaseOrder() {
       console.log("Logo could not be added to PDF:", error);
     }
     
-    // Title - positioned to the right of the logo with proper spacing
-    doc.setFontSize(18); // 2 points smaller than original 20
+    // Title - positioned to the right of the logo with reduced spacing
+    doc.setFontSize(14); // 4 points smaller (was 18, now 14)
     doc.setFont("helvetica", "bold");
-    doc.text("Exhibit C - New Home Pricing Proposal", leftMargin + 50, topMargin + 12); // Positioned to right of logo
+    doc.text("Exhibit C - New Home Pricing Proposal", leftMargin + 50, topMargin + 8); // Reduced vertical spacing
     
     // Customer Information - adjusted positioning with margins
     doc.setFontSize(14);
