@@ -915,7 +915,7 @@ export default function PurchaseOrder() {
       const rightAlignX = rightColumnX + rightColumnWidth - valueWidth - 5;
       doc.text(value, rightAlignX, rightYPos);
       
-      rightYPos += 15; // Generous spacing to match customer info visual rhythm
+      rightYPos += 10; // Reduced spacing to prevent overlap
     });
     
     // Set yPos to the maximum of both columns for next section
