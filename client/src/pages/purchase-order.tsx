@@ -846,7 +846,7 @@ export default function PurchaseOrder() {
     doc.text(titleText, centerX, topMargin + 10); // Center aligned and positioned at logo center height
     
     // Customer Information - positioned immediately after logo with no gap
-    doc.setFontSize(8); // Reduced by 3 points (was 11)
+    doc.setFontSize(9); // Optimal size for readability
     const customerInfoData = [
       ['Date', new Date().toLocaleDateString()],
       ['Customer Name', formData.buyerLastName || 'Not specified'],
@@ -856,36 +856,37 @@ export default function PurchaseOrder() {
       ['Home Plan', currentTemplate.name]
     ];
     
-    // Two-column layout: Customer Information (left) and Base Pricing (right) - compact and readable
+    // Two-column layout: Optimized for readability and aesthetics
     let yPos = topMargin + 22; // Start immediately after logo/title line
     const leftColumnX = leftMargin;
-    const leftColumnWidth = 110; // Fixed width for customer info
-    const rightColumnX = leftColumnX + leftColumnWidth + 20; // Right column with spacing
-    const rightColumnWidth = contentWidth - leftColumnWidth - 20; // Remaining width
+    const leftColumnWidth = 130; // Optimal width for customer info readability
+    const columnGap = 25; // Generous spacing between columns
+    const rightColumnX = leftColumnX + leftColumnWidth + columnGap;
+    const rightColumnWidth = contentWidth - leftColumnWidth - columnGap;
     
     // Customer Information - Left Column
     let leftYPos = yPos;
     customerInfoData.forEach(([label, value]) => {
-      // Label - light gray, normal weight
+      // Label - medium gray for better contrast
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(100, 100, 100); // Light gray
+      doc.setTextColor(80, 80, 80); // Medium gray for better readability
       doc.text(label, leftColumnX, leftYPos);
       
-      // Value - black, bold, aligned with compact spacing
+      // Value - black, bold, with optimal spacing
       doc.setFont("helvetica", "bold");
       doc.setTextColor(0, 0, 0); // Black
-      doc.text(value, leftColumnX + 50, leftYPos); // Compact spacing
+      doc.text(value, leftColumnX + 55, leftYPos); // Optimal spacing for readability
       
-      // Light gray underline - adjusted for fixed column width
-      doc.setDrawColor(200, 200, 200); // Light gray
-      doc.setLineWidth(0.2);
-      doc.line(leftColumnX + 50, leftYPos + 2, leftColumnX + leftColumnWidth - 5, leftYPos + 2);
+      // Subtle underline for visual separation
+      doc.setDrawColor(180, 180, 180); // Slightly darker gray
+      doc.setLineWidth(0.3);
+      doc.line(leftColumnX + 55, leftYPos + 2.5, leftColumnX + leftColumnWidth - 3, leftYPos + 2.5);
       
-      leftYPos += 9; // Increased spacing to balance with 4-line base pricing
+      leftYPos += 10; // Generous line spacing for readability
     });
     
     // Base Pricing - Right Column (no header)
-    doc.setFontSize(8); // Reduced by 3 points (was 11)
+    doc.setFontSize(9); // Match customer info font size for consistency
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0); // Reset to black
     
@@ -902,12 +903,19 @@ export default function PurchaseOrder() {
     basePricing.push([`Design Studio Allowance:`, `$${parseInt(formData.designStudioAllowance || "0").toLocaleString()}`]);
     
     basePricing.forEach(([label, value]) => {
+      // Label - consistent styling with customer info
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(80, 80, 80); // Medium gray to match customer info
       doc.text(label, rightColumnX, rightYPos);
-      // Right-align the amounts
+      
+      // Value - bold and right-aligned for professional appearance
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0); // Black
       const valueWidth = doc.getTextWidth(value);
       const rightAlignX = rightColumnX + rightColumnWidth - valueWidth - 5;
       doc.text(value, rightAlignX, rightYPos);
-      rightYPos += 13.5; // Increased spacing to match customer info height (54pt total / 4 lines = 13.5pt)
+      
+      rightYPos += 15; // Generous spacing to match customer info visual rhythm
     });
     
     // Set yPos to the maximum of both columns for next section
