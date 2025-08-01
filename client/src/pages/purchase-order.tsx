@@ -1145,33 +1145,35 @@ export default function PurchaseOrder() {
     
     yPos += 25;
     
-    // Legal agreement section with two columns
-    doc.setFontSize(8);
+    // Legal agreement section with two columns (50-50 split)
+    doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
     
-    // Left column - Legal text (constrained width to prevent overlap)
-    const legalTextWidth = signatureColumnWidth - 10; // Leave space for right column
+    // 50-50 column split
+    const legalColumnWidth = signatureLineWidth * 0.5;
+    const rightColumnStart = signatureLeftX + legalColumnWidth;
+    
+    // Left column - Legal text (3 lines, justified)
     const legalText = [
-      "Once signed by Buyer and accepted by B&D Authorized Agent, this agreement will",
-      "become a legal binding agreement. Be sure that all provisions have been read and",
-      "understood before signing. The terms, conditions and provisions of the agreement",
-      "are subject to acceptance by B&D Authorized Agent."
+      "Once signed by Buyer and accepted by B&D Authorized Agent, this agreement will become a legal binding",
+      "agreement. Be sure that all provisions have been read and understood before signing. The terms, conditions",
+      "and provisions of the agreement are subject to acceptance by B&D Authorized Agent."
     ];
     
     let legalTextY = yPos;
     legalText.forEach(line => {
-      doc.text(line, signatureLeftX, legalTextY);
-      legalTextY += 8; // Reduced line spacing
+      doc.text(line, signatureLeftX, legalTextY, { maxWidth: legalColumnWidth - 10 });
+      legalTextY += 8;
     });
     
-    // Right column - Acceptance signature
-    const acceptanceX = signatureRightX + 10; // Moderate separation
-    const acceptanceLineWidth = signatureColumnWidth - 30;
+    // Right column - Acceptance signature (aligned with Buyer text above)
+    const acceptanceX = signatureRightX; // Same position as "Buyer" above
+    const acceptanceLineWidth = legalColumnWidth - 20;
     
     // Signature line for acceptance
     doc.line(acceptanceX, yPos + 8, acceptanceX + acceptanceLineWidth, yPos + 8);
     
-    // Acceptance text below line
+    // Acceptance text below line (aligned with Buyer position)
     doc.setFontSize(9);
     doc.text("Accepted By", acceptanceX, yPos + 16);
     doc.text(todayFormatted, acceptanceX + 60, yPos + 16);
