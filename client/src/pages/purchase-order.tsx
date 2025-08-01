@@ -1033,7 +1033,7 @@ export default function PurchaseOrder() {
                   doc.setTextColor(60, 60, 60);
                   const locationTextWidth = doc.getTextWidth(location);
                   const centerLocationX = locationX + (locationWidth - locationTextWidth) / 2;
-                  const centerLocationY = yPos + (locationCellHeight / 2) + 0.5;
+                  const centerLocationY = yPos + (locationCellHeight / 2) - 1.5;
                   doc.text(location, centerLocationX, centerLocationY);
                   locationCellDrawn = true;
                 }
