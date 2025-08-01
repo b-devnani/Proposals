@@ -952,24 +952,24 @@ export default function PurchaseOrder() {
       doc.text("Location", locationX + 2, yPos + 1);
       doc.text("Option", optionX + 2, yPos + 1);
       doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 1); // Right-aligned header
-      yPos += rowHeight + 1;
+      yPos += rowHeight;
       
       const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
       
       Object.entries(groupedUpgrades).forEach(([category, locations]) => {
-        // Category parent row as part of table structure
+        // Category parent row merged across entire table width
         doc.setFillColor(230, 230, 230);
         doc.setDrawColor(150, 150, 150);
         doc.setLineWidth(0.5);
         doc.rect(locationX, yPos - 2, tableWidth, rowHeight, 'FD');
         
-        // Category row borders to match table structure
-        doc.line(locationX + locationWidth, yPos - 2, locationX + locationWidth, yPos + 5);
-        doc.line(subtotalX, yPos - 2, subtotalX, yPos + 5);
-        
+        // Center-align category text across the entire table width
         doc.setFont("helvetica", "bold");
         doc.setTextColor(0, 0, 0);
-        doc.text(category.toUpperCase(), locationX + 2, yPos + 1);
+        const categoryText = category.toUpperCase();
+        const categoryTextWidth = doc.getTextWidth(categoryText);
+        const centerCategoryX = locationX + (tableWidth - categoryTextWidth) / 2;
+        doc.text(categoryText, centerCategoryX, yPos + 1);
         yPos += rowHeight;
         
         doc.setFont("helvetica", "normal");
