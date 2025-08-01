@@ -12,7 +12,7 @@ import { Search, Filter, Plus, Minus } from "lucide-react";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import logoPath from "@assets/logo-fullColor (1)_1751758486563.png";
+import logoPath from "@assets/logo-fullColor_1754013092305.png";
 import { useToast } from "@/hooks/use-toast";
 import { UpgradeTable } from "@/components/upgrade-table";
 import { OrderSummary } from "@/components/order-summary";
@@ -806,15 +806,22 @@ export default function PurchaseOrder() {
     
     const doc = new jsPDF();
     
-    // Title
+    // Add logo in top left corner
+    try {
+      doc.addImage(logoPath, 'PNG', 15, 10, 40, 20); // x, y, width, height
+    } catch (error) {
+      console.log("Logo could not be added to PDF:", error);
+    }
+    
+    // Title - moved down to accommodate logo
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.text("HOME CONSTRUCTION PROPOSAL", 20, 20);
+    doc.text("HOME CONSTRUCTION PROPOSAL", 20, 40);
     
-    // Customer Information
+    // Customer Information - adjusted positioning
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("CUSTOMER INFORMATION", 20, 40);
+    doc.text("CUSTOMER INFORMATION", 20, 55);
     
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
@@ -827,7 +834,7 @@ export default function PurchaseOrder() {
       `Home Plan: ${currentTemplate.name}`
     ];
     
-    let yPos = 50;
+    let yPos = 65;
     customerInfo.forEach(info => {
       doc.text(info, 20, yPos);
       yPos += 8;

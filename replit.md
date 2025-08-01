@@ -128,6 +128,9 @@ Three main entities:
 - July 15, 2025. Added "Show Selected Only" checkbox filter to display only selected upgrades with dynamic count indicator
 - July 15, 2025. Implemented conditional margin color formatting: red for negative values, yellow for 0-30%, green for 30-55%, and purple for 55%+ margins
 - July 16, 2025. Completed comprehensive mobile and iPad optimization with responsive design improvements across all components including flexible layouts, touch-friendly controls, and improved spacing
+- August 01, 2025. Enhanced form inputs: set Rolling Meadows as default community selection
+- August 01, 2025. Implemented lot number dropdown with 12 Rolling Meadows lots (RM03-RM32) and auto-populating Kayla Drive addresses
+- August 01, 2025. Updated PDF proposal generation with company logo placement in top left corner using updated logo asset
 
 ## User Preferences
 
