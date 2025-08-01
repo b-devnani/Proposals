@@ -837,10 +837,13 @@ export default function PurchaseOrder() {
       console.log("Logo could not be added to PDF:", error);
     }
     
-    // Title - positioned to the right of the logo with minimal spacing
+    // Title - center aligned with logo height
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("Exhibit C - New Home Pricing Proposal", leftMargin + 50, topMargin + 5); // Minimal spacing from top
+    const titleText = "Exhibit C - New Home Pricing Proposal";
+    const titleWidth = doc.getTextWidth(titleText);
+    const centerX = (pageWidth - titleWidth) / 2;
+    doc.text(titleText, centerX, topMargin + 10); // Center aligned and positioned at logo center height
     
     // Customer Information - positioned immediately after logo with no gap
     doc.setFontSize(11);
@@ -853,7 +856,7 @@ export default function PurchaseOrder() {
       ['Home Plan', currentTemplate.name]
     ];
     
-    let yPos = topMargin + 25; // Start immediately after logo with minimal gap
+    let yPos = topMargin + 22; // Start immediately after logo/title line
     customerInfoData.forEach(([label, value]) => {
       // Label - light gray, normal weight
       doc.setFont("helvetica", "normal");
