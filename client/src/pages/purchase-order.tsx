@@ -1165,14 +1165,14 @@ export default function PurchaseOrder() {
     let legalTextY = yPos;
     legalText.forEach(line => {
       doc.text(line, signatureLeftX, legalTextY);
-      legalTextY += 9;
+      legalTextY += 8.5; // 0.5pt line spacing (8pt font + 0.5pt spacing)
     });
     
-    // Right column - Acceptance signature aligned with buyer signature line above
+    // Right column - Acceptance signature at same height as legal text
     const acceptanceX = signatureRightX; // Same position as "Buyer" above
     
-    // Signature line for acceptance (aligned with buyer signature line)
-    const acceptanceLineY = yPos - 25; // Align with buyer signature line
+    // Signature line for acceptance (at same height as legal text)
+    const acceptanceLineY = yPos + 8; // Same height as legal text
     doc.line(acceptanceX, acceptanceLineY, leftMargin + signatureLineWidth, acceptanceLineY);
     
     // Acceptance text below line (closer to underline)
