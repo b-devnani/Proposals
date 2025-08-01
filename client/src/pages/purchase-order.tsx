@@ -828,11 +828,7 @@ export default function PurchaseOrder() {
     doc.setFont("helvetica", "bold");
     doc.text("Exhibit C - New Home Pricing Proposal", leftMargin + 50, topMargin + 8); // Reduced vertical spacing
     
-    // Customer Information - adjusted positioning with margins
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("CUSTOMER INFORMATION", leftMargin, topMargin + 45);
-    
+    // Customer Information - positioned directly after logo
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     const customerInfo = [
@@ -844,7 +840,7 @@ export default function PurchaseOrder() {
       `Home Plan: ${currentTemplate.name}`
     ];
     
-    let yPos = topMargin + 55;
+    let yPos = topMargin + 35; // Start right after logo area
     customerInfo.forEach(info => {
       doc.text(info, leftMargin, yPos);
       yPos += 8;
