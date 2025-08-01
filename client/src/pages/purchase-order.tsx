@@ -1115,13 +1115,7 @@ export default function PurchaseOrder() {
     const grandTotalSubtotalX = leftMargin + 10 + 45 + 100; // rowNumWidth + locationWidth + optionWidth
     const grandTotalX = grandTotalSubtotalX + 30 - grandTotalWidth - 1; // subtotalWidth - grandTotalWidth - padding
     doc.text(grandTotalValue, grandTotalX, yPos);
-    yPos += 20;
-    
-    // Signature Section
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "italic");
-    doc.text("By signing below, both parties agree to the terms and total amount shown above.", leftMargin, yPos);
-    yPos += 20;
+    yPos += 15;
     
     // Single signature line spanning most of the page width
     doc.setFont("helvetica", "normal");
