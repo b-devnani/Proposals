@@ -1091,16 +1091,26 @@ export default function PurchaseOrder() {
       yPos += 5;
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text("Selections Subtotal:", leftMargin, yPos);
-      doc.text(`$${upgradesTotal.toLocaleString()}`, leftMargin + 105, yPos);
-      yPos += 15;
+      // Align label with options column
+      doc.text("Selections Subtotal:", optionX, yPos);
+      // Align value with subtotals column
+      const selectionsSubtotalValue = `$${upgradesTotal.toLocaleString()}`;
+      const selectionsSubtotalWidth = doc.getTextWidth(selectionsSubtotalValue);
+      const selectionsSubtotalX = subtotalX + subtotalWidth - selectionsSubtotalWidth - 1;
+      doc.text(selectionsSubtotalValue, selectionsSubtotalX, yPos);
+      yPos += 8; // Reduced spacing
     }
     
     // Grand Total
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("GRAND TOTAL:", leftMargin, yPos);
-    doc.text(`$${totalPrice.toLocaleString()}`, leftMargin + 105, yPos);
+    // Align label with options column
+    doc.text("GRAND TOTAL:", optionX, yPos);
+    // Align value with subtotals column
+    const grandTotalValue = `$${totalPrice.toLocaleString()}`;
+    const grandTotalWidth = doc.getTextWidth(grandTotalValue);
+    const grandTotalX = subtotalX + subtotalWidth - grandTotalWidth - 1;
+    doc.text(grandTotalValue, grandTotalX, yPos);
     yPos += 20;
     
     // Signature Section
