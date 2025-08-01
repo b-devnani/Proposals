@@ -1124,7 +1124,7 @@ export default function PurchaseOrder() {
     
     if (availableSpace < signatureSpaceNeeded) {
       doc.addPage();
-      yPos = 50; // Start signatures well below top of new page
+      yPos = 25; // Reduced margin for more space on new page
     }
     
     // Single signature line spanning most of the page width
