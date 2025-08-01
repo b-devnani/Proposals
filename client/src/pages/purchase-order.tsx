@@ -929,46 +929,51 @@ export default function PurchaseOrder() {
       doc.setFont("helvetica", "bold");
       
       // Table headers with proper borders and alignment
-      const locationX = leftMargin;
-      const locationWidth = 50;
+      const rowNumX = leftMargin;
+      const rowNumWidth = 20;
+      const locationX = rowNumX + rowNumWidth;
+      const locationWidth = 45;
       const optionX = locationX + locationWidth;
-      const optionWidth = 100;
+      const optionWidth = 90;
       const subtotalX = optionX + optionWidth;
-      const subtotalWidth = 35;
-      const tableWidth = locationWidth + optionWidth + subtotalWidth;
+      const subtotalWidth = 30;
+      const tableWidth = rowNumWidth + locationWidth + optionWidth + subtotalWidth;
       const rowHeight = 7;
       
       // Header background and borders
       doc.setFillColor(245, 245, 245);
       doc.setDrawColor(100, 100, 100);
       doc.setLineWidth(0.5);
-      doc.rect(locationX, yPos - 3, tableWidth, rowHeight, 'FD');
+      doc.rect(rowNumX, yPos - 3, tableWidth, rowHeight, 'FD');
       
       // Header cell borders
-      doc.line(locationX + locationWidth, yPos - 3, locationX + locationWidth, yPos + 4); // Location|Option
+      doc.line(locationX, yPos - 3, locationX, yPos + 4); // Row#|Location
+      doc.line(optionX, yPos - 3, optionX, yPos + 4); // Location|Option
       doc.line(subtotalX, yPos - 3, subtotalX, yPos + 4); // Option|Subtotal
       
       doc.setTextColor(0, 0, 0);
+      doc.text("#", rowNumX + 8, yPos + 1); // Center in narrow column
       doc.text("Location", locationX + 2, yPos + 1);
       doc.text("Option", optionX + 2, yPos + 1);
       doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 1); // Right-aligned header
       yPos += rowHeight;
       
       const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
+      let globalRowNumber = 1; // Track row numbers across all categories and locations
       
       Object.entries(groupedUpgrades).forEach(([category, locations]) => {
         // Category parent row merged across entire table width
         doc.setFillColor(230, 230, 230);
         doc.setDrawColor(150, 150, 150);
         doc.setLineWidth(0.5);
-        doc.rect(locationX, yPos - 2, tableWidth, rowHeight, 'FD');
+        doc.rect(rowNumX, yPos - 2, tableWidth, rowHeight, 'FD');
         
         // Center-align category text across the entire table width
         doc.setFont("helvetica", "bold");
         doc.setTextColor(0, 0, 0);
         const categoryText = category.toUpperCase();
         const categoryTextWidth = doc.getTextWidth(categoryText);
-        const centerCategoryX = locationX + (tableWidth - categoryTextWidth) / 2;
+        const centerCategoryX = rowNumX + (tableWidth - categoryTextWidth) / 2;
         doc.text(categoryText, centerCategoryX, yPos + 1);
         yPos += rowHeight;
         
@@ -998,10 +1003,12 @@ export default function PurchaseOrder() {
                 doc.setFillColor(245, 245, 245);
                 doc.setDrawColor(100, 100, 100);
                 doc.setLineWidth(0.5);
-                doc.rect(locationX, yPos - 3, tableWidth, rowHeight, 'FD');
-                doc.line(locationX + locationWidth, yPos - 3, locationX + locationWidth, yPos + 4);
+                doc.rect(rowNumX, yPos - 3, tableWidth, rowHeight, 'FD');
+                doc.line(locationX, yPos - 3, locationX, yPos + 4);
+                doc.line(optionX, yPos - 3, optionX, yPos + 4);
                 doc.line(subtotalX, yPos - 3, subtotalX, yPos + 4);
                 doc.setTextColor(0, 0, 0);
+                doc.text("#", rowNumX + 8, yPos + 1);
                 doc.text("Location", locationX + 2, yPos + 1);
                 doc.text("Option", optionX + 2, yPos + 1);
                 doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 1);
@@ -1032,25 +1039,34 @@ export default function PurchaseOrder() {
                 }
               }
               
-              // Row background for option and subtotal cells (alternating)
+              // Row background for all cells (alternating)
               if (currentRowIndex % 2 === 0) {
                 doc.setFillColor(250, 250, 250);
               } else {
                 doc.setFillColor(255, 255, 255);
               }
               
-              // Draw option cell
+              // Draw row number cell
               doc.setDrawColor(150, 150, 150);
               doc.setLineWidth(0.5);
+              doc.rect(rowNumX, yPos - 2, rowNumWidth, rowHeight, 'FD');
+              
+              // Draw option cell
               doc.rect(optionX, yPos - 2, optionWidth, rowHeight, 'FD');
               
               // Draw subtotal cell
               doc.rect(subtotalX, yPos - 2, subtotalWidth, rowHeight, 'FD');
               
-              // Option text
+              // Row number (center-aligned)
               doc.setTextColor(0, 0, 0);
-              const optionText = upgrade.choiceTitle.length > 58 ? 
-                upgrade.choiceTitle.substring(0, 55) + "..." : 
+              const rowNumText = globalRowNumber.toString();
+              const rowNumTextWidth = doc.getTextWidth(rowNumText);
+              const centerRowNumX = rowNumX + (rowNumWidth - rowNumTextWidth) / 2;
+              doc.text(rowNumText, centerRowNumX, yPos + 1);
+              
+              // Option text
+              const optionText = upgrade.choiceTitle.length > 50 ? 
+                upgrade.choiceTitle.substring(0, 47) + "..." : 
                 upgrade.choiceTitle;
               doc.text(optionText, optionX + 2, yPos + 1);
               
@@ -1062,6 +1078,7 @@ export default function PurchaseOrder() {
               
               yPos += rowHeight;
               currentRowIndex++;
+              globalRowNumber++;
             });
           });
 
