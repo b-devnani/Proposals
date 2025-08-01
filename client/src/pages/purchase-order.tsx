@@ -975,34 +975,23 @@ export default function PurchaseOrder() {
         doc.setFont("helvetica", "normal");
         
         Object.entries(locations).forEach(([location, parentSelections], locationIndex) => {
-          // Count total rows for this location to calculate vertical center
+          // Count total rows for this location
           let totalRowsForLocation = 0;
           Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
             totalRowsForLocation += upgrades.length;
           });
           
-          const startYForLocation = yPos;
           let currentRowIndex = 0;
-          
-          // First pass: draw location merged cell background
-          const locationCellHeight = totalRowsForLocation * rowHeight;
-          doc.setFillColor(248, 248, 248); // Slightly different shade for location cells
-          doc.setDrawColor(150, 150, 150);
-          doc.setLineWidth(0.5);
-          doc.rect(locationX, yPos - 2, locationWidth, locationCellHeight, 'FD');
-          
-          // Draw location text centered in merged cell
-          doc.setTextColor(60, 60, 60);
-          const locationTextWidth = doc.getTextWidth(location);
-          const centerLocationX = locationX + (locationWidth - locationTextWidth) / 2;
-          const centerLocationY = yPos + (locationCellHeight / 2) - 1;
-          doc.text(location, centerLocationX, centerLocationY);
+          let locationDrawn = false;
+          let locationStartY = yPos;
           
           Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
             upgrades.forEach((upgrade) => {
-              if (yPos > pageHeight - bottomMargin - 20) { // Add new page if needed
+              // Check if we need a new page
+              if (yPos > pageHeight - bottomMargin - 20) {
                 doc.addPage();
                 yPos = topMargin;
+                locationDrawn = false; // Reset location drawing for new page
                 
                 // Repeat headers on new page
                 doc.setFontSize(8);
@@ -1017,11 +1006,33 @@ export default function PurchaseOrder() {
                 doc.text("Location", locationX + 2, yPos + 1);
                 doc.text("Option", optionX + 2, yPos + 1);
                 doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 1);
-                yPos += rowHeight + 1;
+                yPos += rowHeight;
                 doc.setFont("helvetica", "normal");
+                locationStartY = yPos; // Reset location start for new page
               }
               
-              // Row background for option and subtotal cells only (alternating)
+              // Draw location cell for first row on this page or if not drawn yet
+              if (!locationDrawn) {
+                doc.setFillColor(248, 248, 248);
+                doc.setDrawColor(150, 150, 150);
+                doc.setLineWidth(0.5);
+                doc.rect(locationX, yPos - 2, locationWidth, rowHeight, 'FD');
+                
+                // Draw location text
+                doc.setTextColor(60, 60, 60);
+                const locationTextWidth = doc.getTextWidth(location);
+                const centerLocationX = locationX + (locationWidth - locationTextWidth) / 2;
+                doc.text(location, centerLocationX, yPos + 1);
+                locationDrawn = true;
+              } else {
+                // For subsequent rows, just draw location cell background without text
+                doc.setFillColor(248, 248, 248);
+                doc.setDrawColor(150, 150, 150);
+                doc.setLineWidth(0.5);
+                doc.rect(locationX, yPos - 2, locationWidth, rowHeight, 'FD');
+              }
+              
+              // Row background for option and subtotal cells (alternating)
               if (currentRowIndex % 2 === 0) {
                 doc.setFillColor(250, 250, 250);
               } else {
