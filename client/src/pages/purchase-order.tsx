@@ -882,7 +882,7 @@ export default function PurchaseOrder() {
       doc.setLineWidth(0.3);
       doc.line(leftColumnX + 38, leftYPos + 2.5, leftColumnX + leftColumnWidth - 3, leftYPos + 2.5);
       
-      leftYPos += 8; // Reduced line spacing for compact layout
+      leftYPos += 7; // Tighter line spacing
     });
     
     // Base Pricing - Right Column (no header)
@@ -890,14 +890,16 @@ export default function PurchaseOrder() {
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0); // Reset to black
     
-    let rightYPos = yPos + 16; // Start two lines lower (2 * 8pt spacing)
+    let rightYPos = yPos + 14; // Start two lines lower (2 * 7pt spacing)
     const basePricing = [
       [`Base Price:`, `$${parseInt(currentTemplate.basePrice).toLocaleString()}`],
       [`Lot Premium:`, `$${parseInt(formData.lotPremium || "0").toLocaleString()}`],
     ];
     
     if (salesIncentiveEnabled) {
-      basePricing.push([`Sales Adjustment:`, `$${parseInt(formData.salesIncentive || "0").toLocaleString()}`]);
+      const salesAmount = parseInt(formData.salesIncentive || "0");
+      const formattedSales = salesAmount < 0 ? `($${Math.abs(salesAmount).toLocaleString()})` : `$${salesAmount.toLocaleString()}`;
+      basePricing.push([`Sales Adjustment:`, formattedSales]);
     }
     
     basePricing.push([`Design Studio Allowance:`, `$${parseInt(formData.designStudioAllowance || "0").toLocaleString()}`]);
@@ -915,7 +917,7 @@ export default function PurchaseOrder() {
       const rightAlignX = rightColumnX + rightColumnWidth - valueWidth - 5;
       doc.text(value, rightAlignX, rightYPos);
       
-      rightYPos += 8; // Compact spacing to match customer info
+      rightYPos += 7; // Tighter spacing to match customer info
     });
     
     // Set yPos to the maximum of both columns for next section
