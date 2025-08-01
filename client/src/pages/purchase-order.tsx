@@ -957,16 +957,20 @@ export default function PurchaseOrder() {
       const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
       
       Object.entries(groupedUpgrades).forEach(([category, locations]) => {
-        // Category parent row spanning entire table width
-        doc.setFillColor(220, 220, 220);
-        doc.setDrawColor(100, 100, 100);
+        // Category parent row as part of table structure
+        doc.setFillColor(230, 230, 230);
+        doc.setDrawColor(150, 150, 150);
         doc.setLineWidth(0.5);
-        doc.rect(locationX, yPos - 3, tableWidth, rowHeight, 'FD');
+        doc.rect(locationX, yPos - 2, tableWidth, rowHeight, 'FD');
+        
+        // Category row borders to match table structure
+        doc.line(locationX + locationWidth, yPos - 2, locationX + locationWidth, yPos + 5);
+        doc.line(subtotalX, yPos - 2, subtotalX, yPos + 5);
         
         doc.setFont("helvetica", "bold");
         doc.setTextColor(0, 0, 0);
         doc.text(category.toUpperCase(), locationX + 2, yPos + 1);
-        yPos += rowHeight + 1;
+        yPos += rowHeight;
         
         doc.setFont("helvetica", "normal");
         
