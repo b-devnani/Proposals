@@ -982,8 +982,25 @@ export default function PurchaseOrder() {
           });
           
           let currentRowIndex = 0;
-          let locationDrawn = false;
           let locationStartY = yPos;
+          let remainingRowsOnPage = Math.floor((pageHeight - bottomMargin - 20 - yPos) / rowHeight);
+          let rowsForThisPageSegment = Math.min(totalRowsForLocation, remainingRowsOnPage);
+          
+          // Draw merged location cell for current page segment
+          if (rowsForThisPageSegment > 0) {
+            const locationCellHeight = rowsForThisPageSegment * rowHeight;
+            doc.setFillColor(248, 248, 248);
+            doc.setDrawColor(150, 150, 150);
+            doc.setLineWidth(0.5);
+            doc.rect(locationX, yPos - 2, locationWidth, locationCellHeight, 'FD');
+            
+            // Center location text in merged cell
+            doc.setTextColor(60, 60, 60);
+            const locationTextWidth = doc.getTextWidth(location);
+            const centerLocationX = locationX + (locationWidth - locationTextWidth) / 2;
+            const centerLocationY = yPos + (locationCellHeight / 2) - 1;
+            doc.text(location, centerLocationX, centerLocationY);
+          }
           
           Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
             upgrades.forEach((upgrade) => {
@@ -991,7 +1008,6 @@ export default function PurchaseOrder() {
               if (yPos > pageHeight - bottomMargin - 20) {
                 doc.addPage();
                 yPos = topMargin;
-                locationDrawn = false; // Reset location drawing for new page
                 
                 // Repeat headers on new page
                 doc.setFontSize(8);
@@ -1008,28 +1024,26 @@ export default function PurchaseOrder() {
                 doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 1);
                 yPos += rowHeight;
                 doc.setFont("helvetica", "normal");
-                locationStartY = yPos; // Reset location start for new page
-              }
-              
-              // Draw location cell for first row on this page or if not drawn yet
-              if (!locationDrawn) {
-                doc.setFillColor(248, 248, 248);
-                doc.setDrawColor(150, 150, 150);
-                doc.setLineWidth(0.5);
-                doc.rect(locationX, yPos - 2, locationWidth, rowHeight, 'FD');
                 
-                // Draw location text
-                doc.setTextColor(60, 60, 60);
-                const locationTextWidth = doc.getTextWidth(location);
-                const centerLocationX = locationX + (locationWidth - locationTextWidth) / 2;
-                doc.text(location, centerLocationX, yPos + 1);
-                locationDrawn = true;
-              } else {
-                // For subsequent rows, just draw location cell background without text
-                doc.setFillColor(248, 248, 248);
-                doc.setDrawColor(150, 150, 150);
-                doc.setLineWidth(0.5);
-                doc.rect(locationX, yPos - 2, locationWidth, rowHeight, 'FD');
+                // Calculate remaining rows and draw new merged location cell
+                const remainingRows = totalRowsForLocation - currentRowIndex;
+                const newRemainingRowsOnPage = Math.floor((pageHeight - bottomMargin - 20 - yPos) / rowHeight);
+                const newRowsForThisPageSegment = Math.min(remainingRows, newRemainingRowsOnPage);
+                
+                if (newRowsForThisPageSegment > 0) {
+                  const newLocationCellHeight = newRowsForThisPageSegment * rowHeight;
+                  doc.setFillColor(248, 248, 248);
+                  doc.setDrawColor(150, 150, 150);
+                  doc.setLineWidth(0.5);
+                  doc.rect(locationX, yPos - 2, locationWidth, newLocationCellHeight, 'FD');
+                  
+                  // Center location text in new merged cell
+                  doc.setTextColor(60, 60, 60);
+                  const locationTextWidth = doc.getTextWidth(location);
+                  const centerLocationX = locationX + (locationWidth - locationTextWidth) / 2;
+                  const centerLocationY = yPos + (newLocationCellHeight / 2) - 1;
+                  doc.text(location, centerLocationX, centerLocationY);
+                }
               }
               
               // Row background for option and subtotal cells (alternating)
