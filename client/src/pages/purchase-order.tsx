@@ -1123,14 +1123,28 @@ export default function PurchaseOrder() {
     doc.text("By signing below, both parties agree to the terms and total amount shown above.", leftMargin, yPos);
     yPos += 20;
     
+    // Single signature line spanning most of the page width
     doc.setFont("helvetica", "normal");
-    doc.text("Customer Signature: ____________________________", leftMargin, yPos);
-    yPos += 10;
-    doc.text("Date: ____________________________", leftMargin, yPos);
+    const signatureLineWidth = pageWidth - (leftMargin * 2);
+    doc.line(leftMargin, yPos, leftMargin + signatureLineWidth, yPos);
     yPos += 15;
-    doc.text("Sales Representative: ____________________________", leftMargin, yPos);
-    yPos += 10;
-    doc.text("Date: ____________________________", leftMargin, yPos);
+    
+    // Two column layout for signatures
+    const signatureColumnWidth = signatureLineWidth / 2;
+    const signatureLeftX = leftMargin;
+    const signatureRightX = leftMargin + signatureColumnWidth;
+    
+    // Get today's date in MM/DD/YYYY format
+    const today = new Date();
+    const todayFormatted = `${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getDate().toString().padStart(2, '0')}/${today.getFullYear()}`;
+    
+    // Left column - First Buyer
+    doc.text("Buyer", signatureLeftX, yPos);
+    doc.text(todayFormatted, signatureLeftX + 80, yPos);
+    
+    // Right column - Second Buyer  
+    doc.text("Buyer", signatureRightX, yPos);
+    doc.text(todayFormatted, signatureRightX + 80, yPos);
     
     // Add footer to all pages
     const totalPages = doc.getNumberOfPages();
