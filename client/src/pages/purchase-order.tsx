@@ -1146,37 +1146,39 @@ export default function PurchaseOrder() {
     yPos += 25;
     
     // Legal agreement section with two columns (50-50 split)
-    doc.setFontSize(7);
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     
     // 50-50 column split
     const legalColumnWidth = signatureLineWidth * 0.5;
     const rightColumnStart = signatureLeftX + legalColumnWidth;
     
-    // Left column - Legal text (3 lines, justified)
+    // Left column - Legal text (5 lines)
     const legalText = [
-      "Once signed by Buyer and accepted by B&D Authorized Agent, this agreement will become a legal binding",
-      "agreement. Be sure that all provisions have been read and understood before signing. The terms, conditions",
-      "and provisions of the agreement are subject to acceptance by B&D Authorized Agent."
+      "Once signed by Buyer and accepted by B&D Authorized Agent,",
+      "this agreement will become a legal binding agreement. Be sure", 
+      "that all provisions have been read and understood before",
+      "signing. The terms, conditions and provisions of the agreement",
+      "are subject to acceptance by B&D Authorized Agent."
     ];
     
     let legalTextY = yPos;
     legalText.forEach(line => {
-      doc.text(line, signatureLeftX, legalTextY, { maxWidth: legalColumnWidth - 10 });
-      legalTextY += 8;
+      doc.text(line, signatureLeftX, legalTextY);
+      legalTextY += 9;
     });
     
-    // Right column - Acceptance signature (aligned with Buyer text above)
+    // Right column - Acceptance signature aligned with buyer signature line above
     const acceptanceX = signatureRightX; // Same position as "Buyer" above
-    const acceptanceLineWidth = legalColumnWidth - 20;
     
-    // Signature line for acceptance
-    doc.line(acceptanceX, yPos + 8, acceptanceX + acceptanceLineWidth, yPos + 8);
+    // Signature line for acceptance (aligned with buyer signature line)
+    const acceptanceLineY = yPos - 25; // Align with buyer signature line
+    doc.line(acceptanceX, acceptanceLineY, leftMargin + signatureLineWidth, acceptanceLineY);
     
-    // Acceptance text below line (aligned with Buyer position)
+    // Acceptance text below line (closer to underline)
     doc.setFontSize(9);
-    doc.text("Accepted By", acceptanceX, yPos + 16);
-    doc.text(todayFormatted, acceptanceX + 60, yPos + 16);
+    doc.text("Accepted By", acceptanceX, acceptanceLineY + 4);
+    doc.text(todayFormatted, acceptanceX + 60, acceptanceLineY + 4);
     
     // Add footer to all pages
     const totalPages = doc.getNumberOfPages();
