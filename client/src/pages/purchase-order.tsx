@@ -813,10 +813,10 @@ export default function PurchaseOrder() {
       console.log("Logo could not be added to PDF:", error);
     }
     
-    // Title - moved down to accommodate logo
-    doc.setFontSize(20);
+    // Title - positioned to the right of the logo
+    doc.setFontSize(18); // 2 points smaller than original 20
     doc.setFont("helvetica", "bold");
-    doc.text("HOME CONSTRUCTION PROPOSAL", 20, 40);
+    doc.text("Exhibit C - New Home Pricing Proposal", 65, 22); // Positioned to right of logo
     
     // Customer Information - adjusted positioning
     doc.setFontSize(14);
