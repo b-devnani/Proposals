@@ -944,12 +944,12 @@ export default function PurchaseOrder() {
       doc.setFillColor(245, 245, 245);
       doc.setDrawColor(100, 100, 100);
       doc.setLineWidth(0.5);
-      doc.rect(rowNumX, yPos - 3, tableWidth, rowHeight, 'FD');
+      doc.rect(rowNumX, yPos - 2, tableWidth, rowHeight, 'FD');
       
       // Header cell borders
-      doc.line(locationX, yPos - 3, locationX, yPos + 4); // Row#|Location
-      doc.line(optionX, yPos - 3, optionX, yPos + 4); // Location|Option
-      doc.line(subtotalX, yPos - 3, subtotalX, yPos + 4); // Option|Subtotal
+      doc.line(locationX, yPos - 2, locationX, yPos + 3.5); // Row#|Location
+      doc.line(optionX, yPos - 2, optionX, yPos + 3.5); // Location|Option
+      doc.line(subtotalX, yPos - 2, subtotalX, yPos + 3.5); // Option|Subtotal
       
       doc.setTextColor(0, 0, 0);
       doc.text("#", rowNumX + rowNumWidth - 3, yPos + 2); // Right-aligned, vertically centered
@@ -1003,10 +1003,10 @@ export default function PurchaseOrder() {
                 doc.setFillColor(245, 245, 245);
                 doc.setDrawColor(100, 100, 100);
                 doc.setLineWidth(0.5);
-                doc.rect(rowNumX, yPos - 3, tableWidth, rowHeight, 'FD');
-                doc.line(locationX, yPos - 3, locationX, yPos + 4);
-                doc.line(optionX, yPos - 3, optionX, yPos + 4);
-                doc.line(subtotalX, yPos - 3, subtotalX, yPos + 4);
+                doc.rect(rowNumX, yPos - 2, tableWidth, rowHeight, 'FD');
+                doc.line(locationX, yPos - 2, locationX, yPos + 3.5);
+                doc.line(optionX, yPos - 2, optionX, yPos + 3.5);
+                doc.line(subtotalX, yPos - 2, subtotalX, yPos + 3.5);
                 doc.setTextColor(0, 0, 0);
                 doc.text("#", rowNumX + rowNumWidth - 3, yPos + 2);
                 doc.text("Location", locationX + 2, yPos + 2);
