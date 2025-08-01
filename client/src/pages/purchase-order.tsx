@@ -910,11 +910,11 @@ export default function PurchaseOrder() {
       doc.setTextColor(80, 80, 80); // Medium gray to match customer info
       doc.text(label, rightColumnX, rightYPos);
       
-      // Value - bold and right-aligned for professional appearance
+      // Value - bold and right-aligned to match subtotal column
       doc.setFont("helvetica", "bold");
       doc.setTextColor(0, 0, 0); // Black
       const valueWidth = doc.getTextWidth(value);
-      const rightAlignX = rightColumnX + rightColumnWidth - valueWidth - 5;
+      const rightAlignX = subtotalX + subtotalWidth - valueWidth - 2; // Align with subtotal column
       doc.text(value, rightAlignX, rightYPos);
       
       rightYPos += 7; // Tighter spacing to match customer info
@@ -930,11 +930,11 @@ export default function PurchaseOrder() {
       
       // Table headers with proper borders and alignment
       const rowNumX = leftMargin;
-      const rowNumWidth = 20;
+      const rowNumWidth = 10;
       const locationX = rowNumX + rowNumWidth;
       const locationWidth = 45;
       const optionX = locationX + locationWidth;
-      const optionWidth = 90;
+      const optionWidth = 100;
       const subtotalX = optionX + optionWidth;
       const subtotalWidth = 30;
       const tableWidth = rowNumWidth + locationWidth + optionWidth + subtotalWidth;
@@ -952,7 +952,7 @@ export default function PurchaseOrder() {
       doc.line(subtotalX, yPos - 3, subtotalX, yPos + 4); // Option|Subtotal
       
       doc.setTextColor(0, 0, 0);
-      doc.text("#", rowNumX + 8, yPos + 1); // Center in narrow column
+      doc.text("#", rowNumX + rowNumWidth - 2, yPos + 1); // Right-aligned
       doc.text("Location", locationX + 2, yPos + 1);
       doc.text("Option", optionX + 2, yPos + 1);
       doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 1); // Right-aligned header
@@ -1008,7 +1008,7 @@ export default function PurchaseOrder() {
                 doc.line(optionX, yPos - 3, optionX, yPos + 4);
                 doc.line(subtotalX, yPos - 3, subtotalX, yPos + 4);
                 doc.setTextColor(0, 0, 0);
-                doc.text("#", rowNumX + 8, yPos + 1);
+                doc.text("#", rowNumX + rowNumWidth - 2, yPos + 1); // Right-aligned
                 doc.text("Location", locationX + 2, yPos + 1);
                 doc.text("Option", optionX + 2, yPos + 1);
                 doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 1);
@@ -1057,24 +1057,24 @@ export default function PurchaseOrder() {
               // Draw subtotal cell
               doc.rect(subtotalX, yPos - 2, subtotalWidth, rowHeight, 'FD');
               
-              // Row number (center-aligned)
+              // Row number (right-aligned)
               doc.setTextColor(0, 0, 0);
               const rowNumText = globalRowNumber.toString();
               const rowNumTextWidth = doc.getTextWidth(rowNumText);
-              const centerRowNumX = rowNumX + (rowNumWidth - rowNumTextWidth) / 2;
-              doc.text(rowNumText, centerRowNumX, yPos + 1);
+              const rightAlignRowNumX = rowNumX + rowNumWidth - rowNumTextWidth - 1;
+              doc.text(rowNumText, rightAlignRowNumX, yPos + 1);
               
               // Option text
-              const optionText = upgrade.choiceTitle.length > 50 ? 
-                upgrade.choiceTitle.substring(0, 47) + "..." : 
+              const optionText = upgrade.choiceTitle.length > 58 ? 
+                upgrade.choiceTitle.substring(0, 55) + "..." : 
                 upgrade.choiceTitle;
               doc.text(optionText, optionX + 2, yPos + 1);
               
-              // Subtotal (right-aligned to match base pricing alignment)
+              // Subtotal (right-aligned within subtotal column)
               const price = `$${parseInt(upgrade.clientPrice).toLocaleString()}`;
               const priceWidth = doc.getTextWidth(price);
-              const rightAlignX = rightColumnX + rightColumnWidth - priceWidth - 5;
-              doc.text(price, rightAlignX, yPos + 1);
+              const rightAlignSubtotalX = subtotalX + subtotalWidth - priceWidth - 2;
+              doc.text(price, rightAlignSubtotalX, yPos + 1);
               
               yPos += rowHeight;
               currentRowIndex++;
