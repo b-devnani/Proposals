@@ -1165,7 +1165,7 @@ export default function PurchaseOrder() {
     let legalTextY = yPos;
     legalText.forEach(line => {
       doc.text(line, signatureLeftX, legalTextY);
-      legalTextY += 8.5; // 0.5pt line spacing (8pt font + 0.5pt spacing)
+      legalTextY += 8; // Zero line spacing (8pt font only)
     });
     
     // Right column - Acceptance signature at same height as legal text
