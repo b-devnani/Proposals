@@ -910,11 +910,13 @@ export default function PurchaseOrder() {
       doc.setTextColor(80, 80, 80); // Medium gray to match customer info
       doc.text(label, rightColumnX, rightYPos);
       
-      // Value - bold and right-aligned for professional appearance
+      // Value - bold and right-aligned to match subtotals column
       doc.setFont("helvetica", "bold");
       doc.setTextColor(0, 0, 0); // Black
       const valueWidth = doc.getTextWidth(value);
-      const rightAlignX = rightColumnX + rightColumnWidth - valueWidth - 5;
+      // Align with subtotals column
+      const subtotalColumnX = leftMargin + 10 + 45 + 100; // rowNumWidth + locationWidth + optionWidth
+      const rightAlignX = subtotalColumnX + 30 - valueWidth - 1; // subtotalWidth - valueWidth - padding
       doc.text(value, rightAlignX, rightYPos);
       
       rightYPos += 7; // Tighter spacing to match customer info
