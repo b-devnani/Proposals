@@ -134,6 +134,7 @@ Three main entities:
 - August 01, 2025. Changed all instances of "Upgrades" to "Selections" throughout the web application and PDF/Excel exports for consistent terminology
 - August 01, 2025. Updated PDF proposal header: moved title to right of logo, renamed to "Exhibit C - New Home Pricing Proposal", reduced font size to 14pt with minimal spacing above
 - August 01, 2025. Implemented consistent narrow margins (15pt) throughout entire PDF document for professional formatting
+- August 01, 2025. Added professional PDF footer with customer initials field (bottom left) and page numbering (bottom center) on all pages
 
 ## User Preferences
 

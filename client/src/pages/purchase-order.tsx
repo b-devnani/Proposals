@@ -810,8 +810,11 @@ export default function PurchaseOrder() {
     const leftMargin = 15;
     const rightMargin = 15;
     const topMargin = 15;
+    const bottomMargin = 25; // Space for footer
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const contentWidth = pageWidth - leftMargin - rightMargin;
+    const footerY = pageHeight - 10; // Footer position
     
     // Add logo in top left corner with margin
     try {
@@ -903,7 +906,7 @@ export default function PurchaseOrder() {
           
           Object.entries(parentSelections).forEach(([parentSelection, upgrades]) => {
             upgrades.forEach((upgrade) => {
-              if (yPos > 270) { // Add new page if needed
+              if (yPos > pageHeight - bottomMargin - 20) { // Add new page if needed
                 doc.addPage();
                 yPos = topMargin;
               }
@@ -951,6 +954,23 @@ export default function PurchaseOrder() {
     doc.text("Sales Representative: ____________________________", leftMargin, yPos);
     yPos += 10;
     doc.text("Date: ____________________________", leftMargin, yPos);
+    
+    // Add footer to all pages
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      
+      // Customer Initials - Bottom Left
+      doc.text("Customer Initials: _____", leftMargin, footerY);
+      
+      // Page Number - Bottom Center
+      const pageText = `Page ${i} of ${totalPages}`;
+      const pageTextWidth = doc.getTextWidth(pageText);
+      const centerX = (pageWidth - pageTextWidth) / 2;
+      doc.text(pageText, centerX, footerY);
+    }
     
     // Save PDF
     doc.save(`${formData.buyerLastName || 'Customer'}_Proposal_${new Date().toISOString().split('T')[0]}.pdf`);
