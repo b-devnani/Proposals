@@ -856,12 +856,12 @@ export default function PurchaseOrder() {
       ['Home Plan', currentTemplate.name]
     ];
     
-    // Two-column layout: Customer Information (left 2/3) and Base Pricing (right 1/3)
+    // Two-column layout: Customer Information (left) and Base Pricing (right) - compact and readable
     let yPos = topMargin + 22; // Start immediately after logo/title line
     const leftColumnX = leftMargin;
-    const leftColumnWidth = (contentWidth * 2) / 3; // 2/3 of total width
-    const rightColumnX = leftMargin + leftColumnWidth + 15; // Right column with spacing
-    const rightColumnWidth = contentWidth / 3 - 15; // 1/3 minus spacing
+    const leftColumnWidth = 110; // Fixed width for customer info
+    const rightColumnX = leftColumnX + leftColumnWidth + 20; // Right column with spacing
+    const rightColumnWidth = contentWidth - leftColumnWidth - 20; // Remaining width
     
     // Customer Information - Left Column
     let leftYPos = yPos;
@@ -871,17 +871,17 @@ export default function PurchaseOrder() {
       doc.setTextColor(100, 100, 100); // Light gray
       doc.text(label, leftColumnX, leftYPos);
       
-      // Value - black, bold, aligned with reduced spacing
+      // Value - black, bold, aligned with compact spacing
       doc.setFont("helvetica", "bold");
       doc.setTextColor(0, 0, 0); // Black
-      doc.text(value, leftColumnX + 60, leftYPos); // Reduced spacing (was 80)
+      doc.text(value, leftColumnX + 50, leftYPos); // Compact spacing
       
-      // Light gray underline - adjusted for column width
+      // Light gray underline - adjusted for fixed column width
       doc.setDrawColor(200, 200, 200); // Light gray
       doc.setLineWidth(0.2);
-      doc.line(leftColumnX + 60, leftYPos + 2, leftColumnX + leftColumnWidth - 10, leftYPos + 2);
+      doc.line(leftColumnX + 50, leftYPos + 2, leftColumnX + leftColumnWidth - 5, leftYPos + 2);
       
-      leftYPos += 6; // Reduced line spacing to match smaller font
+      leftYPos += 9; // Increased spacing to balance with 4-line base pricing
     });
     
     // Base Pricing - Right Column (no header)
@@ -903,8 +903,11 @@ export default function PurchaseOrder() {
     
     basePricing.forEach(([label, value]) => {
       doc.text(label, rightColumnX, rightYPos);
-      doc.text(value, rightColumnX + 45, rightYPos); // Further reduced for better fit
-      rightYPos += 6; // Reduced line spacing to match smaller font
+      // Right-align the amounts
+      const valueWidth = doc.getTextWidth(value);
+      const rightAlignX = rightColumnX + rightColumnWidth - valueWidth - 5;
+      doc.text(value, rightAlignX, rightYPos);
+      rightYPos += 13.5; // Increased spacing to match customer info height (54pt total / 4 lines = 13.5pt)
     });
     
     // Set yPos to the maximum of both columns for next section
