@@ -856,10 +856,12 @@ export default function PurchaseOrder() {
       ['Home Plan', currentTemplate.name]
     ];
     
-    // Two-column layout: Customer Information (left) and Base Pricing (right)
+    // Two-column layout: Customer Information (left 2/3) and Base Pricing (right 1/3)
     let yPos = topMargin + 22; // Start immediately after logo/title line
     const leftColumnX = leftMargin;
-    const rightColumnX = leftMargin + (contentWidth / 2) + 10; // Right column starts at center + spacing
+    const leftColumnWidth = (contentWidth * 2) / 3; // 2/3 of total width
+    const rightColumnX = leftMargin + leftColumnWidth + 15; // Right column with spacing
+    const rightColumnWidth = contentWidth / 3 - 15; // 1/3 minus spacing
     
     // Customer Information - Left Column
     let leftYPos = yPos;
@@ -874,10 +876,10 @@ export default function PurchaseOrder() {
       doc.setTextColor(0, 0, 0); // Black
       doc.text(value, leftColumnX + 80, leftYPos); // Aligned spacing
       
-      // Light gray underline
+      // Light gray underline - adjusted for column width
       doc.setDrawColor(200, 200, 200); // Light gray
       doc.setLineWidth(0.2);
-      doc.line(leftColumnX + 80, leftYPos + 2, leftColumnX + 160, leftYPos + 2);
+      doc.line(leftColumnX + 80, leftYPos + 2, leftColumnX + leftColumnWidth - 10, leftYPos + 2);
       
       leftYPos += 7; // Reduced line spacing for compactness
     });
@@ -901,7 +903,7 @@ export default function PurchaseOrder() {
     
     basePricing.forEach(([label, value]) => {
       doc.text(label, rightColumnX, rightYPos);
-      doc.text(value, rightColumnX + 85, rightYPos);
+      doc.text(value, rightColumnX + 60, rightYPos); // Adjusted for narrower column
       rightYPos += 7; // Reduced line spacing
     });
     
