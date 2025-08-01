@@ -846,7 +846,7 @@ export default function PurchaseOrder() {
     doc.text(titleText, centerX, topMargin + 10); // Center aligned and positioned at logo center height
     
     // Customer Information - positioned immediately after logo with no gap
-    doc.setFontSize(11);
+    doc.setFontSize(8); // Reduced by 3 points (was 11)
     const customerInfoData = [
       ['Date', new Date().toLocaleDateString()],
       ['Customer Name', formData.buyerLastName || 'Not specified'],
@@ -871,21 +871,21 @@ export default function PurchaseOrder() {
       doc.setTextColor(100, 100, 100); // Light gray
       doc.text(label, leftColumnX, leftYPos);
       
-      // Value - black, bold, aligned with spacing
+      // Value - black, bold, aligned with reduced spacing
       doc.setFont("helvetica", "bold");
       doc.setTextColor(0, 0, 0); // Black
-      doc.text(value, leftColumnX + 80, leftYPos); // Aligned spacing
+      doc.text(value, leftColumnX + 60, leftYPos); // Reduced spacing (was 80)
       
       // Light gray underline - adjusted for column width
       doc.setDrawColor(200, 200, 200); // Light gray
       doc.setLineWidth(0.2);
-      doc.line(leftColumnX + 80, leftYPos + 2, leftColumnX + leftColumnWidth - 10, leftYPos + 2);
+      doc.line(leftColumnX + 60, leftYPos + 2, leftColumnX + leftColumnWidth - 10, leftYPos + 2);
       
-      leftYPos += 7; // Reduced line spacing for compactness
+      leftYPos += 6; // Reduced line spacing to match smaller font
     });
     
     // Base Pricing - Right Column (no header)
-    doc.setFontSize(11);
+    doc.setFontSize(8); // Reduced by 3 points (was 11)
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0); // Reset to black
     
@@ -903,8 +903,8 @@ export default function PurchaseOrder() {
     
     basePricing.forEach(([label, value]) => {
       doc.text(label, rightColumnX, rightYPos);
-      doc.text(value, rightColumnX + 60, rightYPos); // Adjusted for narrower column
-      rightYPos += 7; // Reduced line spacing
+      doc.text(value, rightColumnX + 45, rightYPos); // Further reduced for better fit
+      rightYPos += 6; // Reduced line spacing to match smaller font
     });
     
     // Set yPos to the maximum of both columns for next section
