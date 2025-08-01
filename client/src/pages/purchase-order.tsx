@@ -859,7 +859,7 @@ export default function PurchaseOrder() {
     // Two-column layout: Optimized for readability and aesthetics
     let yPos = topMargin + 22; // Start immediately after logo/title line
     const leftColumnX = leftMargin;
-    const leftColumnWidth = 130; // Optimal width for customer info readability
+    const leftColumnWidth = 120; // Reduced width with closer spacing
     const columnGap = 25; // Generous spacing between columns
     const rightColumnX = leftColumnX + leftColumnWidth + columnGap;
     const rightColumnWidth = contentWidth - leftColumnWidth - columnGap;
@@ -872,15 +872,15 @@ export default function PurchaseOrder() {
       doc.setTextColor(80, 80, 80); // Medium gray for better readability
       doc.text(label, leftColumnX, leftYPos);
       
-      // Value - black, bold, with optimal spacing
+      // Value - black, bold, with closer spacing
       doc.setFont("helvetica", "bold");
       doc.setTextColor(0, 0, 0); // Black
-      doc.text(value, leftColumnX + 55, leftYPos); // Optimal spacing for readability
+      doc.text(value, leftColumnX + 45, leftYPos); // Moved closer to label
       
       // Subtle underline for visual separation
       doc.setDrawColor(180, 180, 180); // Slightly darker gray
       doc.setLineWidth(0.3);
-      doc.line(leftColumnX + 55, leftYPos + 2.5, leftColumnX + leftColumnWidth - 3, leftYPos + 2.5);
+      doc.line(leftColumnX + 45, leftYPos + 2.5, leftColumnX + leftColumnWidth - 3, leftYPos + 2.5);
       
       leftYPos += 10; // Generous line spacing for readability
     });
