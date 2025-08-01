@@ -890,7 +890,7 @@ export default function PurchaseOrder() {
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0); // Reset to black
     
-    let rightYPos = yPos;
+    let rightYPos = yPos + 16; // Start two lines lower (2 * 8pt spacing)
     const basePricing = [
       [`Base Price:`, `$${parseInt(currentTemplate.basePrice).toLocaleString()}`],
       [`Lot Premium:`, `$${parseInt(formData.lotPremium || "0").toLocaleString()}`],
