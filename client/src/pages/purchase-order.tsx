@@ -860,7 +860,7 @@ export default function PurchaseOrder() {
     let yPos = topMargin + 22; // Start immediately after logo/title line
     const leftColumnX = leftMargin;
     const leftColumnWidth = 110; // Further reduced width for tighter layout
-    const columnGap = 15; // Reduced gap between columns
+    const columnGap = 8; // Minimal gap between columns
     const rightColumnX = leftColumnX + leftColumnWidth + columnGap;
     const rightColumnWidth = contentWidth - leftColumnWidth - columnGap;
     
@@ -882,7 +882,7 @@ export default function PurchaseOrder() {
       doc.setLineWidth(0.3);
       doc.line(leftColumnX + 38, leftYPos + 2.5, leftColumnX + leftColumnWidth - 3, leftYPos + 2.5);
       
-      leftYPos += 10; // Generous line spacing for readability
+      leftYPos += 8; // Reduced line spacing for compact layout
     });
     
     // Base Pricing - Right Column (no header)
@@ -915,7 +915,7 @@ export default function PurchaseOrder() {
       const rightAlignX = rightColumnX + rightColumnWidth - valueWidth - 5;
       doc.text(value, rightAlignX, rightYPos);
       
-      rightYPos += 10; // Reduced spacing to prevent overlap
+      rightYPos += 8; // Compact spacing to match customer info
     });
     
     // Set yPos to the maximum of both columns for next section
