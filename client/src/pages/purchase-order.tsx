@@ -952,10 +952,10 @@ export default function PurchaseOrder() {
       doc.line(subtotalX, yPos - 3, subtotalX, yPos + 4); // Option|Subtotal
       
       doc.setTextColor(0, 0, 0);
-      doc.text("#", rowNumX + rowNumWidth - 3, yPos + 1); // Right-aligned in narrow column
-      doc.text("Location", locationX + 2, yPos + 1);
-      doc.text("Option", optionX + 2, yPos + 1);
-      doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 1); // Right-aligned header
+      doc.text("#", rowNumX + rowNumWidth - 3, yPos + 2.5); // Right-aligned, vertically centered
+      doc.text("Location", locationX + 2, yPos + 2.5);
+      doc.text("Option", optionX + 2, yPos + 2.5);
+      doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 2.5); // Right-aligned header, vertically centered
       yPos += rowHeight;
       
       const groupedUpgrades = groupUpgradesByCategory(selectedUpgradeItems);
@@ -974,7 +974,7 @@ export default function PurchaseOrder() {
         const categoryText = category.toUpperCase();
         const categoryTextWidth = doc.getTextWidth(categoryText);
         const centerCategoryX = rowNumX + (tableWidth - categoryTextWidth) / 2;
-        doc.text(categoryText, centerCategoryX, yPos + 1);
+        doc.text(categoryText, centerCategoryX, yPos + 2.5);
         yPos += rowHeight;
         
         doc.setFont("helvetica", "normal");
@@ -1008,10 +1008,10 @@ export default function PurchaseOrder() {
                 doc.line(optionX, yPos - 3, optionX, yPos + 4);
                 doc.line(subtotalX, yPos - 3, subtotalX, yPos + 4);
                 doc.setTextColor(0, 0, 0);
-                doc.text("#", rowNumX + rowNumWidth - 3, yPos + 1);
-                doc.text("Location", locationX + 2, yPos + 1);
-                doc.text("Option", optionX + 2, yPos + 1);
-                doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 1);
+                doc.text("#", rowNumX + rowNumWidth - 3, yPos + 2.5);
+                doc.text("Location", locationX + 2, yPos + 2.5);
+                doc.text("Option", optionX + 2, yPos + 2.5);
+                doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 2.5);
                 yPos += rowHeight;
                 doc.setFont("helvetica", "normal");
               }
@@ -1033,7 +1033,7 @@ export default function PurchaseOrder() {
                   doc.setTextColor(60, 60, 60);
                   const locationTextWidth = doc.getTextWidth(location);
                   const centerLocationX = locationX + (locationWidth - locationTextWidth) / 2;
-                  const centerLocationY = yPos + (locationCellHeight / 2) - 1;
+                  const centerLocationY = yPos + (locationCellHeight / 2) + 0.5;
                   doc.text(location, centerLocationX, centerLocationY);
                   locationCellDrawn = true;
                 }
@@ -1057,24 +1057,24 @@ export default function PurchaseOrder() {
               // Draw subtotal cell
               doc.rect(subtotalX, yPos - 2, subtotalWidth, rowHeight, 'FD');
               
-              // Row number (right-aligned)
+              // Row number (right-aligned, vertically centered)
               doc.setTextColor(0, 0, 0);
               const rowNumText = globalRowNumber.toString();
               const rowNumTextWidth = doc.getTextWidth(rowNumText);
               const rightAlignRowNumX = rowNumX + rowNumWidth - rowNumTextWidth - 1;
-              doc.text(rowNumText, rightAlignRowNumX, yPos + 1);
+              doc.text(rowNumText, rightAlignRowNumX, yPos + 2.5);
               
-              // Option text
+              // Option text (vertically centered)
               const optionText = upgrade.choiceTitle.length > 62 ? 
                 upgrade.choiceTitle.substring(0, 59) + "..." : 
                 upgrade.choiceTitle;
-              doc.text(optionText, optionX + 2, yPos + 1);
+              doc.text(optionText, optionX + 2, yPos + 2.5);
               
-              // Subtotal (right-aligned)
+              // Subtotal (right-aligned, vertically centered)
               const price = `$${parseInt(upgrade.clientPrice).toLocaleString()}`;
               const priceWidth = doc.getTextWidth(price);
               const rightAlignSubtotalX = subtotalX + subtotalWidth - priceWidth - 1;
-              doc.text(price, rightAlignSubtotalX, yPos + 1);
+              doc.text(price, rightAlignSubtotalX, yPos + 2.5);
               
               yPos += rowHeight;
               currentRowIndex++;
