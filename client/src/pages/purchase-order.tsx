@@ -830,21 +830,37 @@ export default function PurchaseOrder() {
     
     // Customer Information - positioned immediately after logo with no gap
     doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    const customerInfo = [
-      `Date: ${new Date().toLocaleDateString()}`,
-      `Customer Name: ${formData.buyerLastName || 'Not specified'}`,
-      `Community: ${formData.community || 'Not specified'}`,
-      `Lot Number: ${formData.lotNumber || 'TBD'}`,
-      `Lot Address: ${formData.lotAddress || 'TBD'}`,
-      `Home Plan: ${currentTemplate.name}`
+    const customerInfoData = [
+      ['Date', new Date().toLocaleDateString()],
+      ['Customer Name', formData.buyerLastName || 'Not specified'],
+      ['Community', formData.community || 'Not specified'],
+      ['Lot Number', formData.lotNumber || 'TBD'],
+      ['Lot Address', formData.lotAddress || 'TBD'],
+      ['Home Plan', currentTemplate.name]
     ];
     
     let yPos = topMargin + 25; // Start immediately after logo with minimal gap
-    customerInfo.forEach(info => {
-      doc.text(info, leftMargin, yPos);
+    customerInfoData.forEach(([label, value]) => {
+      // Label - light gray, normal weight
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 100, 100); // Light gray
+      doc.text(label, leftMargin, yPos);
+      
+      // Value - black, bold, aligned with spacing
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0); // Black
+      doc.text(value, leftMargin + 80, yPos); // Aligned spacing
+      
+      // Light gray underline
+      doc.setDrawColor(200, 200, 200); // Light gray
+      doc.setLineWidth(0.2);
+      doc.line(leftMargin + 80, yPos + 2, leftMargin + 180, yPos + 2);
+      
       yPos += 7; // Reduced line spacing for compactness
     });
+    
+    // Reset text color to black for rest of document
+    doc.setTextColor(0, 0, 0);
     
     // Base Pricing - reduced spacing
     yPos += 6; // Minimal space before base pricing
