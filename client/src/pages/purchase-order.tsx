@@ -1127,7 +1127,7 @@ export default function PurchaseOrder() {
     doc.setFont("helvetica", "normal");
     const signatureLineWidth = pageWidth - (leftMargin * 2);
     doc.line(leftMargin, yPos, leftMargin + signatureLineWidth, yPos);
-    yPos += 15;
+    yPos += 8; // Closer to the line
     
     // Two column layout for signatures
     const signatureColumnWidth = signatureLineWidth / 2;
@@ -1140,13 +1140,11 @@ export default function PurchaseOrder() {
     
     // Left column - First Buyer
     doc.text("Buyer", signatureLeftX, yPos);
-    doc.text("Today's Date", signatureLeftX + 50, yPos);
-    doc.text(todayFormatted, signatureLeftX + 120, yPos);
+    doc.text(todayFormatted, signatureLeftX + 60, yPos);
     
     // Right column - Second Buyer  
     doc.text("Buyer", signatureRightX, yPos);
-    doc.text("Today's Date", signatureRightX + 50, yPos);
-    doc.text(todayFormatted, signatureRightX + 120, yPos);
+    doc.text(todayFormatted, signatureRightX + 60, yPos);
     
     // Add footer to all pages
     const totalPages = doc.getNumberOfPages();
