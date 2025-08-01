@@ -303,7 +303,7 @@ export default function PurchaseOrder() {
     // Configure print settings
     worksheet.pageSetup = {
       // Paper size (Letter)
-      paperSize: 1,
+      paperSize: 'Letter' as any,
       // Orientation (Portrait)
       orientation: 'portrait',
       // Margins (Narrow)
@@ -1092,11 +1092,13 @@ export default function PurchaseOrder() {
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
       // Align label with options column
-      doc.text("Selections Subtotal:", optionX, yPos);
+      const selectionsOptionX = leftMargin + 10 + 45; // rowNumWidth + locationWidth
+      doc.text("Selections Subtotal:", selectionsOptionX, yPos);
       // Align value with subtotals column
       const selectionsSubtotalValue = `$${upgradesTotal.toLocaleString()}`;
       const selectionsSubtotalWidth = doc.getTextWidth(selectionsSubtotalValue);
-      const selectionsSubtotalX = subtotalX + subtotalWidth - selectionsSubtotalWidth - 1;
+      const selectionsSubtotalColumnX = leftMargin + 10 + 45 + 100; // rowNumWidth + locationWidth + optionWidth
+      const selectionsSubtotalX = selectionsSubtotalColumnX + 30 - selectionsSubtotalWidth - 1; // subtotalWidth - selectionsSubtotalWidth - padding
       doc.text(selectionsSubtotalValue, selectionsSubtotalX, yPos);
       yPos += 8; // Reduced spacing
     }
@@ -1105,11 +1107,13 @@ export default function PurchaseOrder() {
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     // Align label with options column
-    doc.text("GRAND TOTAL:", optionX, yPos);
+    const grandTotalOptionX = leftMargin + 10 + 45; // rowNumWidth + locationWidth
+    doc.text("GRAND TOTAL:", grandTotalOptionX, yPos);
     // Align value with subtotals column
     const grandTotalValue = `$${totalPrice.toLocaleString()}`;
     const grandTotalWidth = doc.getTextWidth(grandTotalValue);
-    const grandTotalX = subtotalX + subtotalWidth - grandTotalWidth - 1;
+    const grandTotalSubtotalX = leftMargin + 10 + 45 + 100; // rowNumWidth + locationWidth + optionWidth
+    const grandTotalX = grandTotalSubtotalX + 30 - grandTotalWidth - 1; // subtotalWidth - grandTotalWidth - padding
     doc.text(grandTotalValue, grandTotalX, yPos);
     yPos += 20;
     
@@ -1129,7 +1133,7 @@ export default function PurchaseOrder() {
     doc.text("Date: ____________________________", leftMargin, yPos);
     
     // Add footer to all pages
-    const totalPages = doc.internal.getNumberOfPages();
+    const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
       doc.setFontSize(9);
