@@ -1030,7 +1030,7 @@ export default function PurchaseOrder() {
         {/* Header */}
         <div className="mb-4 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Proposal Generator</h1>
-          <p className="text-sm sm:text-base text-gray-600">Create detailed proposals with home templates and upgrades</p>
+          <p className="text-sm sm:text-base text-gray-600">Create detailed proposals with home templates and selections</p>
         </div>
 
         {/* Template Selection */}
@@ -1297,7 +1297,7 @@ export default function PurchaseOrder() {
                   {/* Search Bar */}
                   <div>
                     <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
-                      Search Upgrades
+                      Search Selections
                     </Label>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
