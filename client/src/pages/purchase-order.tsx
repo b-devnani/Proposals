@@ -1012,7 +1012,7 @@ export default function PurchaseOrder() {
               // Draw location merged cell if not drawn yet on this page
               if (!locationCellDrawn) {
                 const remainingRows = totalRowsForLocation - currentRowIndex;
-                const availableRowsOnPage = Math.floor((pageHeight - bottomMargin - 20 - yPos) / rowHeight);
+                const availableRowsOnPage = Math.floor((pageHeight - bottomMargin - 20 - yPos + rowHeight) / rowHeight);
                 const rowsForThisPageSegment = Math.min(remainingRows, availableRowsOnPage);
                 
                 if (rowsForThisPageSegment > 0) {
