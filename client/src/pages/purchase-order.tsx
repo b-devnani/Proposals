@@ -1131,8 +1131,9 @@ export default function PurchaseOrder() {
     // Single signature line spanning most of the page width
     doc.setFont("helvetica", "normal");
     const signatureLineWidth = pageWidth - (leftMargin * 2);
+    yPos += 5; // Move line down to create more signing space above
     doc.line(leftMargin, yPos, leftMargin + signatureLineWidth, yPos);
-    yPos += 8; // More space for buyer signatures
+    yPos += 3; // Space between line and buyer text
     
     // Two column layout for signatures
     const signatureColumnWidth = signatureLineWidth / 2;
