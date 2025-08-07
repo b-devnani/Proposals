@@ -1836,20 +1836,6 @@ export default function PurchaseOrder() {
                             className="mb-2"
                           />
                         </div>
-                        <div className="w-32">
-                          <div className="flex items-center gap-1">
-                            <span className="text-sm text-gray-700">$</span>
-                            <Input
-                              type="text"
-                              placeholder="0"
-                              value={formatNumberWithCommas(sro.price)}
-                              onChange={(e) => handleNumberInputChange(e.target.value, (value) => 
-                                updateSpecialRequestOption(sro.id, 'price', value)
-                              )}
-                              className="text-right"
-                            />
-                          </div>
-                        </div>
                         {showCostColumns && (
                           <div className="w-28">
                             <div className="flex flex-col gap-1">
@@ -1869,6 +1855,20 @@ export default function PurchaseOrder() {
                             </div>
                           </div>
                         )}
+                        <div className="w-32">
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm text-gray-700">$</span>
+                            <Input
+                              type="text"
+                              placeholder="0"
+                              value={formatNumberWithCommas(sro.price)}
+                              onChange={(e) => handleNumberInputChange(e.target.value, (value) => 
+                                updateSpecialRequestOption(sro.id, 'price', value)
+                              )}
+                              className="text-right"
+                            />
+                          </div>
+                        </div>
                         <Button
                           variant="ghost"
                           size="sm"
