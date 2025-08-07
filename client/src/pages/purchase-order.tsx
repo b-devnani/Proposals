@@ -1826,36 +1826,58 @@ export default function PurchaseOrder() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {specialRequestOptions.map((sro) => (
-                      <div key={sro.id} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border">
-                        <div className="flex-1">
-                          <Input
-                            placeholder="Enter description..."
-                            value={sro.description}
-                            onChange={(e) => updateSpecialRequestOption(sro.id, 'description', e.target.value)}
-                            className="mb-2"
-                          />
+                    {/* Headers Row */}
+                    {specialRequestOptions.length > 0 && (
+                      <div className="grid gap-3 p-3 bg-gray-100 rounded-lg border font-medium text-sm text-gray-700" 
+                           style={{
+                             gridTemplateColumns: showCostColumns 
+                               ? "1fr 120px 120px 40px" 
+                               : "1fr 120px 40px"
+                           }}>
+                        <div>Description</div>
+                        {showCostColumns && <div className="text-center">Builder Cost</div>}
+                        <div className="text-center">Client Price</div>
+                        <div></div>
+                      </div>
+                    )}
+                    
+                    {specialRequestOptions.map((sro, index) => (
+                      <div key={sro.id} className="space-y-2">
+                        {/* SRO Header */}
+                        <div className="text-sm font-semibold text-gray-800 px-2">
+                          SRO #{String(index + 1).padStart(2, '0')}
                         </div>
-                        {showCostColumns && (
-                          <div className="w-28">
-                            <div className="flex flex-col gap-1">
-                              <label className="text-xs text-gray-500">Builder Cost</label>
-                              <div className="flex items-center gap-1">
-                                <span className="text-sm text-gray-700">$</span>
-                                <Input
-                                  type="text"
-                                  placeholder="0"
-                                  value={formatNumberWithCommas(sro.builderCost)}
-                                  onChange={(e) => handleNumberInputChange(e.target.value, (value) => 
-                                    updateSpecialRequestOption(sro.id, 'builderCost', value)
-                                  )}
-                                  className="text-right text-xs"
-                                />
-                              </div>
-                            </div>
+                        
+                        {/* Input Row */}
+                        <div className="grid gap-3 p-4 bg-gray-50 rounded-lg border items-center"
+                             style={{
+                               gridTemplateColumns: showCostColumns 
+                                 ? "1fr 120px 120px 40px" 
+                                 : "1fr 120px 40px"
+                             }}>
+                          <div>
+                            <Input
+                              placeholder="Enter description..."
+                              value={sro.description}
+                              onChange={(e) => updateSpecialRequestOption(sro.id, 'description', e.target.value)}
+                            />
                           </div>
-                        )}
-                        <div className="w-32">
+                          
+                          {showCostColumns && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-sm text-gray-700">$</span>
+                              <Input
+                                type="text"
+                                placeholder="0"
+                                value={formatNumberWithCommas(sro.builderCost)}
+                                onChange={(e) => handleNumberInputChange(e.target.value, (value) => 
+                                  updateSpecialRequestOption(sro.id, 'builderCost', value)
+                                )}
+                                className="text-right"
+                              />
+                            </div>
+                          )}
+                          
                           <div className="flex items-center gap-1">
                             <span className="text-sm text-gray-700">$</span>
                             <Input
@@ -1868,17 +1890,19 @@ export default function PurchaseOrder() {
                               className="text-right"
                             />
                           </div>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeSpecialRequestOption(sro.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeSpecialRequestOption(sro.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
                       </div>
                     ))}
+                    
                     {specialRequestOptions.length > 0 && (
                       <div className="flex justify-end pt-2 border-t border-gray-200">
                         <div className="text-sm font-semibold text-gray-900">
