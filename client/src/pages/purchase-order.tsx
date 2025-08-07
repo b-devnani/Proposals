@@ -71,6 +71,7 @@ export default function PurchaseOrder() {
     id: number;
     description: string;
     price: string;
+    builderCost: string;
   }[]>([]);
   const [nextSroId, setNextSroId] = useState(1);
   
@@ -105,7 +106,8 @@ export default function PurchaseOrder() {
       {
         id: nextSroId,
         description: "",
-        price: "0"
+        price: "0",
+        builderCost: "0"
       }
     ]);
     setNextSroId(nextSroId + 1);
@@ -115,15 +117,18 @@ export default function PurchaseOrder() {
     setSpecialRequestOptions(specialRequestOptions.filter(sro => sro.id !== id));
   };
 
-  const updateSpecialRequestOption = (id: number, field: 'description' | 'price', value: string) => {
+  const updateSpecialRequestOption = (id: number, field: 'description' | 'price' | 'builderCost', value: string) => {
     setSpecialRequestOptions(specialRequestOptions.map(sro => 
       sro.id === id ? { ...sro, [field]: value } : sro
     ));
   };
 
-  // Calculate SRO total
+  // Calculate SRO totals
   const specialRequestTotal = specialRequestOptions.reduce((sum, sro) => 
     sum + parseFloat(sro.price || "0"), 0
+  );
+  const specialRequestCostTotal = specialRequestOptions.reduce((sum, sro) => 
+    sum + parseFloat(sro.builderCost || "0"), 0
   );
 
   // Queries
@@ -1845,6 +1850,25 @@ export default function PurchaseOrder() {
                             />
                           </div>
                         </div>
+                        {showCostColumns && (
+                          <div className="w-28">
+                            <div className="flex flex-col gap-1">
+                              <label className="text-xs text-gray-500">Builder Cost</label>
+                              <div className="flex items-center gap-1">
+                                <span className="text-sm text-gray-700">$</span>
+                                <Input
+                                  type="text"
+                                  placeholder="0"
+                                  value={formatNumberWithCommas(sro.builderCost)}
+                                  onChange={(e) => handleNumberInputChange(e.target.value, (value) => 
+                                    updateSpecialRequestOption(sro.id, 'builderCost', value)
+                                  )}
+                                  className="text-right text-xs"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"

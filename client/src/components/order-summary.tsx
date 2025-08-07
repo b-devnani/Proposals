@@ -12,7 +12,7 @@ interface OrderSummaryProps {
   salesIncentiveEnabled: boolean;
   designStudioAllowance: string;
   selectedUpgrades: Upgrade[];
-  specialRequestOptions: { id: number; description: string; price: string; }[];
+  specialRequestOptions: { id: number; description: string; price: string; builderCost: string; }[];
   specialRequestTotal: number;
   showCostColumns: boolean;
   onSaveDraft: () => void;
@@ -54,8 +54,16 @@ export function OrderSummary({
   const upgradesSubtotal = parseFloat(designStudioAllowance || "0") + upgradesTotal + specialRequestTotal;
   
   const grandTotal = baseSubtotal + upgradesSubtotal;
-  const totalCost = parseFloat(baseCost || "0") + upgradesBuilderCost;
+  const specialRequestCostTotal = specialRequestOptions.reduce((sum, sro) => 
+    sum + parseFloat(sro.builderCost || "0"), 0
+  );
+  const totalCost = parseFloat(baseCost || "0") + upgradesBuilderCost + specialRequestCostTotal;
   const overallMargin = grandTotal > 0 ? ((grandTotal - totalCost) / grandTotal * 100) : 0;
+  
+  // Calculate combined selections margin (standard + SRO)
+  const totalSelectionsPrice = upgradesTotal + specialRequestTotal;
+  const totalSelectionsCost = upgradesBuilderCost + specialRequestCostTotal;
+  const selectionsMargin = totalSelectionsPrice > 0 ? ((totalSelectionsPrice - totalSelectionsCost) / totalSelectionsPrice * 100) : 0;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky bottom-0 mt-4">
@@ -124,17 +132,17 @@ export function OrderSummary({
                     <span className="text-blue-600">{formatCurrency(upgradesSubtotal)}</span>
                   </div>
                 </div>
-                {showCostColumns && selectedUpgrades.length > 0 && (
+                {showCostColumns && (selectedUpgrades.length > 0 || specialRequestOptions.length > 0) && (
                   <div className="flex justify-between items-center text-xs text-gray-500">
                     <span>Selections Cost:</span>
-                    <span className="font-medium">{formatCurrency(upgradesBuilderCost)}</span>
+                    <span className="font-medium">{formatCurrency(totalSelectionsCost)}</span>
                   </div>
                 )}
-                {showCostColumns && selectedUpgrades.length > 0 && (
+                {showCostColumns && (selectedUpgrades.length > 0 || specialRequestOptions.length > 0) && (
                   <div className="flex justify-between items-center text-xs text-gray-500">
                     <span>Margin:</span>
-                    <span className={`font-medium ${formatMargin(upgradesMargin / 100).colorClass}`}>
-                      {formatMargin(upgradesMargin / 100).value}
+                    <span className={`font-medium ${formatMargin(selectionsMargin / 100).colorClass}`}>
+                      {formatMargin(selectionsMargin / 100).value}
                     </span>
                   </div>
                 )}
