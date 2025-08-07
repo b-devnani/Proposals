@@ -1221,29 +1221,18 @@ export default function PurchaseOrder() {
           globalRowNumber++;
         });
         
-        // Special Request Options Total
-        yPos += 5;
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "bold");
-        const sroTotalOptionX = leftMargin + 10 + 45; // rowNumWidth + locationWidth
-        doc.text("Special Request Options Total:", sroTotalOptionX, yPos);
-        const sroTotalValue = `$${specialRequestTotal.toLocaleString()}`;
-        const sroTotalWidth = doc.getTextWidth(sroTotalValue);
-        const sroTotalSubtotalColumnX = leftMargin + 10 + 45 + 100; // rowNumWidth + locationWidth + optionWidth
-        const sroTotalX = sroTotalSubtotalColumnX + 30 - sroTotalWidth - 1;
-        doc.text(sroTotalValue, sroTotalX, yPos);
-        yPos += 8;
       }
       
-      // Options Total
+      // Options Total (includes both standard selections and SROs)
       yPos += 5;
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
       // Align label with options column
       const selectionsOptionX = leftMargin + 10 + 45; // rowNumWidth + locationWidth
       doc.text("Options Total:", selectionsOptionX, yPos);
-      // Align value with subtotals column
-      const selectionsSubtotalValue = `$${upgradesTotal.toLocaleString()}`;
+      // Align value with subtotals column - combine upgrades and SRO totals
+      const totalOptionsValue = upgradesTotal + specialRequestTotal;
+      const selectionsSubtotalValue = `$${totalOptionsValue.toLocaleString()}`;
       const selectionsSubtotalWidth = doc.getTextWidth(selectionsSubtotalValue);
       const selectionsSubtotalColumnX = leftMargin + 10 + 45 + 100; // rowNumWidth + locationWidth + optionWidth
       const selectionsSubtotalX = selectionsSubtotalColumnX + 30 - selectionsSubtotalWidth - 1; // subtotalWidth - selectionsSubtotalWidth - padding
