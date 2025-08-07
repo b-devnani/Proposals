@@ -12,6 +12,8 @@ interface OrderSummaryProps {
   salesIncentiveEnabled: boolean;
   designStudioAllowance: string;
   selectedUpgrades: Upgrade[];
+  specialRequestOptions: { id: number; description: string; price: string; }[];
+  specialRequestTotal: number;
   showCostColumns: boolean;
   onSaveDraft: () => void;
   onGenerateProposal: () => void;
@@ -26,6 +28,8 @@ export function OrderSummary({
   salesIncentiveEnabled,
   designStudioAllowance,
   selectedUpgrades,
+  specialRequestOptions,
+  specialRequestTotal,
   showCostColumns,
   onSaveDraft,
   onGenerateProposal,
@@ -47,7 +51,7 @@ export function OrderSummary({
   
   // Subtotals
   const baseSubtotal = parseFloat(basePrice) + parseFloat(lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(salesIncentive || "0") : 0);
-  const upgradesSubtotal = parseFloat(designStudioAllowance || "0") + upgradesTotal;
+  const upgradesSubtotal = parseFloat(designStudioAllowance || "0") + upgradesTotal + specialRequestTotal;
   
   const grandTotal = baseSubtotal + upgradesSubtotal;
   const totalCost = parseFloat(baseCost || "0") + upgradesBuilderCost;
@@ -108,6 +112,12 @@ export function OrderSummary({
                   <span>Selections ({selectedUpgrades.length}):</span>
                   <span className="font-medium">{formatCurrency(upgradesTotal)}</span>
                 </div>
+                {specialRequestOptions.length > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span>Special Requests ({specialRequestOptions.length}):</span>
+                    <span className="font-medium text-orange-600">{formatCurrency(specialRequestTotal)}</span>
+                  </div>
+                )}
                 <div className="border-t pt-1 mt-1">
                   <div className="flex justify-between items-center font-semibold">
                     <span>Selections Subtotal:</span>

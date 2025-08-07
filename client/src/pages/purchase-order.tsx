@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Filter, Plus, Minus } from "lucide-react";
+import { Search, Filter, Plus, Minus, Package } from "lucide-react";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -66,6 +66,14 @@ export default function PurchaseOrder() {
   const [locationFilter, setLocationFilter] = useState("all");
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   
+  // Special Request Options state
+  const [specialRequestOptions, setSpecialRequestOptions] = useState<{
+    id: number;
+    description: string;
+    price: string;
+  }[]>([]);
+  const [nextSroId, setNextSroId] = useState(1);
+  
   // Form state
   const [formData, setFormData] = useState({
     todaysDate: new Date().toISOString().split('T')[0],
@@ -89,6 +97,34 @@ export default function PurchaseOrder() {
       lotAddress: address 
     });
   };
+
+  // Special Request Options handlers
+  const addSpecialRequestOption = () => {
+    setSpecialRequestOptions([
+      ...specialRequestOptions,
+      {
+        id: nextSroId,
+        description: "",
+        price: "0"
+      }
+    ]);
+    setNextSroId(nextSroId + 1);
+  };
+
+  const removeSpecialRequestOption = (id: number) => {
+    setSpecialRequestOptions(specialRequestOptions.filter(sro => sro.id !== id));
+  };
+
+  const updateSpecialRequestOption = (id: number, field: 'description' | 'price', value: string) => {
+    setSpecialRequestOptions(specialRequestOptions.map(sro => 
+      sro.id === id ? { ...sro, [field]: value } : sro
+    ));
+  };
+
+  // Calculate SRO total
+  const specialRequestTotal = specialRequestOptions.reduce((sum, sro) => 
+    sum + parseFloat(sro.price || "0"), 0
+  );
 
   // Queries
   const { data: templates = [], isLoading: templatesLoading } = useQuery<HomeTemplate[]>({
@@ -780,7 +816,7 @@ export default function PurchaseOrder() {
     
     const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
     const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
-    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal;
+    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestTotal;
     
     const proposalData = {
       todaysDate: new Date().toISOString().split('T')[0],
@@ -816,7 +852,7 @@ export default function PurchaseOrder() {
     
     const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
     const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
-    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal;
+    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestTotal;
     
     const doc = new jsPDF();
     
@@ -1086,6 +1122,113 @@ export default function PurchaseOrder() {
 
         });
       });
+      
+      // Add Special Request Options if any exist
+      if (specialRequestOptions.length > 0) {
+        // Add spacing
+        yPos += 5;
+        
+        // Special Request Options header
+        doc.setFillColor(230, 230, 230);
+        doc.setDrawColor(150, 150, 150);
+        doc.setLineWidth(0.5);
+        doc.rect(rowNumX, yPos - 2, tableWidth, rowHeight, 'FD');
+        
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        const sroHeaderText = "SPECIAL REQUEST OPTIONS";
+        const sroHeaderTextWidth = doc.getTextWidth(sroHeaderText);
+        const centerSroHeaderX = rowNumX + (tableWidth - sroHeaderTextWidth) / 2;
+        doc.text(sroHeaderText, centerSroHeaderX, yPos + 2);
+        yPos += rowHeight;
+        
+        doc.setFont("helvetica", "normal");
+        
+        // Add each special request option
+        specialRequestOptions.forEach((sro, index) => {
+          // Check if we need a new page
+          if (yPos > pageHeight - bottomMargin - 20) {
+            doc.addPage();
+            yPos = topMargin;
+            
+            // Repeat headers on new page
+            doc.setFontSize(8);
+            doc.setFont("helvetica", "bold");
+            doc.setFillColor(245, 245, 245);
+            doc.setDrawColor(100, 100, 100);
+            doc.setLineWidth(0.5);
+            doc.rect(rowNumX, yPos - 2, tableWidth, rowHeight, 'FD');
+            doc.line(locationX, yPos - 2, locationX, yPos + 3.5);
+            doc.line(optionX, yPos - 2, optionX, yPos + 3.5);
+            doc.line(subtotalX, yPos - 2, subtotalX, yPos + 3.5);
+            doc.setTextColor(0, 0, 0);
+            doc.text("#", rowNumX + rowNumWidth - 3, yPos + 2);
+            doc.text("Location", locationX + 2, yPos + 2);
+            doc.text("Option", optionX + 2, yPos + 2);
+            doc.text("Subtotal", subtotalX + subtotalWidth - 15, yPos + 2);
+            yPos += rowHeight;
+            doc.setFont("helvetica", "normal");
+          }
+          
+          // Row background (alternating)
+          if (index % 2 === 0) {
+            doc.setFillColor(250, 250, 250);
+          } else {
+            doc.setFillColor(255, 255, 255);
+          }
+          
+          // Draw cells
+          doc.setDrawColor(150, 150, 150);
+          doc.setLineWidth(0.5);
+          doc.rect(rowNumX, yPos - 2, rowNumWidth, rowHeight, 'FD');
+          doc.rect(locationX, yPos - 2, locationWidth, rowHeight, 'FD');
+          doc.rect(optionX, yPos - 2, optionWidth, rowHeight, 'FD');
+          doc.rect(subtotalX, yPos - 2, subtotalWidth, rowHeight, 'FD');
+          
+          // Row number (continuing from last globalRowNumber)
+          doc.setTextColor(0, 0, 0);
+          const sroRowNumText = globalRowNumber.toString();
+          const sroRowNumTextWidth = doc.getTextWidth(sroRowNumText);
+          const rightAlignSroRowNumX = rowNumX + rowNumWidth - sroRowNumTextWidth - 1;
+          doc.text(sroRowNumText, rightAlignSroRowNumX, yPos + 2);
+          
+          // Location (Special Request)
+          doc.setTextColor(60, 60, 60);
+          const locationText = "Special Request";
+          const locationTextWidth = doc.getTextWidth(locationText);
+          const centerLocationX = locationX + (locationWidth - locationTextWidth) / 2;
+          doc.text(locationText, centerLocationX, yPos + 2);
+          
+          // Option description
+          doc.setTextColor(0, 0, 0);
+          const sroOptionText = sro.description.length > 62 ? 
+            sro.description.substring(0, 59) + "..." : 
+            sro.description;
+          doc.text(sroOptionText, optionX + 2, yPos + 2);
+          
+          // Subtotal (right-aligned)
+          const sroPrice = `$${parseInt(sro.price).toLocaleString()}`;
+          const sroPriceWidth = doc.getTextWidth(sroPrice);
+          const rightAlignSroSubtotalX = subtotalX + subtotalWidth - sroPriceWidth - 1;
+          doc.text(sroPrice, rightAlignSroSubtotalX, yPos + 2);
+          
+          yPos += rowHeight;
+          globalRowNumber++;
+        });
+        
+        // Special Request Options Total
+        yPos += 5;
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        const sroTotalOptionX = leftMargin + 10 + 45; // rowNumWidth + locationWidth
+        doc.text("Special Request Options Total:", sroTotalOptionX, yPos);
+        const sroTotalValue = `$${specialRequestTotal.toLocaleString()}`;
+        const sroTotalWidth = doc.getTextWidth(sroTotalValue);
+        const sroTotalSubtotalColumnX = leftMargin + 10 + 45 + 100; // rowNumWidth + locationWidth + optionWidth
+        const sroTotalX = sroTotalSubtotalColumnX + 30 - sroTotalWidth - 1;
+        doc.text(sroTotalValue, sroTotalX, yPos);
+        yPos += 8;
+      }
       
       // Options Total
       yPos += 5;
@@ -1651,6 +1794,79 @@ export default function PurchaseOrder() {
               </CardContent>
             </Card>
 
+            {/* Special Request Options */}
+            <Card className="mb-4">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-gray-900">Special Request Options</CardTitle>
+                    <p className="text-sm text-gray-600 mt-1">Custom selections not included in standard options</p>
+                  </div>
+                  <Button
+                    onClick={addSpecialRequestOption}
+                    className="flex items-center gap-2"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add New SRO
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-2">
+                {specialRequestOptions.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Package className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p className="text-sm">No special request options added</p>
+                    <p className="text-xs text-gray-400 mt-1">Click "Add New SRO" to create custom selections</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {specialRequestOptions.map((sro) => (
+                      <div key={sro.id} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border">
+                        <div className="flex-1">
+                          <Input
+                            placeholder="Enter description..."
+                            value={sro.description}
+                            onChange={(e) => updateSpecialRequestOption(sro.id, 'description', e.target.value)}
+                            className="mb-2"
+                          />
+                        </div>
+                        <div className="w-32">
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm text-gray-700">$</span>
+                            <Input
+                              type="text"
+                              placeholder="0"
+                              value={formatNumberWithCommas(sro.price)}
+                              onChange={(e) => handleNumberInputChange(e.target.value, (value) => 
+                                updateSpecialRequestOption(sro.id, 'price', value)
+                              )}
+                              className="text-right"
+                            />
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeSpecialRequestOption(sro.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    {specialRequestOptions.length > 0 && (
+                      <div className="flex justify-end pt-2 border-t border-gray-200">
+                        <div className="text-sm font-semibold text-gray-900">
+                          Total: ${specialRequestTotal.toLocaleString()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Upgrades Table */}
             <Card>
               <CardContent>
@@ -1673,6 +1889,8 @@ export default function PurchaseOrder() {
                     salesIncentiveEnabled={salesIncentiveEnabled}
                     designStudioAllowance={formData.designStudioAllowance}
                     selectedUpgrades={selectedUpgradeItems}
+                    specialRequestOptions={specialRequestOptions}
+                    specialRequestTotal={specialRequestTotal}
                     showCostColumns={showCostColumns}
                     onSaveDraft={handleSaveDraft}
                     onExportExcel={handleExportExcel}
