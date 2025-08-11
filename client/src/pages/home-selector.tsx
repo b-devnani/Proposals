@@ -3,6 +3,9 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Template } from "@shared/schema";
+import ravelloImage from "@assets/Ravello_1754950998192.webp";
+import sorrentoImage from "@assets/Sorrento_1754950998192.webp";
+import veronaImage from "@assets/Verona_1754950998191.webp";
 
 interface HomeTemplate extends Template {
   beds: string;
@@ -18,21 +21,21 @@ const homeTemplateDetails: Record<string, Omit<HomeTemplate, 'id' | 'name' | 'ba
     baths: '2.5 Baths', 
     garage: '2 Garage',
     sqft: 2250,
-    imageUrl: '/api/placeholder/600/400?text=Sorrento'
+    imageUrl: sorrentoImage
   },
   'Ravello': {
     beds: '4 Beds',
     baths: '3 Baths',
     garage: '2 Garage', 
     sqft: 2450,
-    imageUrl: '/api/placeholder/600/400?text=Ravello'
+    imageUrl: ravelloImage
   },
   'Verona': {
     beds: '3-4 Beds',
     baths: '2.5 Baths',
     garage: '2 Garage',
     sqft: 2300,
-    imageUrl: '/api/placeholder/600/400?text=Verona'
+    imageUrl: veronaImage
   }
 };
 
