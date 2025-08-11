@@ -2,12 +2,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Template } from "@shared/schema";
+import { HomeTemplate } from "@shared/schema";
 import ravelloImage from "@assets/Ravello_1754950998192.webp";
 import sorrentoImage from "@assets/Sorrento_1754950998192.webp";
 import veronaImage from "@assets/Verona_1754950998191.webp";
 
-interface HomeTemplate extends Template {
+interface ExtendedHomeTemplate extends HomeTemplate {
   beds: string;
   baths: string;
   garage: string;
@@ -15,32 +15,32 @@ interface HomeTemplate extends Template {
   imageUrl?: string;
 }
 
-const homeTemplateDetails: Record<string, Omit<HomeTemplate, 'id' | 'name' | 'basePrice'>> = {
+const homeTemplateDetails: Record<string, Omit<ExtendedHomeTemplate, 'id' | 'name' | 'basePrice'>> = {
   'Sorrento': {
-    beds: '3-4 Beds',
-    baths: '2.5 Baths', 
-    garage: '2 Garage',
-    sqft: 2250,
+    beds: '2 Beds',
+    baths: '2 Baths', 
+    garage: '2 Car Garage',
+    sqft: 2002,
     imageUrl: sorrentoImage
   },
   'Ravello': {
     beds: '4 Beds',
     baths: '3 Baths',
-    garage: '2 Garage', 
-    sqft: 2450,
+    garage: '2 Car Garage', 
+    sqft: 2184,
     imageUrl: ravelloImage
   },
   'Verona': {
-    beds: '3-4 Beds',
-    baths: '2.5 Baths',
-    garage: '2 Garage',
-    sqft: 2300,
+    beds: '2 Beds',
+    baths: '2 Baths',
+    garage: '2 Car Garage',
+    sqft: 1987,
     imageUrl: veronaImage
   }
 };
 
 export default function HomeSelector() {
-  const { data: templates = [], isLoading } = useQuery<Template[]>({
+  const { data: templates = [], isLoading } = useQuery<HomeTemplate[]>({
     queryKey: ['/api/templates'],
   });
 
