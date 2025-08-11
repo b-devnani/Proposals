@@ -90,16 +90,6 @@ export default function PurchaseOrder() {
   });
 
   const [salesIncentiveEnabled, setSalesIncentiveEnabled] = useState(false);
-
-  // Set template based on URL parameter
-  useEffect(() => {
-    if (templates.length > 0 && params.template) {
-      const template = templates.find(t => t.name.toLowerCase() === params.template?.toLowerCase());
-      if (template) {
-        setActiveTemplate(template.id.toString());
-      }
-    }
-  }, [templates, params.template]);
   
   // Handler for lot selection
   const handleLotSelection = (lotNumber: string) => {
@@ -148,7 +138,15 @@ export default function PurchaseOrder() {
     queryKey: ["/api/templates"],
   });
 
-  // Current template will be determined later in the component
+  // Set template based on URL parameter
+  useEffect(() => {
+    if (templates.length > 0 && params.template) {
+      const template = templates.find(t => t.name.toLowerCase() === params.template?.toLowerCase());
+      if (template) {
+        setActiveTemplate(template.id.toString());
+      }
+    }
+  }, [templates, params.template]);
 
   const { data: upgrades = [], isLoading: upgradesLoading } = useQuery<Upgrade[]>({
     queryKey: ["/api/upgrades", activeTemplate],
