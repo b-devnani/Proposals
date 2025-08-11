@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams, Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,9 +56,10 @@ const formatCommunityName = (communityValue: string) => {
 export default function PurchaseOrder() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const params = useParams();
   
   // State
-  const [activeTemplate, setActiveTemplate] = useState<string>("2"); // Sorrento ID (now has real data)
+  const [activeTemplate, setActiveTemplate] = useState<string>("2"); // Default to Sorrento
   const [showCostColumns, setShowCostColumns] = useState(false); // Off by default
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [selectedUpgrades, setSelectedUpgrades] = useState<Set<number>>(new Set());
@@ -88,6 +90,16 @@ export default function PurchaseOrder() {
   });
 
   const [salesIncentiveEnabled, setSalesIncentiveEnabled] = useState(false);
+
+  // Set template based on URL parameter
+  useEffect(() => {
+    if (templates.length > 0 && params.template) {
+      const template = templates.find(t => t.name.toLowerCase() === params.template?.toLowerCase());
+      if (template) {
+        setActiveTemplate(template.id.toString());
+      }
+    }
+  }, [templates, params.template]);
   
   // Handler for lot selection
   const handleLotSelection = (lotNumber: string) => {
@@ -1427,17 +1439,26 @@ export default function PurchaseOrder() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-7xl">
-        {/* Header */}
+        {/* Header with Back Button */}
         <div className="mb-4 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Proposal Generator</h1>
+          <div className="flex items-center gap-4 mb-4">
+            <Link href="/">
+              <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 hover:bg-blue-50">
+                ← Back to Floor Plans
+              </Button>
+            </Link>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            {currentTemplate.name} Proposal Generator
+          </h1>
           <p className="text-sm sm:text-base text-gray-600">Create detailed proposals with home templates and selections</p>
         </div>
 
-        {/* Template Selection */}
+        {/* Template Information */}
         <Card className="mb-4 sm:mb-6">
           <CardContent className="pt-4 sm:pt-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Select Home Template</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">{currentTemplate.name} Configuration</h2>
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <Label htmlFor="cost-toggle" className="text-xs sm:text-sm text-gray-700 font-medium">
                   Show Builder Cost & Margin
@@ -1455,22 +1476,8 @@ export default function PurchaseOrder() {
               </div>
             </div>
 
-            <Tabs 
-              value={activeTemplate || templates[0]?.id.toString()}
-              onValueChange={(value) => setActiveTemplate(value)}
-            >
-              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 h-auto sm:h-10">
-                {templates.map((template) => (
-                  <TabsTrigger key={template.id} value={template.id.toString()} className="w-full py-3 sm:py-2">
-                    {template.name}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              
-              {templates.map((template) => (
-                <TabsContent key={template.id} value={template.id.toString()}>
-                  <Card className="bg-blue-50 border-blue-200">
-                    <CardContent className="pt-6">
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="pt-6">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         <div>
                           <Label htmlFor="buyer-name">Buyer's Last Name</Label>
@@ -1533,7 +1540,7 @@ export default function PurchaseOrder() {
                           <Label htmlFor="house-plan">House Plan</Label>
                           <Input
                             id="house-plan"
-                            value={template.name}
+                            value={currentTemplate.name}
                             readOnly
                             className="bg-gray-50"
                           />
@@ -1546,7 +1553,7 @@ export default function PurchaseOrder() {
                           <div className="flex items-center justify-between">
                             <div>
                               <h3 className="text-lg font-semibold text-gray-900">
-                                {template.name} Pricing
+                                {currentTemplate.name} Pricing
                               </h3>
                               <p className="text-sm text-gray-600">Base pricing for this home template</p>
                             </div>
@@ -1558,7 +1565,7 @@ export default function PurchaseOrder() {
                                     id="base-cost"
                                     type="text"
                                     className="w-40"
-                                    value={formatNumberWithCommas(template.baseCost || "0")}
+                                    value={formatNumberWithCommas(currentTemplate.baseCost || "0")}
                                     onChange={(e) => handleNumberInputChange(e.target.value, handleBaseCostUpdate)}
                                   />
                                 </div>
@@ -1569,7 +1576,7 @@ export default function PurchaseOrder() {
                                   id="base-price"
                                   type="text"
                                   className="w-40 font-semibold"
-                                  value={formatNumberWithCommas(template.basePrice)}
+                                  value={formatNumberWithCommas(currentTemplate.basePrice)}
                                   onChange={(e) => handleNumberInputChange(e.target.value, handleBasePriceUpdate)}
                                 />
                               </div>
@@ -1684,10 +1691,7 @@ export default function PurchaseOrder() {
                       </Card>
                     </CardContent>
                   </Card>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </CardContent>
+                </CardContent>
           </Card>
 
             {/* Search and Filter Controls */}

@@ -5,13 +5,15 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PasswordProtection } from "@/components/password-protection";
+import HomeSelector from "@/pages/home-selector";
 import PurchaseOrder from "@/pages/purchase-order";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={PurchaseOrder} />
+      <Route path="/" component={HomeSelector} />
+      <Route path="/proposal/:template" component={PurchaseOrder} />
       <Route component={NotFound} />
     </Switch>
   );
