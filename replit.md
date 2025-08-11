@@ -135,6 +135,9 @@ Three main entities:
 - August 01, 2025. Updated PDF proposal header: moved title to right of logo, renamed to "Exhibit C - New Home Pricing Proposal", reduced font size to 14pt with minimal spacing above
 - August 01, 2025. Implemented consistent narrow margins (15pt) throughout entire PDF document for professional formatting
 - August 01, 2025. Added professional PDF footer with customer initials field (bottom left) and page numbering (bottom center) on all pages
+- August 11, 2025. Created dedicated home selector front page with navigation to template-specific proposal pages
+- August 11, 2025. Updated home specifications and base pricing: Verona ($609,995, 2BR/2BA/1,987sf), Sorrento ($594,990, 2BR/2BA/2,002sf), Ravello ($630,995, 4BR/3BA/2,184sf)
+- August 11, 2025. Replaced placeholder home images with actual architectural renderings for all three templates
 
 ## User Preferences
 
