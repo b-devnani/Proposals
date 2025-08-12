@@ -1458,9 +1458,9 @@ export default function PurchaseOrder() {
         <Card className="mb-4 sm:mb-6">
           <CardContent className="pt-4 sm:pt-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">{currentTemplate.name} Configuration</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">{currentTemplate.name} Configuration</h2>
               <div className="flex items-center space-x-2 sm:space-x-3">
-                <Label htmlFor="cost-toggle" className="text-xs sm:text-sm text-gray-700 font-medium">
+                <Label htmlFor="cost-toggle" className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-medium">
                   Show Builder Cost & Margin
                 </Label>
                 <Switch
@@ -1476,7 +1476,7 @@ export default function PurchaseOrder() {
               </div>
             </div>
 
-            <Card className="bg-blue-50 border-blue-200">
+            <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
               <CardContent className="pt-6">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         <div>
@@ -1532,7 +1532,7 @@ export default function PurchaseOrder() {
                             placeholder="Address will auto-populate"
                             value={formData.lotAddress}
                             readOnly
-                            className="bg-gray-50"
+                            className="bg-gray-50 dark:bg-gray-800"
                           />
                         </div>
 
@@ -1542,7 +1542,7 @@ export default function PurchaseOrder() {
                             id="house-plan"
                             value={currentTemplate.name}
                             readOnly
-                            className="bg-gray-50"
+                            className="bg-gray-50 dark:bg-gray-800"
                           />
                         </div>
                       </div>
@@ -1699,8 +1699,8 @@ export default function PurchaseOrder() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg font-semibold text-gray-900">Special Request Options</CardTitle>
-                    <p className="text-sm text-gray-600 mt-1">Custom selections not included in standard options</p>
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">Special Request Options</CardTitle>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Custom selections not included in standard options</p>
                   </div>
                   <Button
                     onClick={addSpecialRequestOption}
@@ -1714,16 +1714,16 @@ export default function PurchaseOrder() {
               </CardHeader>
               <CardContent className="pt-2">
                 {specialRequestOptions.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Package className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <Package className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                     <p className="text-sm">No special request options added</p>
-                    <p className="text-xs text-gray-400 mt-1">Click "Add New SRO" to create custom selections</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Click "Add New SRO" to create custom selections</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {/* Headers Row */}
                     {specialRequestOptions.length > 0 && (
-                      <div className="grid gap-3 p-3 bg-gray-100 rounded-lg border font-medium text-sm text-gray-700" 
+                      <div className="grid gap-3 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border dark:border-gray-700 font-medium text-sm text-gray-700 dark:text-gray-300" 
                            style={{
                              gridTemplateColumns: showCostColumns 
                                ? "1fr 120px 120px 40px" 
@@ -1739,12 +1739,12 @@ export default function PurchaseOrder() {
                     {specialRequestOptions.map((sro, index) => (
                       <div key={sro.id} className="space-y-2">
                         {/* SRO Header */}
-                        <div className="text-sm font-semibold text-gray-800 px-2">
+                        <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 px-2">
                           SRO #{String(index + 1).padStart(2, '0')}
                         </div>
                         
                         {/* Input Row */}
-                        <div className="grid gap-3 p-4 bg-gray-50 rounded-lg border items-center"
+                        <div className="grid gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700 items-center"
                              style={{
                                gridTemplateColumns: showCostColumns 
                                  ? "1fr 120px 120px 40px" 
@@ -1816,7 +1816,7 @@ export default function PurchaseOrder() {
                 <div className="space-y-4">
                   {/* Search Bar */}
                   <div>
-                    <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
+                    <Label htmlFor="search" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                       Search Selections
                     </Label>
                     <div className="relative">
@@ -1835,7 +1835,7 @@ export default function PurchaseOrder() {
                   {/* Filters Row */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
-                      <Label htmlFor="category-filter" className="text-sm font-medium text-gray-700 mb-2 block">
+                      <Label htmlFor="category-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                         Category
                       </Label>
                       <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -1854,7 +1854,7 @@ export default function PurchaseOrder() {
                     </div>
 
                     <div>
-                      <Label htmlFor="location-filter" className="text-sm font-medium text-gray-700 mb-2 block">
+                      <Label htmlFor="location-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                         Location
                       </Label>
                       <Select value={locationFilter} onValueChange={setLocationFilter}>
@@ -1873,7 +1873,7 @@ export default function PurchaseOrder() {
                     </div>
 
                     <div>
-                      <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                         Show Selected Only
                       </Label>
                       <div className="flex items-center space-x-2 h-10">
@@ -1882,7 +1882,7 @@ export default function PurchaseOrder() {
                           checked={showSelectedOnly}
                           onCheckedChange={(checked) => setShowSelectedOnly(checked === true)}
                         />
-                        <Label htmlFor="show-selected-only" className="text-sm text-gray-700 cursor-pointer">
+                        <Label htmlFor="show-selected-only" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                           Selected ({selectedUpgrades.size})
                         </Label>
                       </div>

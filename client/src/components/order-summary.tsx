@@ -66,12 +66,12 @@ export function OrderSummary({
   const selectionsMargin = totalSelectionsPrice > 0 ? ((totalSelectionsPrice - totalSelectionsCost) / totalSelectionsPrice * 100) : 0;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky bottom-0 mt-4">
+    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 sticky bottom-0 mt-4">
       <div className="px-3 sm:px-4 py-2 sm:py-3">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
           <div className="flex-1">
-            <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3">Proposal Summary</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 text-xs sm:text-sm text-gray-600">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-3">Proposal Summary</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
               {/* Left Column - Base */}
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
@@ -91,17 +91,17 @@ export function OrderSummary({
                 <div className="border-t pt-1 mt-1">
                   <div className="flex justify-between items-center font-semibold">
                     <span>Base Subtotal:</span>
-                    <span className="text-blue-600">{formatCurrency(baseSubtotal)}</span>
+                    <span className="text-blue-600 dark:text-blue-400">{formatCurrency(baseSubtotal)}</span>
                   </div>
                 </div>
                 {showCostColumns && (
-                  <div className="flex justify-between items-center text-xs text-gray-500">
+                  <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
                     <span>Base Cost:</span>
                     <span className="font-medium">{formatCurrency(baseCost || "0")}</span>
                   </div>
                 )}
                 {showCostColumns && (
-                  <div className="flex justify-between items-center text-xs text-gray-500">
+                  <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
                     <span>Margin:</span>
                     <span className={`font-medium ${formatMargin(baseMargin / 100).colorClass}`}>
                       {formatMargin(baseMargin / 100).value}
@@ -129,17 +129,17 @@ export function OrderSummary({
                 <div className="border-t pt-1 mt-1">
                   <div className="flex justify-between items-center font-semibold">
                     <span>Selections Subtotal:</span>
-                    <span className="text-blue-600">{formatCurrency(upgradesSubtotal)}</span>
+                    <span className="text-blue-600 dark:text-blue-400">{formatCurrency(upgradesSubtotal)}</span>
                   </div>
                 </div>
                 {showCostColumns && (selectedUpgrades.length > 0 || specialRequestOptions.length > 0) && (
-                  <div className="flex justify-between items-center text-xs text-gray-500">
+                  <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
                     <span>Selections Cost:</span>
                     <span className="font-medium">{formatCurrency(totalSelectionsCost)}</span>
                   </div>
                 )}
                 {showCostColumns && (selectedUpgrades.length > 0 || specialRequestOptions.length > 0) && (
-                  <div className="flex justify-between items-center text-xs text-gray-500">
+                  <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
                     <span>Margin:</span>
                     <span className={`font-medium ${formatMargin(selectionsMargin / 100).colorClass}`}>
                       {formatMargin(selectionsMargin / 100).value}
@@ -151,10 +151,10 @@ export function OrderSummary({
               {/* Right Column - Grand Total */}
               <div className="flex flex-col justify-center items-center">
                 <div className="text-center">
-                  <div className="text-base sm:text-lg font-bold text-gray-900 mb-1">Grand Total</div>
-                  <div className="text-xl sm:text-2xl font-bold text-blue-600">{formatCurrency(grandTotal)}</div>
+                  <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Grand Total</div>
+                  <div className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">{formatCurrency(grandTotal)}</div>
                   {showCostColumns && (
-                    <div className="text-xs text-gray-500 mt-1 space-y-1">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 space-y-1">
                       <div>
                         <span>Total Cost: </span>
                         <span className="font-medium">{formatCurrency(totalCost)}</span>
