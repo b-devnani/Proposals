@@ -144,6 +144,7 @@ Three main entities:
 - August 12, 2025. Updated all templates with final shortlists: Sorrento (440 options), Ravello (413 options), Verona (420 options) - complete selection catalogs for all home templates
 - August 12, 2025. Applied latest shortlist updates for all three templates - final version with verified data integrity
 - August 12, 2025. Added light/dark mode toggle functionality with theme provider and toggle buttons on both home page and proposal pages
+- August 12, 2025. Completed comprehensive dark mode styling fixes: updated all text colors, backgrounds, borders, and interactive elements for proper contrast and visibility across home selector, proposal configuration section, pricing cards, order summary, upgrade table, and all form components with consistent color schemes
 
 ## User Preferences
 

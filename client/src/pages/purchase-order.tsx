@@ -1454,11 +1454,18 @@ export default function PurchaseOrder() {
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Create detailed proposals with home templates and selections</p>
         </div>
 
-        {/* Template Information */}
-        <Card className="mb-4 sm:mb-6">
-          <CardContent className="pt-4 sm:pt-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">{currentTemplate.name} Configuration</h2>
+        {/* Configuration Section */}
+        <Card className="mb-4 sm:mb-6 bg-white dark:bg-gray-900 shadow-sm border-gray-200 dark:border-gray-700">
+          <CardHeader className="bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-800">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  {currentTemplate.name} Configuration
+                </CardTitle>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Configure your proposal details and pricing
+                </p>
+              </div>
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <Label htmlFor="cost-toggle" className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-medium">
                   Show Builder Cost & Margin
@@ -1469,94 +1476,103 @@ export default function PurchaseOrder() {
                   onCheckedChange={handleCostToggle}
                 />
                 {salesIncentiveEnabled && (
-                  <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-1 rounded">
                     SA
                   </div>
                 )}
               </div>
             </div>
+          </CardHeader>
+          <CardContent className="pt-6">
 
-            <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
-              <CardContent className="pt-6">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                        <div>
-                          <Label htmlFor="buyer-name">Buyer's Last Name</Label>
-                          <Input
-                            id="buyer-name"
-                            placeholder="Enter buyer's last name"
-                            value={formData.buyerLastName}
-                            onChange={(e) => setFormData({ ...formData, buyerLastName: e.target.value })}
-                          />
-                        </div>
+            {/* Customer Information Section */}
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 sm:p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Customer Information</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div>
+                  <Label htmlFor="buyer-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">Buyer's Last Name</Label>
+                  <Input
+                    id="buyer-name"
+                    placeholder="Enter buyer's last name"
+                    value={formData.buyerLastName}
+                    onChange={(e) => setFormData({ ...formData, buyerLastName: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
 
-                        <div>
-                          <Label htmlFor="community">Community</Label>
-                          <Select 
-                            value={formData.community} 
-                            onValueChange={(value) => setFormData({ ...formData, community: value })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select community" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="rolling-meadows">Rolling Meadows</SelectItem>
-                              <SelectItem value="marble-landing">Marble Landing</SelectItem>
-                              <SelectItem value="copper-ridge">Copper Ridge</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                <div>
+                  <Label htmlFor="community" className="text-sm font-medium text-gray-700 dark:text-gray-300">Community</Label>
+                  <Select 
+                    value={formData.community} 
+                    onValueChange={(value) => setFormData({ ...formData, community: value })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select community" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rolling-meadows">Rolling Meadows</SelectItem>
+                      <SelectItem value="marble-landing">Marble Landing</SelectItem>
+                      <SelectItem value="copper-ridge">Copper Ridge</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                        <div>
-                          <Label htmlFor="lot-number">Lot Number</Label>
-                          <Select 
-                            value={formData.lotNumber} 
-                            onValueChange={handleLotSelection}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select lot number" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Object.keys(rollingMeadowsLots).map((lotNumber) => (
-                                <SelectItem key={lotNumber} value={lotNumber}>
-                                  {lotNumber}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                <div>
+                  <Label htmlFor="lot-number" className="text-sm font-medium text-gray-700 dark:text-gray-300">Lot Number</Label>
+                  <Select 
+                    value={formData.lotNumber} 
+                    onValueChange={handleLotSelection}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select lot number" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.keys(rollingMeadowsLots).map((lotNumber) => (
+                        <SelectItem key={lotNumber} value={lotNumber}>
+                          {lotNumber}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                        <div>
-                          <Label htmlFor="lot-address">Lot Address</Label>
-                          <Input
-                            id="lot-address"
-                            placeholder="Address will auto-populate"
-                            value={formData.lotAddress}
-                            readOnly
-                            className="bg-gray-50 dark:bg-gray-800"
-                          />
-                        </div>
+                <div>
+                  <Label htmlFor="lot-address" className="text-sm font-medium text-gray-700 dark:text-gray-300">Lot Address</Label>
+                  <Input
+                    id="lot-address"
+                    placeholder="Address will auto-populate"
+                    value={formData.lotAddress}
+                    readOnly
+                    className="mt-1 bg-gray-100 dark:bg-gray-700"
+                  />
+                </div>
 
-                        <div>
-                          <Label htmlFor="house-plan">House Plan</Label>
-                          <Input
-                            id="house-plan"
-                            value={currentTemplate.name}
-                            readOnly
-                            className="bg-gray-50 dark:bg-gray-800"
-                          />
-                        </div>
-                      </div>
+                <div>
+                  <Label htmlFor="house-plan" className="text-sm font-medium text-gray-700 dark:text-gray-300">House Plan</Label>
+                  <Input
+                    id="house-plan"
+                    value={currentTemplate.name}
+                    readOnly
+                    className="mt-1 bg-gray-100 dark:bg-gray-700"
+                  />
+                </div>
+              </div>
+            </div>
 
-                      {/* Base Price Editor */}
-                      <Card className="mb-6 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
-                        <CardContent className="pt-6">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                {currentTemplate.name} Pricing
-                              </h3>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">Base pricing for this home template</p>
-                            </div>
+            {/* Pricing Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Pricing Configuration</h3>
+              
+              {/* Base Price Editor */}
+              <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        {currentTemplate.name} Pricing
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Base pricing for this home template</p>
+                    </div>
                             <div className="flex items-center space-x-6">
                               {showCostColumns && (
                                 <div className="flex items-center space-x-2">
@@ -1583,11 +1599,11 @@ export default function PurchaseOrder() {
                             </div>
                           </div>
 
-                        </CardContent>
-                      </Card>
+                </CardContent>
+              </Card>
 
-                      {/* Lot Premium */}
-                      <Card className="mb-4 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+              {/* Lot Premium */}
+              <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
                         <CardContent className="pt-4">
                           <div className="flex items-center justify-between">
                             <div>
@@ -1611,7 +1627,7 @@ export default function PurchaseOrder() {
 
                       {/* Sales Incentive - Hidden by default */}
                       {salesIncentiveEnabled ? (
-                        <Card className="mb-4 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+                <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
                           <CardContent className="pt-4">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
@@ -1667,8 +1683,8 @@ export default function PurchaseOrder() {
                         </div>
                       )}
 
-                      {/* Design Studio Allowance */}
-                      <Card className="mb-4 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+              {/* Design Studio Allowance */}
+              <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
                         <CardContent className="pt-4">
                           <div className="flex items-center justify-between">
                             <div>
@@ -1687,12 +1703,11 @@ export default function PurchaseOrder() {
                               />
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    </CardContent>
-                  </Card>
                 </CardContent>
-          </Card>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
 
             {/* Special Request Options */}
             <Card className="mb-4">
