@@ -46,7 +46,7 @@ export function getHomeTemplateUpgrades(templateName: string): Upgrade[] {
   const fileMap: { [key: string]: string } = {
     'Sorrento': 'Sorrento Selections_Short List.xlsx',
     'Ravello': 'Ravello Selections.xlsx',
-    'Verona': 'Verona Selections.xlsx'    // Will be added when provided
+    'Verona': 'Verona Selections.xlsx'
   };
   
   const fileName = fileMap[templateName];
