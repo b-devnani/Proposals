@@ -140,6 +140,7 @@ Three main entities:
 - August 11, 2025. Replaced placeholder home images with actual architectural renderings for all three templates
 - August 12, 2025. Moved search and filters section below Special Request Options (SROs) for improved workflow
 - August 12, 2025. Updated Sorrento Shortlist with latest Excel file containing 440 selection options (final revision)
+- August 12, 2025. Added Ravello selections with 413 selection options - now fully functional for Ravello proposals
 
 ## User Preferences
 
