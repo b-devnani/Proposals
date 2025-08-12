@@ -105,12 +105,12 @@ export function UpgradeTable({
                        expandedLocations.size === getAllLocationKeys().length;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Available Selections</h2>
-            <p className="text-sm text-gray-600">Select options to add to your proposal</p>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Available Selections</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Select options to add to your proposal</p>
           </div>
           <Button
             variant="outline"
@@ -136,44 +136,44 @@ export function UpgradeTable({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+              <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
                 Select
               </th>
-              <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px]">
+              <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[200px]">
                 Choice Title
               </th>
               {showCostColumns && (
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[100px]">
                   Builder Cost
                 </th>
               )}
-              <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
+              <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[100px]">
                 Client Price
               </th>
               {showCostColumns && (
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px]">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[80px]">
                   Margin
                 </th>
               )}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
             {Object.entries(groupedUpgrades).map(([category, locations]) => (
               <React.Fragment key={category}>
                 {/* Category Header */}
-                <tr className="bg-gray-100 cursor-pointer hover:bg-gray-200" onClick={() => toggleCategory(category)}>
+                <tr className="bg-gray-100 dark:bg-gray-800 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700" onClick={() => toggleCategory(category)}>
                   <td colSpan={showCostColumns ? 5 : 3} className="px-3 sm:px-6 py-3">
                     <div className="flex items-center space-x-2">
                       {expandedCategories.has(category) ? (
-                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                        <ChevronDown className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       ) : (
-                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                        <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       )}
-                      <span className="font-semibold text-gray-900 text-sm sm:text-base">{category}</span>
-                      <span className="text-xs sm:text-sm text-gray-500">
+                      <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">{category}</span>
+                      <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                         ({getCategoryUpgradeCount(category)} items)
                       </span>
                     </div>
@@ -187,7 +187,7 @@ export function UpgradeTable({
                     return (
                       <React.Fragment key={locationKey}>
                         {/* Location Header */}
-                        <tr className="bg-gray-50 cursor-pointer hover:bg-gray-100" onClick={() => toggleLocation(locationKey)}>
+                        <tr className="bg-gray-50 dark:bg-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600" onClick={() => toggleLocation(locationKey)}>
                           <td className="px-3 sm:px-6 py-3">
                             <Checkbox
                               checked={areAllParentSelectionSelected(parentSelections)}
@@ -197,13 +197,13 @@ export function UpgradeTable({
                           <td colSpan={showCostColumns ? 4 : 2} className="px-3 sm:px-6 py-3">
                             <div className="flex items-center space-x-2">
                               {expandedLocations.has(locationKey) ? (
-                                <ChevronDown className="h-3 w-3 text-gray-400" />
+                                <ChevronDown className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                               ) : (
-                                <ChevronRight className="h-3 w-3 text-gray-400" />
+                                <ChevronRight className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                               )}
-                              <MapPin className="h-3 w-3 text-gray-400" />
-                              <span className="font-medium text-gray-700 text-sm">{location}</span>
-                              <span className="text-xs text-gray-500">
+                              <MapPin className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                              <span className="font-medium text-gray-700 dark:text-gray-200 text-sm">{location}</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 ({getLocationUpgradeCount(parentSelections)} items)
                               </span>
                             </div>
@@ -215,7 +215,7 @@ export function UpgradeTable({
                           Object.entries(parentSelections).map(([parentSelection, upgrades]) => (
                             <React.Fragment key={`${locationKey}-${parentSelection}`}>
                               {/* Parent Selection Header */}
-                              <tr className="bg-gray-100/50">
+                              <tr className="bg-gray-100/50 dark:bg-gray-800/50">
                                 <td className="px-6 py-2">
                                   <Checkbox
                                     checked={areAllSelected(upgrades)}
@@ -224,9 +224,9 @@ export function UpgradeTable({
                                 </td>
                                 <td colSpan={showCostColumns ? 4 : 2} className="px-3 sm:px-6 py-3">
                                   <div className="flex items-center space-x-2 pl-2 sm:pl-4">
-                                    <Package className="h-3 w-3 text-gray-400" />
-                                    <span className="font-medium text-gray-600 text-xs sm:text-sm">{parentSelection}</span>
-                                    <span className="text-xs text-gray-500">
+                                    <Package className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                                    <span className="font-medium text-gray-600 dark:text-gray-300 text-xs sm:text-sm">{parentSelection}</span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
                                       ({upgrades.length} items)
                                     </span>
                                   </div>
@@ -237,22 +237,22 @@ export function UpgradeTable({
                               {upgrades.map((upgrade) => {
                                 const margin = formatMargin(upgrade.margin);
                                 return (
-                                  <tr key={upgrade.id} className="hover:bg-gray-50">
+                                  <tr key={upgrade.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                                     <td className="px-3 sm:px-6 py-2 sm:py-3">
                                       <Checkbox
                                         checked={selectedUpgrades.has(upgrade.id)}
                                         onCheckedChange={() => onUpgradeToggle(upgrade.id)}
                                       />
                                     </td>
-                                    <td className="px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm text-gray-900 pl-4 sm:pl-8">
+                                    <td className="px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 pl-4 sm:pl-8">
                                       <div className="break-words">{upgrade.choiceTitle}</div>
                                     </td>
                                     {showCostColumns && (
-                                      <td className="px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm text-gray-700">
+                                      <td className="px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                                         {formatCurrency(upgrade.builderCost)}
                                       </td>
                                     )}
-                                    <td className="px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium text-gray-900">
+                                    <td className="px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">
                                       {formatCurrency(upgrade.clientPrice)}
                                     </td>
                                     {showCostColumns && (

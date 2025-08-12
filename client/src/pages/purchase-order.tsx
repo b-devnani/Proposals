@@ -1548,19 +1548,19 @@ export default function PurchaseOrder() {
                       </div>
 
                       {/* Base Price Editor */}
-                      <Card className="mb-6 bg-blue-50 border-blue-200">
+                      <Card className="mb-6 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
                         <CardContent className="pt-6">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h3 className="text-lg font-semibold text-gray-900">
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                                 {currentTemplate.name} Pricing
                               </h3>
-                              <p className="text-sm text-gray-600">Base pricing for this home template</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">Base pricing for this home template</p>
                             </div>
                             <div className="flex items-center space-x-6">
                               {showCostColumns && (
                                 <div className="flex items-center space-x-2">
-                                  <Label htmlFor="base-cost" className="text-sm font-medium text-gray-700">Cost $</Label>
+                                  <Label htmlFor="base-cost" className="text-sm font-medium text-gray-700 dark:text-gray-300">Cost $</Label>
                                   <Input
                                     id="base-cost"
                                     type="text"
@@ -1571,7 +1571,7 @@ export default function PurchaseOrder() {
                                 </div>
                               )}
                               <div className="flex items-center space-x-2">
-                                <Label htmlFor="base-price" className="text-sm font-medium text-gray-700">Price $</Label>
+                                <Label htmlFor="base-price" className="text-sm font-medium text-gray-700 dark:text-gray-300">Price $</Label>
                                 <Input
                                   id="base-price"
                                   type="text"
@@ -1587,15 +1587,15 @@ export default function PurchaseOrder() {
                       </Card>
 
                       {/* Lot Premium */}
-                      <Card className="mb-4 bg-white border-gray-200">
+                      <Card className="mb-4 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
                         <CardContent className="pt-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h4 className="text-md font-medium text-gray-900">Lot Premium</h4>
-                              <p className="text-sm text-gray-600">Additional cost for lot location</p>
+                              <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">Lot Premium</h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">Additional cost for lot location</p>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Label htmlFor="lot-premium" className="text-sm font-medium text-gray-700">Amount $</Label>
+                              <Label htmlFor="lot-premium" className="text-sm font-medium text-gray-700 dark:text-gray-300">Amount $</Label>
                               <Input
                                 id="lot-premium"
                                 type="text"
@@ -1611,11 +1611,11 @@ export default function PurchaseOrder() {
 
                       {/* Sales Incentive - Hidden by default */}
                       {salesIncentiveEnabled ? (
-                        <Card className="mb-4 bg-white border-gray-200">
+                        <Card className="mb-4 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
                           <CardContent className="pt-4">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
-                                <h4 className="text-md font-medium text-gray-900">Sales Incentive</h4>
+                                <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">Sales Incentive</h4>
                                 <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">SA</span>
                                 <Button
                                   type="button"
@@ -1631,7 +1631,7 @@ export default function PurchaseOrder() {
                                 </Button>
                               </div>
                               <div className="flex items-center space-x-2">
-                                <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700">Amount $</Label>
+                                <Label htmlFor="sales-incentive" className="text-sm font-medium text-gray-700 dark:text-gray-300">Amount $</Label>
                                 <Input
                                   id="sales-incentive"
                                   type="text"
@@ -1668,15 +1668,15 @@ export default function PurchaseOrder() {
                       )}
 
                       {/* Design Studio Allowance */}
-                      <Card className="mb-4 bg-white border-gray-200">
+                      <Card className="mb-4 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
                         <CardContent className="pt-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h4 className="text-md font-medium text-gray-900">Design Studio Allowance</h4>
-                              <p className="text-sm text-gray-600">Credit for design studio selections</p>
+                              <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">Design Studio Allowance</h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">Credit for design studio selections</p>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Label htmlFor="design-studio-allowance" className="text-sm font-medium text-gray-700">Amount $</Label>
+                              <Label htmlFor="design-studio-allowance" className="text-sm font-medium text-gray-700 dark:text-gray-300">Amount $</Label>
                               <Input
                                 id="design-studio-allowance"
                                 type="text"
