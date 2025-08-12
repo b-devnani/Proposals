@@ -96,28 +96,28 @@ export default function HomeSelector() {
                     </div>
                     <div className="p-6 space-y-4">
                       <div className="space-y-2">
-                        <h2 className="text-xl font-semibold text-gray-800">{home.name}</h2>
-                        <p className="text-lg font-bold text-blue-600">
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{home.name}</h2>
+                        <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
                           From ${parseInt(home.basePrice).toLocaleString()}
                         </p>
                       </div>
 
-                      <div className="pt-4 border-t border-gray-100">
+                      <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <span className="text-gray-400">🏠</span>
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <span className="text-gray-400 dark:text-gray-500">🏠</span>
                             <span>{home.beds}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <span className="text-gray-400">🛁</span>
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <span className="text-gray-400 dark:text-gray-500">🛁</span>
                             <span>{home.baths}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <span className="text-gray-400">🚪</span>
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <span className="text-gray-400 dark:text-gray-500">🚪</span>
                             <span>{home.garage}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <span className="text-gray-400">📏</span>
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <span className="text-gray-400 dark:text-gray-500">📏</span>
                             <span>{home.sqft.toLocaleString()} SF</span>
                           </div>
                         </div>
