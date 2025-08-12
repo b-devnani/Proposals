@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { HomeTemplate } from "@shared/schema";
+import { ThemeToggle } from "@/components/theme-toggle";
 import ravelloImage from "@assets/Ravello_1754950998192.webp";
 import sorrentoImage from "@assets/Sorrento_1754950998192.webp";
 import veronaImage from "@assets/Verona_1754950998191.webp";
@@ -21,21 +22,24 @@ const homeTemplateDetails: Record<string, Omit<ExtendedHomeTemplate, 'id' | 'nam
     baths: '2 Baths', 
     garage: '2 Car Garage',
     sqft: 2002,
-    imageUrl: sorrentoImage
+    imageUrl: sorrentoImage,
+    baseCost: '0'
   },
   'Ravello': {
     beds: '4 Beds',
     baths: '3 Baths',
     garage: '2 Car Garage', 
     sqft: 2184,
-    imageUrl: ravelloImage
+    imageUrl: ravelloImage,
+    baseCost: '0'
   },
   'Verona': {
     beds: '2 Beds',
     baths: '2 Baths',
     garage: '2 Car Garage',
     sqft: 1987,
-    imageUrl: veronaImage
+    imageUrl: veronaImage,
+    baseCost: '0'
   }
 };
 
@@ -60,8 +64,13 @@ export default function HomeSelector() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Header with theme toggle */}
+        <div className="flex justify-end mb-4">
+          <ThemeToggle />
+        </div>
+        
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-semibold text-gray-800 mb-4 relative pb-4">
+          <h1 className="text-4xl font-semibold text-gray-800 dark:text-gray-200 mb-4 relative pb-4">
             Select a Floor Plan
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-blue-500"></div>
           </h1>

@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/theme-provider";
 import { PasswordProtection } from "@/components/password-protection";
 import HomeSelector from "@/pages/home-selector";
 import PurchaseOrder from "@/pages/purchase-order";
@@ -37,14 +38,16 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        {isAuthenticated ? (
-          <Router />
-        ) : (
-          <PasswordProtection onAuthenticated={handleAuthenticated} />
-        )}
-      </TooltipProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          {isAuthenticated ? (
+            <Router />
+          ) : (
+            <PasswordProtection onAuthenticated={handleAuthenticated} />
+          )}
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

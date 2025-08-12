@@ -60,7 +60,7 @@
 
 /* Custom styling for compact table design */
 .upgrade-table tr {
-  @apply border-b border-gray-100;
+  @apply border-b border-gray-100 dark:border-gray-700;
 }
 
 .upgrade-table td {
@@ -68,11 +68,11 @@
 }
 
 .upgrade-table .category-row {
-  @apply bg-gray-100 font-semibold;
+  @apply bg-gray-100 dark:bg-gray-800 font-semibold;
 }
 
 .upgrade-table .location-row {
-  @apply bg-gray-50 font-medium;
+  @apply bg-gray-50 dark:bg-gray-900 font-medium;
 }
 
 /* Sticky header */
@@ -87,9 +87,9 @@
 
 /* Ensure proper contrast for badges */
 .margin-positive {
-  @apply bg-green-100 text-green-800;
+  @apply bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200;
 }
 
 .margin-negative {
-  @apply bg-red-100 text-red-800;
+  @apply bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200;
 }

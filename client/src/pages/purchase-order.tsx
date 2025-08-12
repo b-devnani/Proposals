@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Filter, Plus, Minus, Package } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -1435,21 +1436,22 @@ export default function PurchaseOrder() {
   const uniqueLocations = Array.from(new Set(upgrades?.map(u => u.location) || [])).sort();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-7xl">
-        {/* Header with Back Button */}
+        {/* Header with Back Button and Theme Toggle */}
         <div className="mb-4 sm:mb-8">
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-center justify-between mb-4">
             <Link href="/">
               <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 hover:bg-blue-50">
                 ← Back to Floor Plans
               </Button>
             </Link>
+            <ThemeToggle />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {currentTemplate.name} Proposal Generator
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">Create detailed proposals with home templates and selections</p>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Create detailed proposals with home templates and selections</p>
         </div>
 
         {/* Template Information */}
