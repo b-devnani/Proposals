@@ -1692,104 +1692,6 @@ export default function PurchaseOrder() {
                 </CardContent>
           </Card>
 
-            {/* Search and Filter Controls */}
-            <Card className="mb-4">
-              <CardContent className="pt-4 sm:pt-6">
-                <div className="space-y-4">
-                  {/* Search Bar */}
-                  <div>
-                    <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
-                      Search Selections
-                    </Label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        id="search"
-                        type="text"
-                        placeholder="Search by choice title..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Filters Row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div>
-                      <Label htmlFor="category-filter" className="text-sm font-medium text-gray-700 mb-2 block">
-                        Category
-                      </Label>
-                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Filter by category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Categories</SelectItem>
-                          {uniqueCategories.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="location-filter" className="text-sm font-medium text-gray-700 mb-2 block">
-                        Location
-                      </Label>
-                      <Select value={locationFilter} onValueChange={setLocationFilter}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Filter by location" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Locations</SelectItem>
-                          {uniqueLocations.map((location) => (
-                            <SelectItem key={location} value={location}>
-                              {location}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                        Show Selected Only
-                      </Label>
-                      <div className="flex items-center space-x-2 h-10">
-                        <Checkbox
-                          id="show-selected-only"
-                          checked={showSelectedOnly}
-                          onCheckedChange={(checked) => setShowSelectedOnly(checked === true)}
-                        />
-                        <Label htmlFor="show-selected-only" className="text-sm text-gray-700 cursor-pointer">
-                          Selected ({selectedUpgrades.size})
-                        </Label>
-                      </div>
-                    </div>
-
-                    <div className="flex items-end">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => {
-                          setSearchTerm("");
-                          setCategoryFilter("all");
-                          setLocationFilter("all");
-                          setShowSelectedOnly(false);
-                        }}
-                        className="h-10 w-full sm:w-auto"
-                        size="sm"
-                      >
-                        Clear Filters
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Special Request Options */}
             <Card className="mb-4">
               <CardHeader>
@@ -1903,6 +1805,104 @@ export default function PurchaseOrder() {
                     )}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Search and Filter Controls */}
+            <Card className="mb-4">
+              <CardContent className="pt-4 sm:pt-6">
+                <div className="space-y-4">
+                  {/* Search Bar */}
+                  <div>
+                    <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
+                      Search Selections
+                    </Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        id="search"
+                        type="text"
+                        placeholder="Search by choice title..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Filters Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <Label htmlFor="category-filter" className="text-sm font-medium text-gray-700 mb-2 block">
+                        Category
+                      </Label>
+                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Filter by category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Categories</SelectItem>
+                          {uniqueCategories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="location-filter" className="text-sm font-medium text-gray-700 mb-2 block">
+                        Location
+                      </Label>
+                      <Select value={locationFilter} onValueChange={setLocationFilter}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Filter by location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Locations</SelectItem>
+                          {uniqueLocations.map((location) => (
+                            <SelectItem key={location} value={location}>
+                              {location}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Show Selected Only
+                      </Label>
+                      <div className="flex items-center space-x-2 h-10">
+                        <Checkbox
+                          id="show-selected-only"
+                          checked={showSelectedOnly}
+                          onCheckedChange={(checked) => setShowSelectedOnly(checked === true)}
+                        />
+                        <Label htmlFor="show-selected-only" className="text-sm text-gray-700 cursor-pointer">
+                          Selected ({selectedUpgrades.size})
+                        </Label>
+                      </div>
+                    </div>
+
+                    <div className="flex items-end">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setSearchTerm("");
+                          setCategoryFilter("all");
+                          setLocationFilter("all");
+                          setShowSelectedOnly(false);
+                        }}
+                        className="h-10 w-full sm:w-auto"
+                        size="sm"
+                      >
+                        Clear Filters
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
