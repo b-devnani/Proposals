@@ -892,7 +892,7 @@ export default function PurchaseOrder() {
     // Title - center aligned with logo height
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    const titleText = "Exhibit C - New Home Pricing Proposal";
+    const titleText = "Exhibit A - New Home Pricing Proposal";
     const titleWidth = doc.getTextWidth(titleText);
     const centerX = (pageWidth - titleWidth) / 2;
     doc.text(titleText, centerX, topMargin + 10); // Center aligned and positioned at logo center height
