@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { 
   homeTemplates, 
   type HomeTemplate, 
@@ -10,6 +11,9 @@ import {
   type InsertProposal
 } from "@shared/schema";
 import { getHomeTemplateUpgrades } from "./excel-import.js";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { eq } from "drizzle-orm";
+import { Pool } from "pg";
 
 export interface IStorage {
   // Home Templates
@@ -28,7 +32,7 @@ export interface IStorage {
   getProposal(id: number): Promise<Proposal | undefined>;
 }
 
-export class MemStorage implements IStorage {
+export class MemStorage implements IStorage { //deprecated
   private homeTemplatesMap: Map<number, HomeTemplate>;
   private upgradesMap: Map<number, Upgrade>;
   private proposalsMap: Map<number, Proposal>;
@@ -131,4 +135,94 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  private db: any;
+  private initialized = false;
+
+  constructor() {
+    this.initialize();
+  }
+
+  private async initialize() {
+    if (this.initialized) return;
+    
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL environment variable is required");
+    }
+    
+    try {
+      // Use regular PostgreSQL connection pool
+      const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+          rejectUnauthorized: false
+        }
+      });
+      
+      this.db = drizzle(pool);
+      this.initialized = true;
+      console.log("🚀 DATABASE STORAGE: Database connection created!");
+    } catch (error) {
+      console.error("🚀 DATABASE STORAGE: Database connection failed:", error);
+      throw error;
+    }
+  }
+
+  async getHomeTemplates(): Promise<HomeTemplate[]> {    
+    try {
+      return await this.db.select().from(homeTemplates);
+    } catch (error: any) {
+      console.error("DATABASE STORAGE: Error details:", {
+        message: error.message,
+        code: error.code,
+        detail: error.detail
+      });
+      throw error;
+    }
+  }
+
+  async getHomeTemplate(id: number): Promise<HomeTemplate | undefined> {
+    const result = await this.db.select().from(homeTemplates).where(eq(homeTemplates.id, id));
+    return result[0];
+  }
+
+  async updateHomeTemplate(id: number, template: Partial<InsertHomeTemplate>): Promise<HomeTemplate | undefined> {
+    const result = await this.db
+      .update(homeTemplates)
+      .set(template)
+      .where(eq(homeTemplates.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async getUpgrades(): Promise<Upgrade[]> {
+    return await this.db.select().from(upgrades);
+  }
+
+  async getUpgradesByCategory(category: string): Promise<Upgrade[]> {
+    return await this.db.select().from(upgrades).where(eq(upgrades.category, category));
+  }
+
+  async getUpgradesByTemplate(templateName: string): Promise<Upgrade[]> {    // For now, return all upgrades. You can implement template-specific logic later
+    return await this.db.select().from(upgrades);
+  }
+
+  async createProposal(proposal: InsertProposal): Promise<Proposal> {
+    const result = await this.db
+      .insert(proposals)
+      .values(proposal)
+      .returning();
+    return result[0];
+  }
+
+  async getProposals(): Promise<Proposal[]> {
+    return await this.db.select().from(proposals);
+  }
+
+  async getProposal(id: number): Promise<Proposal | undefined> {
+    const result = await this.db.select().from(proposals).where(eq(proposals.id, id));
+    return result[0];
+  }
+}
+
+export const storage = new DatabaseStorage()
