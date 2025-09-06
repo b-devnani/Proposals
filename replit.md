@@ -137,6 +137,7 @@ Three main entities:
 - August 01, 2025. Added professional PDF footer with customer initials field (bottom left) and page numbering (bottom center) on all pages
 - August 11, 2025. Created dedicated home selector front page with navigation to template-specific proposal pages
 - August 11, 2025. Updated home specifications and base pricing: Verona ($609,995, 2BR/2BA/1,987sf), Sorrento ($594,990, 2BR/2BA/2,002sf), Ravello ($630,995, 4BR/3BA/2,184sf)
+- September 06, 2025. Updated base pricing: Verona ($609,990), Sorrento ($614,990), Ravello ($630,990)
 - August 11, 2025. Replaced placeholder home images with actual architectural renderings for all three templates
 - August 12, 2025. Moved search and filters section below Special Request Options (SROs) for improved workflow
 - August 12, 2025. Updated Sorrento Shortlist with latest Excel file containing 440 selection options (final revision)
