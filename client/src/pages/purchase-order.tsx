@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { UpgradeTable } from "@/components/upgrade-table";
 import { OrderSummary } from "@/components/order-summary";
 import { CostTogglePassword } from "@/components/cost-toggle-password";
-import { HomeTemplate, Upgrade } from "@shared/schema";
+import { HomeTemplate, Upgrade, Proposal } from "@shared/schema";
 import { groupUpgradesByCategory, sortUpgrades } from "@/lib/upgrade-data";
 import { apiRequest } from "@/lib/queryClient";
 import { formatNumberWithCommas, handleNumberInputChange } from "@/lib/number-utils";
@@ -59,8 +59,13 @@ export default function PurchaseOrder() {
   const queryClient = useQueryClient();
   const params = useParams();
   
+  // Get proposalId from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const proposalId = urlParams.get('proposalId');
+  
   // State
   const [activeTemplate, setActiveTemplate] = useState<string>("2"); // Default to Sorrento
+  const [currentProposal, setCurrentProposal] = useState<Proposal | null>(null);
   const [showCostColumns, setShowCostColumns] = useState(false); // Off by default
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [selectedUpgrades, setSelectedUpgrades] = useState<Set<number>>(new Set());
@@ -139,15 +144,61 @@ export default function PurchaseOrder() {
     queryKey: ["/api/templates"],
   });
 
-  // Set template based on URL parameter
+  // Fetch existing proposal data if proposalId is present
+  const { data: existingProposal, isLoading: proposalLoading } = useQuery<Proposal>({
+    queryKey: ["/api/proposals", proposalId],
+    queryFn: async () => {
+      if (!proposalId) return null;
+      const response = await fetch(`/api/proposals/${proposalId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch proposal");
+      }
+      return await response.json();
+    },
+    enabled: !!proposalId,
+  });
+
+  // Set template based on URL parameter or existing proposal
   useEffect(() => {
-    if (templates.length > 0 && params.template) {
-      const template = templates.find(t => t.name.toLowerCase() === params.template?.toLowerCase());
-      if (template) {
-        setActiveTemplate(template.id.toString());
+    if (templates.length > 0) {
+      if (existingProposal && existingProposal.housePlan) {
+        // Use existing proposal's template
+        const template = templates.find(t => t.name === existingProposal.housePlan);
+        if (template) {
+          setActiveTemplate(template.id.toString());
+          setCurrentProposal(existingProposal);
+        }
+      } else if (params.template) {
+        // Use URL parameter
+        const template = templates.find(t => t.name.toLowerCase() === params.template?.toLowerCase());
+        if (template) {
+          setActiveTemplate(template.id.toString());
+        }
       }
     }
-  }, [templates, params.template]);
+  }, [templates, params.template, existingProposal]);
+
+  // Populate form fields when existing proposal is loaded
+  useEffect(() => {
+    if (existingProposal) {
+      setFormData({
+        todaysDate: existingProposal.todaysDate || new Date().toISOString().split('T')[0],
+        buyerLastName: existingProposal.buyerLastName || "",
+        community: existingProposal.community || "rolling-meadows",
+        lotNumber: existingProposal.lotNumber || "",
+        lotAddress: existingProposal.lotAddress || "",
+        lotPremium: existingProposal.lotPremium || "0",
+        salesIncentive: "0", // Default value since it's not stored in proposals
+        designStudioAllowance: "0", // Default value since it's not stored in proposals
+      });
+      
+      // Set selected upgrades from existing proposal
+      if (existingProposal.selectedUpgrades) {
+        const upgradeIds = existingProposal.selectedUpgrades.map(id => parseInt(id)).filter(id => !isNaN(id));
+        setSelectedUpgrades(new Set(upgradeIds));
+      }
+    }
+  }, [existingProposal]);
 
   const { data: upgrades = [], isLoading: upgradesLoading } = useQuery<Upgrade[]>({
     queryKey: ["/api/upgrades", activeTemplate],
@@ -849,15 +900,53 @@ export default function PurchaseOrder() {
 
     try {
       await apiRequest('POST', '/api/proposals', proposalData);
+      queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
       
       toast({
-        title: "Draft Saved",
-        description: "Your proposal has been saved as a draft.",
+        title: "New Draft Saved",
+        description: "Your new proposal draft has been saved successfully.",
       });
     } catch (error) {
       toast({
         title: "Save Failed",
         description: "Failed to save draft. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!currentTemplate || !currentProposal) return;
+    
+    const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
+    const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
+    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestTotal;
+    
+    const proposalData = {
+      todaysDate: formData.todaysDate || new Date().toISOString().split('T')[0],
+      buyerLastName: formData.buyerLastName || "Customer",
+      community: formData.community || "Rolling Meadows",
+      lotNumber: formData.lotNumber || "1",
+      lotAddress: formData.lotAddress || "TBD",
+      housePlan: currentTemplate.name,
+      basePrice: currentTemplate.basePrice,
+      lotPremium: formData.lotPremium || "0",
+      selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id.toString()),
+      totalPrice: totalPrice.toString()
+    };
+
+    try {
+      await apiRequest('PATCH', `/api/proposals/${currentProposal.id}`, proposalData);
+      queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
+      
+      toast({
+        title: "Changes Saved",
+        description: "Your proposal changes have been saved successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Save Failed",
+        description: "Failed to save changes. Please try again.",
         variant: "destructive"
       });
     }
@@ -1381,16 +1470,27 @@ export default function PurchaseOrder() {
     };
 
     try {
-      // Save to database
-      await apiRequest('POST', '/api/proposals', proposalData);
+      // Save to database (create new or update existing)
+      if (currentProposal) {
+        // Update existing proposal
+        await apiRequest('PATCH', `/api/proposals/${currentProposal.id}`, proposalData);
+        queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
+        toast({
+          title: "Proposal Updated",
+          description: "Your proposal has been updated successfully.",
+        });
+      } else {
+        // Create new proposal
+        await apiRequest('POST', '/api/proposals', proposalData);
+        queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
+        toast({
+          title: "Proposal Created",
+          description: "Your proposal has been created successfully.",
+        });
+      }
       
       // Generate PDF
       await generatePDF();
-      
-      toast({
-        title: "Proposal Generated",
-        description: "Your proposal PDF has been generated and downloaded.",
-      });
     } catch (error) {
       toast({
         title: "Generation Failed",
@@ -1948,7 +2048,9 @@ export default function PurchaseOrder() {
                     specialRequestOptions={specialRequestOptions}
                     specialRequestTotal={specialRequestTotal}
                     showCostColumns={showCostColumns}
+                    isExistingProposal={!!currentProposal}
                     onSaveDraft={handleSaveDraft}
+                    onSaveChanges={handleSaveChanges}
                     onExportExcel={handleExportExcel}
                     onGenerateProposal={handleGeneratePO}
                   />

@@ -33,6 +33,7 @@ export interface IStorage {
   createProposal(proposal: InsertProposal): Promise<Proposal>;
   getProposals(): Promise<Proposal[]>;
   getProposal(id: number): Promise<Proposal | undefined>;
+  updateProposal(id: number, proposal: Partial<InsertProposal>): Promise<Proposal | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -151,11 +152,20 @@ export class MemStorage implements IStorage {
   }
 
   async getProposals(): Promise<Proposal[]> {
-    return Array.from(this.proposalsMap.values());
+    return Array.from(this.proposalsMap.values()).sort((a, b) => b.id - a.id);
   }
 
   async getProposal(id: number): Promise<Proposal | undefined> {
     return this.proposalsMap.get(id);
+  }
+
+  async updateProposal(id: number, proposal: Partial<InsertProposal>): Promise<Proposal | undefined> {
+    const existing = this.proposalsMap.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...proposal };
+    this.proposalsMap.set(id, updated);
+    return updated;
   }
 }
 
@@ -252,7 +262,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProposals(): Promise<Proposal[]> {
-    return await this.db.select().from(proposals);
+    return await this.db.select().from(proposals).orderBy(desc(proposals.id));
   }
 
   async getProposal(id: number): Promise<Proposal | undefined> {
@@ -260,6 +270,15 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(proposals)
       .where(eq(proposals.id, id));
+    return result[0];
+  }
+
+  async updateProposal(id: number, proposal: Partial<InsertProposal>): Promise<Proposal | undefined> {
+    const result = await this.db
+      .update(proposals)
+      .set(proposal)
+      .where(eq(proposals.id, id))
+      .returning();
     return result[0];
   }
 }

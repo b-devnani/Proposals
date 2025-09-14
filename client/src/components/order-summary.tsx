@@ -15,7 +15,9 @@ interface OrderSummaryProps {
   specialRequestOptions: { id: number; description: string; price: string; builderCost: string; }[];
   specialRequestTotal: number;
   showCostColumns: boolean;
+  isExistingProposal?: boolean;
   onSaveDraft: () => void;
+  onSaveChanges?: () => void;
   onGenerateProposal: () => void;
   onExportExcel: () => void;
 }
@@ -31,7 +33,9 @@ export function OrderSummary({
   specialRequestOptions,
   specialRequestTotal,
   showCostColumns,
+  isExistingProposal = false,
   onSaveDraft,
+  onSaveChanges,
   onGenerateProposal,
   onExportExcel,
 }: OrderSummaryProps) {
@@ -175,10 +179,17 @@ export function OrderSummary({
           </div>
 
           <div className="flex flex-col sm:flex-row lg:flex-col space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-0 lg:space-y-2 mt-4 lg:mt-0 lg:ml-6">
-            <Button variant="outline" size="sm" onClick={onSaveDraft} className="w-full sm:w-auto">
-              <Save className="w-3 h-3 mr-1" />
-              Save Draft
-            </Button>
+            {isExistingProposal ? (
+              <Button variant="outline" size="sm" onClick={onSaveChanges} className="w-full sm:w-auto">
+                <Save className="w-3 h-3 mr-1" />
+                Save Changes
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={onSaveDraft} className="w-full sm:w-auto">
+                <Save className="w-3 h-3 mr-1" />
+                Save New Draft
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={onExportExcel} className="w-full sm:w-auto">
               <Download className="w-3 h-3 mr-1" />
               Export Excel

@@ -57,13 +57,16 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
           </div>
         ) : (
           proposals?.map((proposal) => (
-            <Card 
+            <Link 
               key={proposal.id}
-              className={`cursor-pointer hover:shadow-md transition-shadow ${
-                currentProposalId === proposal.id ? 'ring-2 ring-blue-500' : ''
-              }`}
+              href={`/proposal/${proposal.housePlan.toLowerCase()}?proposalId=${proposal.id}`}
               onClick={() => onSelectProposal?.(proposal.id)}
             >
+              <Card 
+                className={`cursor-pointer hover:shadow-md transition-shadow ${
+                  currentProposalId === proposal.id ? 'ring-2 ring-blue-500' : ''
+                }`}
+              >
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium truncate">
                   {proposal.buyerLastName} - {proposal.housePlan}
@@ -83,7 +86,8 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
                   </div>
                 </div>
               </CardContent>
-            </Card>
+              </Card>
+            </Link>
           ))
         )}
       </div>

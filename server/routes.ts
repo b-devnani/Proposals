@@ -100,6 +100,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/proposals/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updateData = insertProposalSchema.partial().parse(req.body);
+      const updated = await storage.updateProposal(id, updateData);
+      if (!updated) {
+        return res.status(404).json({ message: "Proposal not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid proposal data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -10,6 +10,23 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [location] = useLocation();
   const [currentProposalId, setCurrentProposalId] = useState<number | undefined>();
 
+  // Extract proposalId from URL if present
+  const urlParams = new URLSearchParams(window.location.search);
+  const proposalIdFromUrl = urlParams.get('proposalId');
+  
+  // Update currentProposalId based on URL
+  if (proposalIdFromUrl) {
+    const newProposalId = parseInt(proposalIdFromUrl);
+    if (currentProposalId !== newProposalId) {
+      setCurrentProposalId(newProposalId);
+    }
+  } else {
+    // Clear currentProposalId if no proposalId in URL
+    if (currentProposalId !== undefined) {
+      setCurrentProposalId(undefined);
+    }
+  }
+
   // Show sidebar on all pages
   const showSidebar = true;
 
