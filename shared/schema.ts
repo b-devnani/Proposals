@@ -32,6 +32,8 @@ export const proposals = pgTable("proposals", {
   housePlan: text("house_plan").notNull(),
   basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
   lotPremium: decimal("lot_premium", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  salesIncentive: decimal("sales_incentive", { precision: 10, scale: 2 }).default("0.00"),
+  designAllowance: decimal("design_allowance", { precision: 10, scale: 2 }).default("0.00"),
   selectedUpgrades: text("selected_upgrades").array(),
   totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
 });

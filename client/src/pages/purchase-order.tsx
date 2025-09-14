@@ -188,8 +188,8 @@ export default function PurchaseOrder() {
         lotNumber: existingProposal.lotNumber || "",
         lotAddress: existingProposal.lotAddress || "",
         lotPremium: existingProposal.lotPremium || "0",
-        salesIncentive: "0", // Default value since it's not stored in proposals
-        designStudioAllowance: "0", // Default value since it's not stored in proposals
+        salesIncentive: existingProposal.salesIncentive || "0", // Default value since it's not stored in proposals
+        designStudioAllowance: existingProposal.designAllowance || "0", // Default value since it's not stored in proposals
       });
       
       // Set selected upgrades from existing proposal
@@ -894,6 +894,8 @@ export default function PurchaseOrder() {
       housePlan: currentTemplate.name,
       basePrice: currentTemplate.basePrice,
       lotPremium: formData.lotPremium || "0",
+      salesIncentive: formData.salesIncentive || "0",
+      designAllowance: formData.designStudioAllowance || "0",
       selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id.toString()),
       totalPrice: totalPrice.toString()
     };
@@ -931,6 +933,8 @@ export default function PurchaseOrder() {
       housePlan: currentTemplate.name,
       basePrice: currentTemplate.basePrice,
       lotPremium: formData.lotPremium || "0",
+      salesIncentive: formData.salesIncentive || "0",
+      designAllowance: formData.designStudioAllowance || "0",
       selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id.toString()),
       totalPrice: totalPrice.toString()
     };
