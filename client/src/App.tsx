@@ -6,17 +6,20 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PasswordProtection } from "@/components/password-protection";
+import { AppLayout } from "@/components/app-layout";
 import HomeSelector from "@/pages/home-selector";
 import PurchaseOrder from "@/pages/purchase-order";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={HomeSelector} />
-      <Route path="/proposal/:template" component={PurchaseOrder} />
-      <Route component={NotFound} />
-    </Switch>
+    <AppLayout>
+      <Switch>
+        <Route path="/" component={HomeSelector} />
+        <Route path="/proposal/:template" component={PurchaseOrder} />
+        <Route component={NotFound} />
+      </Switch>
+    </AppLayout>
   );
 }
 
