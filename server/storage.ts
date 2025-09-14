@@ -12,7 +12,7 @@ import {
 } from "@shared/schema";
 import { getHomeTemplateUpgrades } from "./excel-import.js";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { eq } from "drizzle-orm";
+import { eq, like } from "drizzle-orm";
 import { Pool } from "pg";
 
 export interface IStorage {
@@ -186,7 +186,7 @@ export class DatabaseStorage implements IStorage {
       this.db = drizzle(pool);
       this.initialized = true;
       console.log("🚀 DATABASE STORAGE: Database connection created!");
-      console.log("HELLO", process.env.DATABASE_URL);
+      console.log("yo", process.env.DATABASE_URL);
     } catch (error) {
       console.error("🚀 DATABASE STORAGE: Database connection failed:", error);
       throw error;
@@ -238,8 +238,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUpgradesByTemplate(templateName: string): Promise<Upgrade[]> {
-    // For now, return all upgrades. You can implement template-specific logic later
-    return await this.db.select().from(upgrades);
+    // Filter upgrades by template using the selectionId pattern
+    const templatePrefix = templateName.toLowerCase();
+    return await this.db
+      .select()
+      .from(upgrades)
+      .where(like(upgrades.selectionId, `${templatePrefix}-%`));
   }
 
   async createProposal(proposal: InsertProposal): Promise<Proposal> {
