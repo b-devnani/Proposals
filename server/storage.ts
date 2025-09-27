@@ -12,7 +12,7 @@ import {
 } from "@shared/schema";
 import { getHomeTemplateUpgrades } from "./excel-import.js";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { eq, like } from "drizzle-orm";
+import { desc, eq, like } from "drizzle-orm";
 import { Pool } from "pg";
 
 export interface IStorage {
@@ -146,6 +146,8 @@ export class MemStorage implements IStorage {
       id,
       selectedUpgrades: proposal.selectedUpgrades || null,
       lotPremium: proposal.lotPremium || "0",
+      salesIncentive: proposal.salesIncentive || null,
+      designAllowance: proposal.designAllowance || null,
     };
     this.proposalsMap.set(id, newProposal);
     return newProposal;
@@ -196,7 +198,6 @@ export class DatabaseStorage implements IStorage {
       this.db = drizzle(pool);
       this.initialized = true;
       console.log("🚀 DATABASE STORAGE: Database connection created!");
-      console.log("yo", process.env.DATABASE_URL);
     } catch (error) {
       console.error("🚀 DATABASE STORAGE: Database connection failed:", error);
       throw error;
