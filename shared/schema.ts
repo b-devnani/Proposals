@@ -7,6 +7,13 @@ export const homeTemplates = pgTable("home_templates", {
   name: text("name").notNull(),
   basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
   baseCost: decimal("base_cost", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  beds: text("beds").default(""),
+  baths: text("baths").default(""),
+  garage: text("garage").default(""),
+  sqft: integer("sqft").default(0),
+  imageUrl: text("image_url").default(""),
+  imageData: text("image_data"), // Base64 encoded image data
+  imageMimeType: text("image_mime_type").default("image/webp"),
 });
 
 export const upgrades = pgTable("upgrades", {
@@ -49,6 +56,25 @@ export const specialRequests = pgTable("special_requests", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const communities = pgTable("communities", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // Display name (e.g., "Rolling Meadows")
+  slug: text("slug").notNull().unique(), // URL-friendly name (e.g., "rolling-meadows")
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const lots = pgTable("lots", {
+  id: serial("id").primaryKey(),
+  communityId: integer("community_id").notNull().references(() => communities.id, { onDelete: "cascade" }),
+  lotNumber: text("lot_number").notNull(), // e.g., "RM03"
+  address: text("address").notNull(), // e.g., "16571 Kayla Drive"
+  isAvailable: boolean("is_available").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertHomeTemplateSchema = createInsertSchema(homeTemplates).omit({
   id: true,
 });
@@ -72,3 +98,9 @@ export type InsertProposal = z.infer<typeof insertProposalSchema>;
 
 export type SpecialRequest = typeof specialRequests.$inferSelect;
 export type InsertSpecialRequest = typeof specialRequests.$inferInsert;
+
+export type Community = typeof communities.$inferSelect;
+export type InsertCommunity = typeof communities.$inferInsert;
+
+export type Lot = typeof lots.$inferSelect;
+export type InsertLot = typeof lots.$inferInsert;

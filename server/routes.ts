@@ -27,6 +27,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/templates", async (req, res) => {
+    try {
+      const templateData = insertHomeTemplateSchema.parse(req.body);
+      const newTemplate = await storage.createHomeTemplate(templateData);
+      res.status(201).json(newTemplate);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid template data" });
+    }
+  });
+
   app.patch("/api/templates/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -38,6 +48,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updated);
     } catch (error) {
       res.status(400).json({ message: "Invalid template data" });
+    }
+  });
+
+  // Serve template images from database
+  app.get("/api/templates/:id/image", async (req, res) => {
+    try {
+      const templateId = parseInt(req.params.id);
+      const template = await storage.getHomeTemplate(templateId);
+      
+      if (!template || !template.imageData) {
+        return res.status(404).json({ message: "Image not found" });
+      }
+      
+      // Convert base64 to buffer
+      const imageBuffer = Buffer.from(template.imageData, 'base64');
+      
+      // Set appropriate headers
+      res.set({
+        'Content-Type': template.imageMimeType || 'image/webp',
+        'Content-Length': imageBuffer.length,
+        'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
+      });
+      
+      res.send(imageBuffer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch image" });
     }
   });
 
@@ -157,6 +193,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(specialRequests);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch special requests" });
+    }
+  });
+
+  // Communities routes
+  app.get("/api/communities", async (_req, res) => {
+    try {
+      const communities = await storage.getCommunities();
+      res.json(communities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch communities" });
+    }
+  });
+
+  app.get("/api/communities/:slug/lots", async (req, res) => {
+    try {
+      const slug = req.params.slug;
+      const lots = await storage.getLotsByCommunitySlug(slug);
+      res.json(lots);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch lots" });
     }
   });
 

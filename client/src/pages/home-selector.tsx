@@ -4,54 +4,11 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { HomeTemplate } from "@shared/schema";
 import { ThemeToggle } from "@/components/theme-toggle";
-import ravelloImage from "@assets/Ravello_1754950998192.webp";
-import sorrentoImage from "@assets/Sorrento_1754950998192.webp";
-import veronaImage from "@assets/Verona_1754950998191.webp";
-
-interface ExtendedHomeTemplate extends HomeTemplate {
-  beds: string;
-  baths: string;
-  garage: string;
-  sqft: number;
-  imageUrl?: string;
-}
-
-const homeTemplateDetails: Record<string, Omit<ExtendedHomeTemplate, 'id' | 'name' | 'basePrice'>> = {
-  'Sorrento': {
-    beds: '2 Beds',
-    baths: '2 Baths', 
-    garage: '2 Car Garage',
-    sqft: 2002,
-    imageUrl: sorrentoImage,
-    baseCost: '0'
-  },
-  'Ravello': {
-    beds: '4 Beds',
-    baths: '3 Baths',
-    garage: '2 Car Garage', 
-    sqft: 2184,
-    imageUrl: ravelloImage,
-    baseCost: '0'
-  },
-  'Verona': {
-    beds: '2 Beds',
-    baths: '2 Baths',
-    garage: '2 Car Garage',
-    sqft: 1987,
-    imageUrl: veronaImage,
-    baseCost: '0'
-  }
-};
 
 export default function HomeSelector() {
   const { data: templates = [], isLoading } = useQuery<HomeTemplate[]>({
     queryKey: ['/api/templates'],
   });
-
-  const enrichedTemplates = templates.map(template => ({
-    ...template,
-    ...homeTemplateDetails[template.name]
-  }));
 
   if (isLoading) {
     return (
@@ -77,7 +34,7 @@ export default function HomeSelector() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-          {enrichedTemplates.map((home) => (
+          {templates.map((home) => (
             <motion.div
               key={home.id}
               whileHover={{ y: -5 }}
@@ -89,7 +46,7 @@ export default function HomeSelector() {
                   <CardContent className="p-0">
                     <div className="aspect-[4/3] overflow-hidden">
                       <img
-                        src={home.imageUrl}
+                        src={`/api/templates/${home.id}/image`}
                         alt={`${home.name} Floor Plan`}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       />
@@ -106,19 +63,19 @@ export default function HomeSelector() {
                         <div className="grid grid-cols-2 gap-3">
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <span className="text-gray-400 dark:text-gray-500">🏠</span>
-                            <span>{home.beds}</span>
+                            <span>{home.beds || ''}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <span className="text-gray-400 dark:text-gray-500">🛁</span>
-                            <span>{home.baths}</span>
+                            <span>{home.baths || ''}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <span className="text-gray-400 dark:text-gray-500">🚪</span>
-                            <span>{home.garage}</span>
+                            <span>{home.garage || ''}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <span className="text-gray-400 dark:text-gray-500">📏</span>
-                            <span>{home.sqft.toLocaleString()} SF</span>
+                            <span>{(home.sqft || 0).toLocaleString()} SF</span>
                           </div>
                         </div>
                       </div>

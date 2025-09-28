@@ -12,6 +12,12 @@ import {
   specialRequests,
   type SpecialRequest,
   type InsertSpecialRequest,
+  communities,
+  type Community,
+  type InsertCommunity,
+  lots,
+  type Lot,
+  type InsertLot,
 } from "@shared/schema";
 import { getHomeTemplateUpgrades } from "./excel-import.js";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -22,6 +28,7 @@ export interface IStorage {
   // Home Templates
   getHomeTemplates(): Promise<HomeTemplate[]>;
   getHomeTemplate(id: number): Promise<HomeTemplate | undefined>;
+  createHomeTemplate(template: InsertHomeTemplate): Promise<HomeTemplate>;
   updateHomeTemplate(
     id: number,
     template: Partial<InsertHomeTemplate>,
@@ -46,6 +53,21 @@ export interface IStorage {
   createSpecialRequest(specialRequest: InsertSpecialRequest): Promise<SpecialRequest>;
   updateSpecialRequest(id: number, specialRequest: Partial<InsertSpecialRequest>): Promise<SpecialRequest | undefined>;
   deleteSpecialRequest(id: number): Promise<boolean>;
+
+  // Communities
+  getCommunities(): Promise<Community[]>;
+  getCommunity(id: number): Promise<Community | undefined>;
+  getCommunityBySlug(slug: string): Promise<Community | undefined>;
+  createCommunity(community: InsertCommunity): Promise<Community>;
+  updateCommunity(id: number, community: Partial<InsertCommunity>): Promise<Community | undefined>;
+
+  // Lots
+  getLots(): Promise<Lot[]>;
+  getLotsByCommunity(communityId: number): Promise<Lot[]>;
+  getLotsByCommunitySlug(communitySlug: string): Promise<Lot[]>;
+  getLot(id: number): Promise<Lot | undefined>;
+  createLot(lot: InsertLot): Promise<Lot>;
+  updateLot(id: number, lot: Partial<InsertLot>): Promise<Lot | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -54,22 +76,30 @@ export class MemStorage implements IStorage {
   private upgradesMap: Map<number, Upgrade>;
   private proposalsMap: Map<number, Proposal>;
   private specialRequestsMap: Map<number, SpecialRequest>;
+  private communitiesMap: Map<number, Community>;
+  private lotsMap: Map<number, Lot>;
   private templateUpgradesCache: Map<string, Upgrade[]>;
   private currentTemplateId: number;
   private currentUpgradeId: number;
   private currentProposalId: number;
   private currentSpecialRequestId: number;
+  private currentCommunityId: number;
+  private currentLotId: number;
 
   constructor() {
     this.homeTemplatesMap = new Map();
     this.upgradesMap = new Map();
     this.proposalsMap = new Map();
     this.specialRequestsMap = new Map();
+    this.communitiesMap = new Map();
+    this.lotsMap = new Map();
     this.templateUpgradesCache = new Map();
     this.currentTemplateId = 1;
     this.currentUpgradeId = 1;
     this.currentProposalId = 1;
     this.currentSpecialRequestId = 1;
+    this.currentCommunityId = 1;
+    this.currentLotId = 1;
 
     this.initializeData();
   }
@@ -82,18 +112,39 @@ export class MemStorage implements IStorage {
         name: "Ravello",
         basePrice: "630990",
         baseCost: "500000",
+        beds: "4 Beds",
+        baths: "3 Baths",
+        garage: "2 Car Garage",
+        sqft: 2184,
+        imageUrl: "/attached_assets/Ravello_1754950998192.webp",
+        imageData: null, // Will be populated from database
+        imageMimeType: "image/webp",
       },
       {
         id: this.currentTemplateId++,
         name: "Sorrento",
         basePrice: "614990",
         baseCost: "485000",
+        beds: "2 Beds",
+        baths: "2 Baths",
+        garage: "2 Car Garage",
+        sqft: 2002,
+        imageUrl: "/attached_assets/Sorrento_1754950998192.webp",
+        imageData: null, // Will be populated from database
+        imageMimeType: "image/webp",
       },
       {
         id: this.currentTemplateId++,
         name: "Verona",
         basePrice: "609990",
         baseCost: "475000",
+        beds: "2 Beds",
+        baths: "2 Baths",
+        garage: "2 Car Garage",
+        sqft: 1987,
+        imageUrl: "/attached_assets/Verona_1754950998191.webp",
+        imageData: null, // Will be populated from database
+        imageMimeType: "image/webp",
       },
     ];
 
@@ -119,6 +170,24 @@ export class MemStorage implements IStorage {
 
   async getHomeTemplate(id: number): Promise<HomeTemplate | undefined> {
     return this.homeTemplatesMap.get(id);
+  }
+
+  async createHomeTemplate(template: InsertHomeTemplate): Promise<HomeTemplate> {
+    const id = this.currentTemplateId++;
+    const newTemplate: HomeTemplate = {
+      ...template,
+      id,
+      baseCost: template.baseCost || "0.00",
+      beds: template.beds || "",
+      baths: template.baths || "",
+      garage: template.garage || "",
+      sqft: template.sqft || 0,
+      imageUrl: template.imageUrl || "",
+      imageData: template.imageData || null,
+      imageMimeType: template.imageMimeType || "image/webp",
+    };
+    this.homeTemplatesMap.set(id, newTemplate);
+    return newTemplate;
   }
 
   async updateHomeTemplate(
@@ -237,6 +306,90 @@ export class MemStorage implements IStorage {
     return this.specialRequestsMap.delete(id);
   }
 
+  // Communities
+  async getCommunities(): Promise<Community[]> {
+    return Array.from(this.communitiesMap.values());
+  }
+
+  async getCommunity(id: number): Promise<Community | undefined> {
+    return this.communitiesMap.get(id);
+  }
+
+  async getCommunityBySlug(slug: string): Promise<Community | undefined> {
+    return Array.from(this.communitiesMap.values()).find(c => c.slug === slug);
+  }
+
+  async createCommunity(community: InsertCommunity): Promise<Community> {
+    const id = this.currentCommunityId++;
+    const newCommunity: Community = {
+      ...community,
+      id,
+      isActive: community.isActive ?? true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.communitiesMap.set(id, newCommunity);
+    return newCommunity;
+  }
+
+  async updateCommunity(id: number, community: Partial<InsertCommunity>): Promise<Community | undefined> {
+    const existing = this.communitiesMap.get(id);
+    if (!existing) return undefined;
+
+    const updated: Community = { 
+      ...existing, 
+      ...community, 
+      updatedAt: new Date() 
+    };
+    this.communitiesMap.set(id, updated);
+    return updated;
+  }
+
+  // Lots
+  async getLots(): Promise<Lot[]> {
+    return Array.from(this.lotsMap.values());
+  }
+
+  async getLotsByCommunity(communityId: number): Promise<Lot[]> {
+    return Array.from(this.lotsMap.values()).filter(lot => lot.communityId === communityId);
+  }
+
+  async getLotsByCommunitySlug(communitySlug: string): Promise<Lot[]> {
+    const community = await this.getCommunityBySlug(communitySlug);
+    if (!community) return [];
+    return this.getLotsByCommunity(community.id);
+  }
+
+  async getLot(id: number): Promise<Lot | undefined> {
+    return this.lotsMap.get(id);
+  }
+
+  async createLot(lot: InsertLot): Promise<Lot> {
+    const id = this.currentLotId++;
+    const newLot: Lot = {
+      ...lot,
+      id,
+      isAvailable: lot.isAvailable ?? true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.lotsMap.set(id, newLot);
+    return newLot;
+  }
+
+  async updateLot(id: number, lot: Partial<InsertLot>): Promise<Lot | undefined> {
+    const existing = this.lotsMap.get(id);
+    if (!existing) return undefined;
+
+    const updated: Lot = { 
+      ...existing, 
+      ...lot, 
+      updatedAt: new Date() 
+    };
+    this.lotsMap.set(id, updated);
+    return updated;
+  }
+
   async getProposal(id: number): Promise<Proposal | undefined> {
     return this.proposalsMap.get(id);
   }
@@ -302,6 +455,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(homeTemplates)
       .where(eq(homeTemplates.id, id));
+    return result[0];
+  }
+
+  async createHomeTemplate(template: InsertHomeTemplate): Promise<HomeTemplate> {
+    const result = await this.db
+      .insert(homeTemplates)
+      .values(template)
+      .returning();
     return result[0];
   }
 
@@ -425,6 +586,88 @@ export class DatabaseStorage implements IStorage {
       .where(eq(specialRequests.id, id))
       .returning();
     return result.length > 0;
+  }
+
+  // Communities
+  async getCommunities(): Promise<Community[]> {
+    return await this.db.select().from(communities).where(eq(communities.isActive, true));
+  }
+
+  async getCommunity(id: number): Promise<Community | undefined> {
+    const result = await this.db
+      .select()
+      .from(communities)
+      .where(eq(communities.id, id));
+    return result[0];
+  }
+
+  async getCommunityBySlug(slug: string): Promise<Community | undefined> {
+    const result = await this.db
+      .select()
+      .from(communities)
+      .where(eq(communities.slug, slug));
+    return result[0];
+  }
+
+  async createCommunity(community: InsertCommunity): Promise<Community> {
+    const result = await this.db
+      .insert(communities)
+      .values(community)
+      .returning();
+    return result[0];
+  }
+
+  async updateCommunity(id: number, community: Partial<InsertCommunity>): Promise<Community | undefined> {
+    const result = await this.db
+      .update(communities)
+      .set({ ...community, updatedAt: new Date() })
+      .where(eq(communities.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Lots
+  async getLots(): Promise<Lot[]> {
+    return await this.db.select().from(lots).where(eq(lots.isAvailable, true));
+  }
+
+  async getLotsByCommunity(communityId: number): Promise<Lot[]> {
+    return await this.db
+      .select()
+      .from(lots)
+      .where(eq(lots.communityId, communityId))
+      .orderBy(lots.lotNumber);
+  }
+
+  async getLotsByCommunitySlug(communitySlug: string): Promise<Lot[]> {
+    const community = await this.getCommunityBySlug(communitySlug);
+    if (!community) return [];
+    return this.getLotsByCommunity(community.id);
+  }
+
+  async getLot(id: number): Promise<Lot | undefined> {
+    const result = await this.db
+      .select()
+      .from(lots)
+      .where(eq(lots.id, id));
+    return result[0];
+  }
+
+  async createLot(lot: InsertLot): Promise<Lot> {
+    const result = await this.db
+      .insert(lots)
+      .values(lot)
+      .returning();
+    return result[0];
+  }
+
+  async updateLot(id: number, lot: Partial<InsertLot>): Promise<Lot | undefined> {
+    const result = await this.db
+      .update(lots)
+      .set({ ...lot, updatedAt: new Date() })
+      .where(eq(lots.id, id))
+      .returning();
+    return result[0];
   }
 }
 

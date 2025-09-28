@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,40 +22,28 @@ import { groupUpgradesByCategory, sortUpgrades } from "@/lib/upgrade-data";
 import { apiRequest } from "@/lib/queryClient";
 import { formatNumberWithCommas, handleNumberInputChange } from "@/lib/number-utils";
 
-// Rolling Meadows lot data
-const rollingMeadowsLots = {
-  "RM03": "16571 Kayla Drive",
-  "RM04": "16561 Kayla Drive", 
-  "RM05": "16551 Kayla Drive",
-  "RM06": "16541 Kayla Drive",
-  "RM25": "16520 Kayla Drive",
-  "RM26": "16530 Kayla Drive",
-  "RM27": "16540 Kayla Drive",
-  "RM28": "16550 Kayla Drive",
-  "RM29": "16560 Kayla Drive",
-  "RM30": "16570 Kayla Drive",
-  "RM31": "16580 Kayla Drive",
-  "RM32": "16590 Kayla Drive"
-};
+// Types for communities and lots
+interface Community {
+  id: number;
+  name: string;
+  slug: string;
+  isActive: boolean;
+}
 
-// Helper function to format community name
-const formatCommunityName = (communityValue: string) => {
-  switch (communityValue) {
-    case 'rolling-meadows':
-      return 'Rolling Meadows';
-    case 'marble-landing':
-      return 'Marble Landing';
-    case 'copper-ridge':
-      return 'Copper Ridge';
-    default:
-      return communityValue;
-  }
-};
+interface Lot {
+  id: number;
+  communityId: number;
+  lotNumber: string;
+  address: string;
+  isAvailable: boolean;
+}
 
 export default function PurchaseOrder() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const params = useParams();
+  const hasSetDefaultCommunity = useRef(false);
+  const lastPopulatedProposalId = useRef<number | null>(null);
   
   // Get proposalId from route params
   const proposalId = params.proposalId || null;
@@ -81,7 +69,7 @@ export default function PurchaseOrder() {
   const [formData, setFormData] = useState({
     todaysDate: new Date().toISOString().split('T')[0],
     buyerLastName: "",
-    community: "rolling-meadows", // Default to Rolling Meadows
+    community: "", // Will be set from database
     lotNumber: "",
     lotAddress: "",
     lotPremium: "0",
@@ -138,11 +126,12 @@ export default function PurchaseOrder() {
   
   // Handler for lot selection
   const handleLotSelection = (lotNumber: string) => {
-    const address = rollingMeadowsLots[lotNumber as keyof typeof rollingMeadowsLots] || "";
+    const selectedLot = availableLots.find(lot => lot.lotNumber === lotNumber);
+    const address = selectedLot?.address || "";
     setFormData({ 
       ...formData, 
-      lotNumber, 
-      lotAddress: address 
+      lotNumber,
+      lotAddress: address
     });
   };
 
@@ -184,6 +173,42 @@ export default function PurchaseOrder() {
     enabled: !!proposalId,
   });
 
+  // Fetch communities
+  const { data: communities = [] } = useQuery<Community[]>({
+    queryKey: ["/api/communities"],
+    queryFn: async () => {
+      const response = await fetch("/api/communities");
+      if (!response.ok) {
+        throw new Error("Failed to fetch communities");
+      }
+      return await response.json();
+    },
+  });
+
+  // Set default community when communities load (only once)
+  useEffect(() => {
+    if (communities.length > 0 && !hasSetDefaultCommunity.current) {
+      const defaultCommunity = communities.find(c => c.slug === "rolling-meadows") || communities[0];
+      console.log('Setting default community:', defaultCommunity.slug);
+      setFormData(prev => ({ ...prev, community: defaultCommunity.slug }));
+      hasSetDefaultCommunity.current = true;
+    }
+  }, [communities]);
+
+  // Fetch lots for selected community
+  const { data: availableLots = [] } = useQuery<Lot[]>({
+    queryKey: ["/api/communities", formData.community, "lots"],
+    queryFn: async () => {
+      if (!formData.community) return [];
+      const response = await fetch(`/api/communities/${formData.community}/lots`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch lots");
+      }
+      return await response.json();
+    },
+    enabled: !!formData.community,
+  });
+
   // Force refetch when proposalId changes
   useEffect(() => {
     if (proposalId) {
@@ -213,12 +238,12 @@ export default function PurchaseOrder() {
 
   // Populate form fields when existing proposal is loaded
   useEffect(() => {
-    console.log('Form population useEffect triggered:', { existingProposal, proposalId });
-    if (existingProposal) {
+    if (existingProposal && lastPopulatedProposalId.current !== existingProposal.id) {
+      console.log('Populating form with existing proposal:', existingProposal.id);
       setFormData({
         todaysDate: existingProposal.todaysDate || new Date().toISOString().split('T')[0],
         buyerLastName: existingProposal.buyerLastName || "",
-        community: existingProposal.community || "rolling-meadows",
+        community: existingProposal.community || "",
         lotNumber: existingProposal.lotNumber || "",
         lotAddress: existingProposal.lotAddress || "",
         lotPremium: existingProposal.lotPremium || "0",
@@ -232,14 +257,14 @@ export default function PurchaseOrder() {
         setSelectedUpgrades(new Set(upgradeIds));
       }
 
-      // Set special requests from existing proposal
-      setSpecialRequests(existingSpecialRequests);
-    } else if (proposalId === null) {
+      lastPopulatedProposalId.current = existingProposal.id;
+    } else if (proposalId === null && lastPopulatedProposalId.current !== null) {
       // Reset form when no proposal is selected
+      console.log('Resetting form - no proposal selected');
       setFormData({
         todaysDate: new Date().toISOString().split('T')[0],
         buyerLastName: "",
-        community: "rolling-meadows",
+        community: "",
         lotNumber: "",
         lotAddress: "",
         lotPremium: "0",
@@ -247,9 +272,28 @@ export default function PurchaseOrder() {
         designStudioAllowance: "0",
       });
       setSelectedUpgrades(new Set());
+      lastPopulatedProposalId.current = null;
+    }
+  }, [existingProposal, proposalId]);
+
+  // Update lot address when availableLots change and we have a lot number
+  useEffect(() => {
+    if (availableLots.length > 0 && formData.lotNumber) {
+      const selectedLot = availableLots.find(lot => lot.lotNumber === formData.lotNumber);
+      if (selectedLot && selectedLot.address !== formData.lotAddress) {
+        setFormData(prev => ({ ...prev, lotAddress: selectedLot.address }));
+      }
+    }
+  }, [availableLots, formData.lotNumber]);
+
+  // Set special requests separately to avoid dependency issues
+  useEffect(() => {
+    if (existingProposal && lastPopulatedProposalId.current === existingProposal.id) {
+      setSpecialRequests(existingSpecialRequests);
+    } else if (!existingProposal && lastPopulatedProposalId.current === null) {
       setSpecialRequests([]);
     }
-  }, [existingProposal, existingSpecialRequests, proposalId]);
+  }, [existingSpecialRequests, existingProposal]);
 
   const { data: upgrades = [], isLoading: upgradesLoading } = useQuery<Upgrade[]>({
     queryKey: ["/api/upgrades", activeTemplate],
@@ -1096,7 +1140,7 @@ export default function PurchaseOrder() {
     const customerInfoData = [
       ['Date', new Date().toLocaleDateString()],
       ['Customer Name', formData.buyerLastName || 'Not specified'],
-      ['Community', formatCommunityName(formData.community) || 'Not specified'],
+      ['Community', communities.find(c => c.slug === formData.community)?.name || 'Not specified'],
       ['Lot Number', formData.lotNumber || 'TBD'],
       ['Lot Address', formData.lotAddress || 'TBD'],
       ['Home Plan', currentTemplate.name]
@@ -1713,15 +1757,21 @@ export default function PurchaseOrder() {
                   <Label htmlFor="community" className="text-sm font-medium text-gray-700 dark:text-gray-300">Community</Label>
                   <Select 
                     value={formData.community} 
-                    onValueChange={(value) => setFormData({ ...formData, community: value })}
+                    onValueChange={(value) => {
+                      setFormData({ ...formData, community: value, lotNumber: "", lotAddress: "" });
+                    }}
                   >
                     <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select community" />
+                      <SelectValue placeholder="Select community">
+                        {formData.community ? communities.find(c => c.slug === formData.community)?.name : "Select community"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="rolling-meadows">Rolling Meadows</SelectItem>
-                      <SelectItem value="marble-landing">Marble Landing</SelectItem>
-                      <SelectItem value="copper-ridge">Copper Ridge</SelectItem>
+                      {communities.map((community) => (
+                        <SelectItem key={community.id} value={community.slug}>
+                          {community.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1736,9 +1786,9 @@ export default function PurchaseOrder() {
                       <SelectValue placeholder="Select lot number" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.keys(rollingMeadowsLots).map((lotNumber) => (
-                        <SelectItem key={lotNumber} value={lotNumber}>
-                          {lotNumber}
+                      {availableLots.map((lot) => (
+                        <SelectItem key={lot.id} value={lot.lotNumber}>
+                          {lot.lotNumber}
                         </SelectItem>
                       ))}
                     </SelectContent>
