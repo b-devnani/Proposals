@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, decimal } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, decimal, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -39,6 +39,16 @@ export const proposals = pgTable("proposals", {
   archived: boolean("archived").notNull().default(false),
 });
 
+export const specialRequests = pgTable("special_requests", {
+  id: serial("id").primaryKey(),
+  proposalId: integer("proposal_id").notNull().references(() => proposals.id, { onDelete: "cascade" }),
+  description: text("description").notNull(),
+  builderCost: decimal("builder_cost", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  clientPrice: decimal("client_price", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertHomeTemplateSchema = createInsertSchema(homeTemplates).omit({
   id: true,
 });
@@ -55,5 +65,10 @@ export type HomeTemplate = typeof homeTemplates.$inferSelect;
 export type InsertHomeTemplate = z.infer<typeof insertHomeTemplateSchema>;
 export type Upgrade = typeof upgrades.$inferSelect;
 export type InsertUpgrade = z.infer<typeof insertUpgradeSchema>;
+
+
 export type Proposal = typeof proposals.$inferSelect;
 export type InsertProposal = z.infer<typeof insertProposalSchema>;
+
+export type SpecialRequest = typeof specialRequests.$inferSelect;
+export type InsertSpecialRequest = typeof specialRequests.$inferInsert;

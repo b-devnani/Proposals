@@ -11,15 +11,13 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Filter, Plus, Minus, Package } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import logoPath from "@assets/logo-fullColor_1754013092305.png";
 import { useToast } from "@/hooks/use-toast";
 import { UpgradeTable } from "@/components/upgrade-table";
 import { OrderSummary } from "@/components/order-summary";
 import { CostTogglePassword } from "@/components/cost-toggle-password";
-import { HomeTemplate, Upgrade, Proposal } from "@shared/schema";
+import { HomeTemplate, Upgrade, Proposal, SpecialRequest } from "@shared/schema";
 import { groupUpgradesByCategory, sortUpgrades } from "@/lib/upgrade-data";
 import { apiRequest } from "@/lib/queryClient";
 import { formatNumberWithCommas, handleNumberInputChange } from "@/lib/number-utils";
@@ -78,14 +76,6 @@ export default function PurchaseOrder() {
   const [locationFilter, setLocationFilter] = useState("all");
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   
-  // Special Request Options state
-  const [specialRequestOptions, setSpecialRequestOptions] = useState<{
-    id: number;
-    description: string;
-    price: string;
-    builderCost: string;
-  }[]>([]);
-  const [nextSroId, setNextSroId] = useState(1);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -99,7 +89,52 @@ export default function PurchaseOrder() {
     designStudioAllowance: "0",
   });
 
+  const [specialRequests, setSpecialRequests] = useState<SpecialRequest[]>([]);
+
   const [salesIncentiveEnabled, setSalesIncentiveEnabled] = useState(false);
+
+  // Special Requests mutations
+  const createSpecialRequestMutation = useMutation({
+    mutationFn: async (data: { proposalId: number; description: string; builderCost: string; clientPrice: string }) => {
+      const response = await fetch('/api/special-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create special request');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/proposals", proposalId, "special-requests"] });
+    },
+  });
+
+  const updateSpecialRequestMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<SpecialRequest> }) => {
+      const response = await fetch(`/api/special-requests/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update special request');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/proposals", proposalId, "special-requests"] });
+    },
+  });
+
+  const deleteSpecialRequestMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/special-requests/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete special request');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/proposals", proposalId, "special-requests"] });
+    },
+  });
   
   // Handler for lot selection
   const handleLotSelection = (lotNumber: string) => {
@@ -111,37 +146,7 @@ export default function PurchaseOrder() {
     });
   };
 
-  // Special Request Options handlers
-  const addSpecialRequestOption = () => {
-    setSpecialRequestOptions([
-      ...specialRequestOptions,
-      {
-        id: nextSroId,
-        description: "",
-        price: "0",
-        builderCost: "0"
-      }
-    ]);
-    setNextSroId(nextSroId + 1);
-  };
 
-  const removeSpecialRequestOption = (id: number) => {
-    setSpecialRequestOptions(specialRequestOptions.filter(sro => sro.id !== id));
-  };
-
-  const updateSpecialRequestOption = (id: number, field: 'description' | 'price' | 'builderCost', value: string) => {
-    setSpecialRequestOptions(specialRequestOptions.map(sro => 
-      sro.id === id ? { ...sro, [field]: value } : sro
-    ));
-  };
-
-  // Calculate SRO totals
-  const specialRequestTotal = specialRequestOptions.reduce((sum, sro) => 
-    sum + parseFloat(sro.price || "0"), 0
-  );
-  const specialRequestCostTotal = specialRequestOptions.reduce((sum, sro) => 
-    sum + parseFloat(sro.builderCost || "0"), 0
-  );
 
   // Queries
   const { data: templates = [], isLoading: templatesLoading } = useQuery<HomeTemplate[]>({
@@ -163,6 +168,20 @@ export default function PurchaseOrder() {
     staleTime: 0, // Always refetch when query key changes
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+  });
+
+  // Fetch special requests for the current proposal
+  const { data: existingSpecialRequests = [] } = useQuery<SpecialRequest[]>({
+    queryKey: ["/api/proposals", proposalId, "special-requests"],
+    queryFn: async () => {
+      if (!proposalId) return [];
+      const response = await fetch(`/api/proposals/${proposalId}/special-requests`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch special requests");
+      }
+      return await response.json();
+    },
+    enabled: !!proposalId,
   });
 
   // Force refetch when proposalId changes
@@ -212,6 +231,9 @@ export default function PurchaseOrder() {
         const upgradeIds = existingProposal.selectedUpgrades.map((id: string) => parseInt(id)).filter((id: number) => !isNaN(id));
         setSelectedUpgrades(new Set(upgradeIds));
       }
+
+      // Set special requests from existing proposal
+      setSpecialRequests(existingSpecialRequests);
     } else if (proposalId === null) {
       // Reset form when no proposal is selected
       setFormData({
@@ -225,8 +247,9 @@ export default function PurchaseOrder() {
         designStudioAllowance: "0",
       });
       setSelectedUpgrades(new Set());
+      setSpecialRequests([]);
     }
-  }, [existingProposal, proposalId]);
+  }, [existingProposal, existingSpecialRequests, proposalId]);
 
   const { data: upgrades = [], isLoading: upgradesLoading } = useQuery<Upgrade[]>({
     queryKey: ["/api/upgrades", activeTemplate],
@@ -721,6 +744,53 @@ export default function PurchaseOrder() {
       });
     });
     
+    // Add Special Requests if any exist
+    if (existingSpecialRequests.length > 0) {
+      // Spacer
+      currentRow += 2;
+      
+      // Special Requests Section Header
+      const specialRequestsHeaderRow = worksheet.getRow(currentRow);
+      specialRequestsHeaderRow.height = 25;
+      const specialRequestsHeaderCell = worksheet.getCell(`A${currentRow}`);
+      specialRequestsHeaderCell.value = 'SPECIAL REQUESTS';
+      specialRequestsHeaderCell.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+      specialRequestsHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
+      specialRequestsHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      specialRequestsHeaderCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      
+      const specialRequestsHeaderCellB = worksheet.getCell(`B${currentRow}`);
+      specialRequestsHeaderCellB.font = { name: 'Calibri', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+      specialRequestsHeaderCellB.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A90E2' } };
+      specialRequestsHeaderCellB.alignment = { horizontal: 'right', vertical: 'middle' };
+      specialRequestsHeaderCellB.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      
+      currentRow++;
+      
+      // Add each special request
+      existingSpecialRequests.forEach((sr) => {
+        const row = worksheet.getRow(currentRow);
+        row.height = 22;
+        
+        const labelCell = worksheet.getCell(`A${currentRow}`);
+        labelCell.value = sr.description;
+        labelCell.font = { name: 'Calibri', size: 11 };
+        labelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } };
+        labelCell.alignment = { horizontal: 'left', vertical: 'middle' };
+        labelCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+        
+        const amountCell = worksheet.getCell(`B${currentRow}`);
+        amountCell.value = parseFloat(sr.clientPrice);
+        amountCell.numFmt = '"$"#,##0';
+        amountCell.font = { name: 'Calibri', size: 11 };
+        amountCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } };
+        amountCell.alignment = { horizontal: 'right', vertical: 'middle' };
+        amountCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+        
+        currentRow++;
+      });
+    }
+    
     // Spacer
     currentRow += 2;
     
@@ -911,7 +981,8 @@ export default function PurchaseOrder() {
     
     const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
     const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
-    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestTotal;
+    const specialRequestsTotal = existingSpecialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0);
+    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestsTotal;
     
     const proposalData = {
       todaysDate: new Date().toISOString().split('T')[0],
@@ -950,7 +1021,8 @@ export default function PurchaseOrder() {
     
     const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
     const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
-    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestTotal;
+    const specialRequestsTotal = existingSpecialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0);
+    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestsTotal;
     
     const proposalData = {
       todaysDate: formData.todaysDate || new Date().toISOString().split('T')[0],
@@ -989,7 +1061,8 @@ export default function PurchaseOrder() {
     
     const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
     const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
-    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestTotal;
+    const specialRequestsTotal = existingSpecialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0);
+    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestsTotal;
     
     const doc = new jsPDF();
     
@@ -1260,12 +1333,12 @@ export default function PurchaseOrder() {
         });
       });
       
-      // Add Special Request Options if any exist
-      if (specialRequestOptions.length > 0) {
+      // Add Special Requests if any exist
+      if (existingSpecialRequests.length > 0) {
         // Add spacing
         yPos += 5;
         
-        // Special Request Options header
+        // Special Requests header
         doc.setFillColor(230, 230, 230);
         doc.setDrawColor(150, 150, 150);
         doc.setLineWidth(0.5);
@@ -1273,16 +1346,16 @@ export default function PurchaseOrder() {
         
         doc.setFont("helvetica", "bold");
         doc.setTextColor(0, 0, 0);
-        const sroHeaderText = "SPECIAL REQUEST OPTIONS";
-        const sroHeaderTextWidth = doc.getTextWidth(sroHeaderText);
-        const centerSroHeaderX = rowNumX + (tableWidth - sroHeaderTextWidth) / 2;
-        doc.text(sroHeaderText, centerSroHeaderX, yPos + 2);
+        const srHeaderText = "SPECIAL REQUESTS";
+        const srHeaderTextWidth = doc.getTextWidth(srHeaderText);
+        const centerSrHeaderX = rowNumX + (tableWidth - srHeaderTextWidth) / 2;
+        doc.text(srHeaderText, centerSrHeaderX, yPos + 2);
         yPos += rowHeight;
         
         doc.setFont("helvetica", "normal");
         
-        // Add each special request option
-        specialRequestOptions.forEach((sro, index) => {
+        // Add each special request
+        existingSpecialRequests.forEach((sr, index) => {
           // Check if we need a new page
           if (yPos > pageHeight - bottomMargin - 20) {
             doc.addPage();
@@ -1338,16 +1411,16 @@ export default function PurchaseOrder() {
           
           // Option description
           doc.setTextColor(0, 0, 0);
-          const sroOptionText = sro.description.length > 62 ? 
-            sro.description.substring(0, 59) + "..." : 
-            sro.description;
-          doc.text(sroOptionText, optionX + 2, yPos + 2);
+          const srOptionText = sr.description.length > 62 ? 
+            sr.description.substring(0, 59) + "..." : 
+            sr.description;
+          doc.text(srOptionText, optionX + 2, yPos + 2);
           
           // Subtotal (right-aligned)
-          const sroPrice = `$${parseInt(sro.price).toLocaleString()}`;
-          const sroPriceWidth = doc.getTextWidth(sroPrice);
-          const rightAlignSroSubtotalX = subtotalX + subtotalWidth - sroPriceWidth - 1;
-          doc.text(sroPrice, rightAlignSroSubtotalX, yPos + 2);
+          const srPrice = `$${parseFloat(sr.clientPrice).toLocaleString()}`;
+          const srPriceWidth = doc.getTextWidth(srPrice);
+          const rightAlignSrSubtotalX = subtotalX + subtotalWidth - srPriceWidth - 1;
+          doc.text(srPrice, rightAlignSrSubtotalX, yPos + 2);
           
           yPos += rowHeight;
           globalRowNumber++;
@@ -1362,8 +1435,9 @@ export default function PurchaseOrder() {
       // Align label with options column
       const selectionsOptionX = leftMargin + 10 + 45; // rowNumWidth + locationWidth
       doc.text("Options Total:", selectionsOptionX, yPos);
-      // Align value with subtotals column - combine upgrades and SRO totals
-      const totalOptionsValue = upgradesTotal + specialRequestTotal;
+      // Align value with subtotals column - combine upgrades and special requests totals
+      const specialRequestsTotal = existingSpecialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0);
+      const totalOptionsValue = upgradesTotal + specialRequestsTotal;
       const selectionsSubtotalValue = `$${totalOptionsValue.toLocaleString()}`;
       const selectionsSubtotalWidth = doc.getTextWidth(selectionsSubtotalValue);
       const selectionsSubtotalColumnX = leftMargin + 10 + 45 + 100; // rowNumWidth + locationWidth + optionWidth
@@ -1486,7 +1560,8 @@ export default function PurchaseOrder() {
     
     const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
     const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
-    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal;
+    const specialRequestsTotal = existingSpecialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0);
+    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestsTotal;
     
     const proposalData = {
       todaysDate: new Date().toISOString().split('T')[0],
@@ -1497,6 +1572,8 @@ export default function PurchaseOrder() {
       housePlan: currentTemplate.name,
       basePrice: currentTemplate.basePrice,
       lotPremium: formData.lotPremium || "0",
+      salesIncentive: formData.salesIncentive || "0",
+      designAllowance: formData.designStudioAllowance || "0",
       selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id.toString()),
       totalPrice: totalPrice.toString()
     };
@@ -1841,121 +1918,6 @@ export default function PurchaseOrder() {
           </CardContent>
         </Card>
 
-            {/* Special Request Options */}
-            <Card className="mb-4">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">Special Request Options</CardTitle>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Custom selections not included in standard options</p>
-                  </div>
-                  <Button
-                    onClick={addSpecialRequestOption}
-                    className="flex items-center gap-2"
-                    size="sm"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add New SRO
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-2">
-                {specialRequestOptions.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <Package className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                    <p className="text-sm">No special request options added</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Click "Add New SRO" to create custom selections</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {/* Headers Row */}
-                    {specialRequestOptions.length > 0 && (
-                      <div className="grid gap-3 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border dark:border-gray-700 font-medium text-sm text-gray-700 dark:text-gray-300" 
-                           style={{
-                             gridTemplateColumns: showCostColumns 
-                               ? "1fr 120px 120px 40px" 
-                               : "1fr 120px 40px"
-                           }}>
-                        <div>Description</div>
-                        {showCostColumns && <div className="text-center">Builder Cost</div>}
-                        <div className="text-center">Client Price</div>
-                        <div></div>
-                      </div>
-                    )}
-                    
-                    {specialRequestOptions.map((sro, index) => (
-                      <div key={sro.id} className="space-y-2">
-                        {/* SRO Header */}
-                        <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 px-2">
-                          SRO #{String(index + 1).padStart(2, '0')}
-                        </div>
-                        
-                        {/* Input Row */}
-                        <div className="grid gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700 items-center"
-                             style={{
-                               gridTemplateColumns: showCostColumns 
-                                 ? "1fr 120px 120px 40px" 
-                                 : "1fr 120px 40px"
-                             }}>
-                          <div>
-                            <Input
-                              placeholder="Enter description..."
-                              value={sro.description}
-                              onChange={(e) => updateSpecialRequestOption(sro.id, 'description', e.target.value)}
-                            />
-                          </div>
-                          
-                          {showCostColumns && (
-                            <div className="flex items-center gap-1">
-                              <span className="text-sm text-gray-700">$</span>
-                              <Input
-                                type="text"
-                                placeholder="0"
-                                value={formatNumberWithCommas(sro.builderCost)}
-                                onChange={(e) => handleNumberInputChange(e.target.value, (value) => 
-                                  updateSpecialRequestOption(sro.id, 'builderCost', value)
-                                )}
-                                className="text-right"
-                              />
-                            </div>
-                          )}
-                          
-                          <div className="flex items-center gap-1">
-                            <span className="text-sm text-gray-700">$</span>
-                            <Input
-                              type="text"
-                              placeholder="0"
-                              value={formatNumberWithCommas(sro.price)}
-                              onChange={(e) => handleNumberInputChange(e.target.value, (value) => 
-                                updateSpecialRequestOption(sro.id, 'price', value)
-                              )}
-                              className="text-right"
-                            />
-                          </div>
-                          
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeSpecialRequestOption(sro.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {specialRequestOptions.length > 0 && (
-                      <div className="flex justify-end pt-2 border-t border-gray-200">
-                        <div className="text-sm font-semibold text-gray-900">
-                          Total: ${specialRequestTotal.toLocaleString()}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
 
             {/* Search and Filter Controls */}
             <Card className="mb-4">
@@ -2067,6 +2029,145 @@ export default function PurchaseOrder() {
                   onExpandCollapseAll={handleExpandCollapseAll}
                 />
 
+            {/* Special Request Options */}
+            <Card className="mb-4">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">Special Request Options</CardTitle>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Custom selections not included in standard options</p>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      if (currentProposal) {
+                        createSpecialRequestMutation.mutate({
+                          proposalId: currentProposal.id,
+                          description: "",
+                          builderCost: "0.00",
+                          clientPrice: "0.00",
+                        });
+                      }
+                    }}
+                    className="flex items-center gap-2"
+                    size="sm"
+                    disabled={!currentProposal}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add New SRO
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-2">
+                {specialRequests.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <Package className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+                    <p className="text-sm">No special request options added</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Click "Add New SRO" to create custom selections</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {/* Headers Row */}
+                    {specialRequests.length > 0 && (
+                      <div className="grid gap-3 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border dark:border-gray-700 font-medium text-sm text-gray-700 dark:text-gray-300" 
+                           style={{
+                             gridTemplateColumns: showCostColumns 
+                               ? "1fr 120px 120px 40px" 
+                               : "1fr 120px 40px"
+                           }}>
+                        <div>Description</div>
+                        {showCostColumns && <div className="text-center">Builder Cost</div>}
+                        <div className="text-center">Client Price</div>
+                        <div></div>
+                      </div>
+                    )}
+                    
+                    {specialRequests.map((sro, index) => (
+                      <div key={sro.id} className="space-y-2">
+                        {/* SRO Header */}
+                        <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 px-2">
+                          SRO #{String(index + 1).padStart(2, '0')}
+                        </div>
+                        
+                        {/* Input Row */}
+                        <div className="grid gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700 items-center"
+                             style={{
+                               gridTemplateColumns: showCostColumns 
+                                 ? "1fr 120px 120px 40px" 
+                                 : "1fr 120px 40px"
+                             }}>
+                          <div>
+                            <Input
+                              placeholder="Enter description..."
+                              value={sro.description}
+                              onChange={(e) => {
+                                updateSpecialRequestMutation.mutate({
+                                  id: sro.id,
+                                  data: { description: e.target.value }
+                                });
+                              }}
+                            />
+                          </div>
+                          
+                          {showCostColumns && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-sm text-gray-700">$</span>
+                              <Input
+                                type="text"
+                                placeholder="0"
+                                value={formatNumberWithCommas(parseFloat(sro.builderCost).toFixed(2))}
+                                onChange={(e) => handleNumberInputChange(e.target.value, (value) => {
+                                  const newCost = parseFloat(value) || 0;
+                                  updateSpecialRequestMutation.mutate({
+                                    id: sro.id,
+                                    data: { builderCost: newCost.toString() }
+                                  });
+                                })}
+                                className="text-right"
+                              />
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm text-gray-700">$</span>
+                            <Input
+                              type="text"
+                              placeholder="0"
+                              value={formatNumberWithCommas(parseFloat(sro.clientPrice).toFixed(2))}
+                              onChange={(e) => handleNumberInputChange(e.target.value, (value) => {
+                                const newPrice = parseFloat(value) || 0;
+                                updateSpecialRequestMutation.mutate({
+                                  id: sro.id,
+                                  data: { clientPrice: newPrice.toString() }
+                                });
+                              })}
+                              className="text-right"
+                            />
+                          </div>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteSpecialRequestMutation.mutate(sro.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {specialRequests.length > 0 && (
+                      <div className="flex justify-end pt-2 border-t border-gray-200">
+                        <div className="text-sm font-semibold text-gray-900">
+                          Total: ${formatNumberWithCommas(existingSpecialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0).toFixed(2))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
                 {/* Order Summary */}
                 {currentTemplate && (
                   <OrderSummary
@@ -2077,8 +2178,7 @@ export default function PurchaseOrder() {
                     salesIncentiveEnabled={salesIncentiveEnabled}
                     designStudioAllowance={formData.designStudioAllowance}
                     selectedUpgrades={selectedUpgradeItems}
-                    specialRequestOptions={specialRequestOptions}
-                    specialRequestTotal={specialRequestTotal}
+                    specialRequests={existingSpecialRequests}
                     showCostColumns={showCostColumns}
                     isExistingProposal={!!currentProposal}
                     onSaveDraft={handleSaveDraft}

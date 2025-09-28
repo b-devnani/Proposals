@@ -9,6 +9,9 @@ import {
   proposals,
   type Proposal,
   type InsertProposal,
+  specialRequests,
+  type SpecialRequest,
+  type InsertSpecialRequest,
 } from "@shared/schema";
 import { getHomeTemplateUpgrades } from "./excel-import.js";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -37,6 +40,12 @@ export interface IStorage {
   updateProposal(id: number, proposal: Partial<InsertProposal>): Promise<Proposal | undefined>;
   archiveProposal(id: number): Promise<Proposal | undefined>;
   unarchiveProposal(id: number): Promise<Proposal | undefined>;
+  
+  // Special Requests
+  getSpecialRequests(proposalId: number): Promise<SpecialRequest[]>;
+  createSpecialRequest(specialRequest: InsertSpecialRequest): Promise<SpecialRequest>;
+  updateSpecialRequest(id: number, specialRequest: Partial<InsertSpecialRequest>): Promise<SpecialRequest | undefined>;
+  deleteSpecialRequest(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -44,19 +53,23 @@ export class MemStorage implements IStorage {
   private homeTemplatesMap: Map<number, HomeTemplate>;
   private upgradesMap: Map<number, Upgrade>;
   private proposalsMap: Map<number, Proposal>;
+  private specialRequestsMap: Map<number, SpecialRequest>;
   private templateUpgradesCache: Map<string, Upgrade[]>;
   private currentTemplateId: number;
   private currentUpgradeId: number;
   private currentProposalId: number;
+  private currentSpecialRequestId: number;
 
   constructor() {
     this.homeTemplatesMap = new Map();
     this.upgradesMap = new Map();
     this.proposalsMap = new Map();
+    this.specialRequestsMap = new Map();
     this.templateUpgradesCache = new Map();
     this.currentTemplateId = 1;
     this.currentUpgradeId = 1;
     this.currentProposalId = 1;
+    this.currentSpecialRequestId = 1;
 
     this.initializeData();
   }
@@ -185,6 +198,43 @@ export class MemStorage implements IStorage {
     const updated = { ...existing, archived: false };
     this.proposalsMap.set(id, updated);
     return updated;
+  }
+
+  // Special Requests
+  async getSpecialRequests(proposalId: number): Promise<SpecialRequest[]> {
+    return Array.from(this.specialRequestsMap.values())
+      .filter(sr => sr.proposalId === proposalId);
+  }
+
+  async createSpecialRequest(specialRequest: InsertSpecialRequest): Promise<SpecialRequest> {
+    const id = this.currentSpecialRequestId++;
+    const newSpecialRequest: SpecialRequest = {
+      ...specialRequest,
+      id,
+      builderCost: specialRequest.builderCost || "0.00",
+      clientPrice: specialRequest.clientPrice || "0.00",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.specialRequestsMap.set(id, newSpecialRequest);
+    return newSpecialRequest;
+  }
+
+  async updateSpecialRequest(id: number, specialRequest: Partial<InsertSpecialRequest>): Promise<SpecialRequest | undefined> {
+    const existing = this.specialRequestsMap.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { 
+      ...existing, 
+      ...specialRequest, 
+      updatedAt: new Date() 
+    };
+    this.specialRequestsMap.set(id, updated);
+    return updated;
+  }
+
+  async deleteSpecialRequest(id: number): Promise<boolean> {
+    return this.specialRequestsMap.delete(id);
   }
 
   async getProposal(id: number): Promise<Proposal | undefined> {
@@ -341,6 +391,40 @@ export class DatabaseStorage implements IStorage {
       .where(eq(proposals.id, id))
       .returning();
     return result[0];
+  }
+
+  // Special Requests
+  async getSpecialRequests(proposalId: number): Promise<SpecialRequest[]> {
+    return await this.db
+      .select()
+      .from(specialRequests)
+      .where(eq(specialRequests.proposalId, proposalId))
+      .orderBy(specialRequests.id);
+  }
+
+  async createSpecialRequest(specialRequest: InsertSpecialRequest): Promise<SpecialRequest> {
+    const result = await this.db
+      .insert(specialRequests)
+      .values(specialRequest)
+      .returning();
+    return result[0];
+  }
+
+  async updateSpecialRequest(id: number, specialRequest: Partial<InsertSpecialRequest>): Promise<SpecialRequest | undefined> {
+    const result = await this.db
+      .update(specialRequests)
+      .set({ ...specialRequest, updatedAt: new Date() })
+      .where(eq(specialRequests.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteSpecialRequest(id: number): Promise<boolean> {
+    const result = await this.db
+      .delete(specialRequests)
+      .where(eq(specialRequests.id, id))
+      .returning();
+    return result.length > 0;
   }
 }
 

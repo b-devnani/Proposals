@@ -149,6 +149,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Special Requests routes
+  app.get("/api/proposals/:id/special-requests", async (req, res) => {
+    try {
+      const proposalId = parseInt(req.params.id);
+      const specialRequests = await storage.getSpecialRequests(proposalId);
+      res.json(specialRequests);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch special requests" });
+    }
+  });
+
+  app.post("/api/special-requests", async (req, res) => {
+    try {
+      const specialRequest = await storage.createSpecialRequest(req.body);
+      res.status(201).json(specialRequest);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create special request" });
+    }
+  });
+
+  app.patch("/api/special-requests/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const specialRequest = await storage.updateSpecialRequest(id, req.body);
+      if (!specialRequest) {
+        return res.status(404).json({ message: "Special request not found" });
+      }
+      res.json(specialRequest);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update special request" });
+    }
+  });
+
+  app.delete("/api/special-requests/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteSpecialRequest(id);
+      if (!success) {
+        return res.status(404).json({ message: "Special request not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete special request" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

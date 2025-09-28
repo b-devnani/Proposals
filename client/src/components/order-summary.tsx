@@ -2,7 +2,7 @@ import { Save, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency, formatMargin } from "@/lib/upgrade-data";
-import { Upgrade } from "@shared/schema";
+import { Upgrade, SpecialRequest } from "@shared/schema";
 
 interface OrderSummaryProps {
   basePrice: string;
@@ -12,8 +12,7 @@ interface OrderSummaryProps {
   salesIncentiveEnabled: boolean;
   designStudioAllowance: string;
   selectedUpgrades: Upgrade[];
-  specialRequestOptions: { id: number; description: string; price: string; builderCost: string; }[];
-  specialRequestTotal: number;
+  specialRequests: SpecialRequest[];
   showCostColumns: boolean;
   isExistingProposal?: boolean;
   onSaveDraft: () => void;
@@ -30,8 +29,7 @@ export function OrderSummary({
   salesIncentiveEnabled,
   designStudioAllowance,
   selectedUpgrades,
-  specialRequestOptions,
-  specialRequestTotal,
+  specialRequests,
   showCostColumns,
   isExistingProposal = false,
   onSaveDraft,
@@ -55,17 +53,16 @@ export function OrderSummary({
   
   // Subtotals
   const baseSubtotal = parseFloat(basePrice) + parseFloat(lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(salesIncentive || "0") : 0);
-  const upgradesSubtotal = parseFloat(designStudioAllowance || "0") + upgradesTotal + specialRequestTotal;
+  const specialRequestsTotal = specialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0);
+  const upgradesSubtotal = parseFloat(designStudioAllowance || "0") + upgradesTotal + specialRequestsTotal;
   
   const grandTotal = baseSubtotal + upgradesSubtotal;
-  const specialRequestCostTotal = specialRequestOptions.reduce((sum, sro) => 
-    sum + parseFloat(sro.builderCost || "0"), 0
-  );
+  const specialRequestCostTotal = specialRequests.reduce((sum, req) => sum + parseFloat(req.builderCost), 0);
   const totalCost = parseFloat(baseCost || "0") + upgradesBuilderCost + specialRequestCostTotal;
   const overallMargin = grandTotal > 0 ? ((grandTotal - totalCost) / grandTotal * 100) : 0;
   
   // Calculate combined selections margin (standard + SRO)
-  const totalSelectionsPrice = upgradesTotal + specialRequestTotal;
+  const totalSelectionsPrice = upgradesTotal + specialRequestsTotal;
   const totalSelectionsCost = upgradesBuilderCost + specialRequestCostTotal;
   const selectionsMargin = totalSelectionsPrice > 0 ? ((totalSelectionsPrice - totalSelectionsCost) / totalSelectionsPrice * 100) : 0;
 
@@ -124,10 +121,10 @@ export function OrderSummary({
                   <span>Selections ({selectedUpgrades.length}):</span>
                   <span className="font-medium">{formatCurrency(upgradesTotal)}</span>
                 </div>
-                {specialRequestOptions.length > 0 && (
+                {specialRequests.length > 0 && (
                   <div className="flex justify-between items-center">
-                    <span>Special Requests ({specialRequestOptions.length}):</span>
-                    <span className="font-medium text-orange-600">{formatCurrency(specialRequestTotal)}</span>
+                    <span>Special Requests ({specialRequests.length}):</span>
+                    <span className="font-medium text-orange-600">{formatCurrency(specialRequestsTotal)}</span>
                   </div>
                 )}
                 <div className="border-t pt-1 mt-1">
@@ -136,13 +133,13 @@ export function OrderSummary({
                     <span className="text-blue-600 dark:text-blue-400">{formatCurrency(upgradesSubtotal)}</span>
                   </div>
                 </div>
-                {showCostColumns && (selectedUpgrades.length > 0 || specialRequestOptions.length > 0) && (
+                {showCostColumns && (selectedUpgrades.length > 0 || specialRequests.length > 0) && (
                   <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
                     <span>Selections Cost:</span>
                     <span className="font-medium">{formatCurrency(totalSelectionsCost)}</span>
                   </div>
                 )}
-                {showCostColumns && (selectedUpgrades.length > 0 || specialRequestOptions.length > 0) && (
+                {showCostColumns && (selectedUpgrades.length > 0 || specialRequests.length > 0) && (
                   <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
                     <span>Margin:</span>
                     <span className={`font-medium ${formatMargin(selectionsMargin / 100).colorClass}`}>
