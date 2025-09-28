@@ -8,9 +8,9 @@ import { GroupedUpgrades, formatCurrency, formatMargin } from "@/lib/upgrade-dat
 
 interface UpgradeTableProps {
   groupedUpgrades: GroupedUpgrades;
-  selectedUpgrades: Set<number>;
+  selectedUpgrades: Set<string>;
   showCostColumns: boolean;
-  onUpgradeToggle: (upgradeId: number) => void;
+  onUpgradeToggle: (upgradeId: string) => void;
   onSelectAll: (category: string, location: string, parentSelection?: string) => void;
   onExpandCollapseAll?: (isExpanded: boolean) => void;
 }

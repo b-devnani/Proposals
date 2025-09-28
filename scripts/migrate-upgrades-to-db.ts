@@ -20,38 +20,23 @@ const templateFileMap = {
   'Sorrento': 'Sorrento Selections_Short List.xlsx',
   'Ravello': 'Ravello Selections.xlsx', 
   'Verona': 'Verona Selections.xlsx',
+  // first word in a template file is used to name the template. Put a space after it 
 };
 
 // Generate unique identifiers for upgrades
-function generateUpgradeId(templateName, index) {
-  return `${templateName.toLowerCase()}-${index + 1}`;
-}
-
-function generateSelectionId(templateName, parentSelection, index) {
-  const cleanParent = parentSelection.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-  return `${templateName.toLowerCase()}-${cleanParent}-${index + 1}`;
-}
-
 function generateChoiceId(templateName, choiceTitle, index) {
   const cleanChoice = choiceTitle.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-  return `${templateName.toLowerCase()}-${cleanChoice}-${index + 1}`;
+  return `${cleanChoice}`;
 }
 
-// Check if upgrade already exists
-async function upgradeExists(templateName, selectionId, choiceId) {
+// Clear all upgrades from database
+async function clearUpgrades() {
   try {
-    const result = await db.select()
-      .from(upgrades)
-      .where(and(
-        eq(upgrades.selectionId, selectionId),
-        eq(upgrades.choiceId, choiceId)
-      ))
-      .limit(1);
-    
-    return result.length > 0;
+    await db.delete(upgrades);
+    console.log('🗑️  Cleared all existing upgrades from database');
   } catch (error) {
-    console.error('Error checking if upgrade exists:', error);
-    return false;
+    console.error('Error clearing upgrades:', error);
+    throw error;
   }
 }
 
@@ -92,23 +77,26 @@ async function migrateTemplateUpgrades(templateName) {
       const excelUpgrade = excelUpgrades[i];
       
       try {
-        // Generate unique identifiers
-        const selectionId = generateSelectionId(templateName, excelUpgrade.parentSelection, i);
-        const choiceId = generateChoiceId(templateName, excelUpgrade.choiceTitle, i);
-        
-        // Check if upgrade already exists
-        const exists = await upgradeExists(templateName, selectionId, choiceId);
-        
-        if (exists) {
-          console.log(`⏭️  Skipping existing upgrade: ${excelUpgrade.choiceTitle}`);
-          skippedCount++;
+        // Validate required fields
+        if (!excelUpgrade.choiceTitle || typeof excelUpgrade.choiceTitle !== 'string') {
+          console.error(`❌ Invalid choiceTitle for upgrade ${i}:`, excelUpgrade.choiceTitle);
+          errorCount++;
           continue;
         }
-
+        
+        if (!excelUpgrade.parentSelection || typeof excelUpgrade.parentSelection !== 'string') {
+          console.error(`❌ Invalid parentSelection for upgrade ${i}:`, excelUpgrade.parentSelection);
+          errorCount++;
+          continue;
+        }
+        
+        // Generate unique identifiers
+        const choiceId = generateChoiceId(templateName, excelUpgrade.id, i);
+        
         // Prepare upgrade data for database
         const upgradeData = {
-          selectionId,
-          choiceId,
+          id: choiceId, // Use choice ID as primary key
+          template: templateName, // Add template column
           parentSelection: excelUpgrade.parentSelection,
           choiceTitle: excelUpgrade.choiceTitle,
           category: excelUpgrade.category,
@@ -140,7 +128,7 @@ async function migrateTemplateUpgrades(templateName) {
 // Main migration function
 async function migrateAllUpgrades() {
   console.log('🚀 Starting upgrade migration to database...');
-  console.log('📋 This script is idempotent - safe to run multiple times');
+  console.log('🗑️  This script will CLEAR and RE-FILL the upgrades table from scratch');
   
   if (!process.env.DATABASE_URL) {
     console.error('❌ DATABASE_URL environment variable is required');
@@ -151,6 +139,9 @@ async function migrateAllUpgrades() {
     // Test database connection
     await pool.query('SELECT 1');
     console.log('✅ Database connection successful');
+
+    // Clear all existing upgrades
+    await clearUpgrades();
 
     const templates = Object.keys(templateFileMap);
     const totalStats = { success: 0, skipped: 0, errors: 0 };
@@ -166,9 +157,8 @@ async function migrateAllUpgrades() {
     // Print summary
     console.log('\n📊 Migration Summary:');
     console.log(`✅ Successfully inserted: ${totalStats.success} upgrades`);
-    console.log(`⏭️  Skipped (already exist): ${totalStats.skipped} upgrades`);
     console.log(`❌ Errors: ${totalStats.errors} upgrades`);
-    console.log(`📁 Total processed: ${totalStats.success + totalStats.skipped + totalStats.errors} upgrades`);
+    console.log(`📁 Total processed: ${totalStats.success + totalStats.errors} upgrades`);
 
     if (totalStats.errors === 0) {
       console.log('\n🎉 Migration completed successfully!');

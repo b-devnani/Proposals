@@ -9,10 +9,11 @@ const __dirname = path.dirname(__filename);
 export interface ExcelUpgradeRow {
   'Parent Selection': string;
   'Choice Title': string;
+  'Choice ID': number
   'Category': string;
   'Location': string;
-  ' Builder Cost ': number;
-  ' Client Price ': number;
+  'Builder Cost': number;
+  'Client Price': number;
   'Margin': number | string;
 }
 
@@ -25,16 +26,17 @@ export function readExcelUpgrades(fileName: string): Upgrade[] {
     const data: ExcelUpgradeRow[] = XLSX.utils.sheet_to_json(worksheet);
     
     return data.map((row, index) => ({
-      id: index + 1,
+      id: row['Choice ID'].toString(),
       selectionId: `excel-${index + 1}`,
-      choiceId: `choice-${index + 1}`,
+      choiceId: row['Choice ID'],
       parentSelection: row['Parent Selection'],
       choiceTitle: row['Choice Title'],
       category: row['Category'],
       location: row['Location'],
-      builderCost: String(row[' Builder Cost '] || 0),
-      clientPrice: String(row[' Client Price '] || 0),
-      margin: typeof row['Margin'] === 'number' ? String(row['Margin']) : '0'
+      builderCost: String(row['Builder Cost'] || 0),
+      clientPrice: String(row['Client Price'] || 0),
+      margin: typeof row['Margin'] === 'number' ? String(row['Margin']) : '0',
+      template: fileName.split(' ')[0]
     }));
   } catch (error) {
     console.error('Error reading Excel file:', error);

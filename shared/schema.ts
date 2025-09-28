@@ -17,9 +17,8 @@ export const homeTemplates = pgTable("home_templates", {
 });
 
 export const upgrades = pgTable("upgrades", {
-  id: serial("id").primaryKey(),
-  selectionId: text("selection_id").notNull(),
-  choiceId: text("choice_id").notNull(),
+  id: text("id").primaryKey(), // Use choice ID as primary key
+  template: text("template").notNull(), // Template name (Sorrento, Ravello, Verona)
   parentSelection: text("parent_selection"),
   choiceTitle: text("choice_title").notNull(),
   category: text("category").notNull(),
@@ -79,9 +78,7 @@ export const insertHomeTemplateSchema = createInsertSchema(homeTemplates).omit({
   id: true,
 });
 
-export const insertUpgradeSchema = createInsertSchema(upgrades).omit({
-  id: true,
-});
+export const insertUpgradeSchema = createInsertSchema(upgrades);
 
 export const insertProposalSchema = createInsertSchema(proposals).omit({
   id: true,

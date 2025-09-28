@@ -73,7 +73,7 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   //deprecated
   private homeTemplatesMap: Map<number, HomeTemplate>;
-  private upgradesMap: Map<number, Upgrade>;
+  private upgradesMap: Map<string, Upgrade>;
   private proposalsMap: Map<number, Proposal>;
   private specialRequestsMap: Map<number, SpecialRequest>;
   private communitiesMap: Map<number, Community>;
@@ -490,12 +490,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUpgradesByTemplate(templateName: string): Promise<Upgrade[]> {
-    // Filter upgrades by template using the selectionId pattern
-    const templatePrefix = templateName.toLowerCase();
+    // Filter upgrades by template using the template field
     return await this.db
       .select()
       .from(upgrades)
-      .where(like(upgrades.selectionId, `${templatePrefix}-%`));
+      .where(eq(upgrades.template, templateName));
   }
 
   async createProposal(proposal: InsertProposal): Promise<Proposal> {

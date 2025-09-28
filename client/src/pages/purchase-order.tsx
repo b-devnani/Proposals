@@ -58,7 +58,7 @@ export default function PurchaseOrder() {
   const [currentProposal, setCurrentProposal] = useState<Proposal | null>(null);
   const [showCostColumns, setShowCostColumns] = useState(false); // Off by default
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
-  const [selectedUpgrades, setSelectedUpgrades] = useState<Set<number>>(new Set());
+  const [selectedUpgrades, setSelectedUpgrades] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -253,8 +253,7 @@ export default function PurchaseOrder() {
       
       // Set selected upgrades from existing proposal
       if (existingProposal.selectedUpgrades) {
-        const upgradeIds = existingProposal.selectedUpgrades.map((id: string) => parseInt(id)).filter((id: number) => !isNaN(id));
-        setSelectedUpgrades(new Set(upgradeIds));
+        setSelectedUpgrades(new Set(existingProposal.selectedUpgrades));
       }
 
       lastPopulatedProposalId.current = existingProposal.id;
@@ -391,7 +390,7 @@ export default function PurchaseOrder() {
     }
   };
 
-  const handleUpgradeToggle = (upgradeId: number) => {
+  const handleUpgradeToggle = (upgradeId: string) => {
     const upgrade = upgrades.find(u => u.id === upgradeId);
     if (!upgrade) return;
     
@@ -1039,7 +1038,7 @@ export default function PurchaseOrder() {
       lotPremium: formData.lotPremium || "0",
       salesIncentive: formData.salesIncentive || "0",
       designAllowance: formData.designStudioAllowance || "0",
-      selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id.toString()),
+      selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id),
       totalPrice: totalPrice.toString()
     };
 
@@ -1079,7 +1078,7 @@ export default function PurchaseOrder() {
       lotPremium: formData.lotPremium || "0",
       salesIncentive: formData.salesIncentive || "0",
       designAllowance: formData.designStudioAllowance || "0",
-      selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id.toString()),
+      selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id),
       totalPrice: totalPrice.toString()
     };
 
@@ -1618,7 +1617,7 @@ export default function PurchaseOrder() {
       lotPremium: formData.lotPremium || "0",
       salesIncentive: formData.salesIncentive || "0",
       designAllowance: formData.designStudioAllowance || "0",
-      selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id.toString()),
+      selectedUpgrades: selectedUpgradeItems.map(upgrade => upgrade.id),
       totalPrice: totalPrice.toString()
     };
 
