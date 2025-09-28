@@ -19,7 +19,7 @@ const db = drizzle(pool);
 const templateFileMap = {
   'Sorrento': 'Sorrento Selections_Short List.xlsx',
   'Ravello': 'Ravello Selections.xlsx', 
-  'Verona': 'Verona Selections.xlsx'
+  'Verona': 'Verona Selections.xlsx',
 };
 
 // Generate unique identifiers for upgrades

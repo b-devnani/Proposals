@@ -32,8 +32,11 @@ export interface IStorage {
   // Proposals
   createProposal(proposal: InsertProposal): Promise<Proposal>;
   getProposals(): Promise<Proposal[]>;
+  getArchivedProposals(): Promise<Proposal[]>;
   getProposal(id: number): Promise<Proposal | undefined>;
   updateProposal(id: number, proposal: Partial<InsertProposal>): Promise<Proposal | undefined>;
+  archiveProposal(id: number): Promise<Proposal | undefined>;
+  unarchiveProposal(id: number): Promise<Proposal | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -148,13 +151,40 @@ export class MemStorage implements IStorage {
       lotPremium: proposal.lotPremium || "0",
       salesIncentive: proposal.salesIncentive || null,
       designAllowance: proposal.designAllowance || null,
+      archived: false,
     };
     this.proposalsMap.set(id, newProposal);
     return newProposal;
   }
 
   async getProposals(): Promise<Proposal[]> {
-    return Array.from(this.proposalsMap.values()).sort((a, b) => b.id - a.id);
+    return Array.from(this.proposalsMap.values())
+      .filter(proposal => !proposal.archived)
+      .sort((a, b) => b.id - a.id);
+  }
+
+  async getArchivedProposals(): Promise<Proposal[]> {
+    return Array.from(this.proposalsMap.values())
+      .filter(proposal => proposal.archived)
+      .sort((a, b) => b.id - a.id);
+  }
+
+  async archiveProposal(id: number): Promise<Proposal | undefined> {
+    const existing = this.proposalsMap.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, archived: true };
+    this.proposalsMap.set(id, updated);
+    return updated;
+  }
+
+  async unarchiveProposal(id: number): Promise<Proposal | undefined> {
+    const existing = this.proposalsMap.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, archived: false };
+    this.proposalsMap.set(id, updated);
+    return updated;
   }
 
   async getProposal(id: number): Promise<Proposal | undefined> {
@@ -263,7 +293,37 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProposals(): Promise<Proposal[]> {
-    return await this.db.select().from(proposals).orderBy(desc(proposals.id));
+    return await this.db
+      .select()
+      .from(proposals)
+      .where(eq(proposals.archived, false))
+      .orderBy(desc(proposals.id));
+  }
+
+  async getArchivedProposals(): Promise<Proposal[]> {
+    return await this.db
+      .select()
+      .from(proposals)
+      .where(eq(proposals.archived, true))
+      .orderBy(desc(proposals.id));
+  }
+
+  async archiveProposal(id: number): Promise<Proposal | undefined> {
+    const result = await this.db
+      .update(proposals)
+      .set({ archived: true })
+      .where(eq(proposals.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async unarchiveProposal(id: number): Promise<Proposal | undefined> {
+    const result = await this.db
+      .update(proposals)
+      .set({ archived: false })
+      .where(eq(proposals.id, id))
+      .returning();
+    return result[0];
   }
 
   async getProposal(id: number): Promise<Proposal | undefined> {

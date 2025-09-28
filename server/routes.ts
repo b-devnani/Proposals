@@ -87,6 +87,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/proposals/archived", async (req, res) => {
+    try {
+      const proposals = await storage.getArchivedProposals();
+      res.json(proposals);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch archived proposals" });
+    }
+  });
+
   app.get("/api/proposals/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -111,6 +120,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updated);
     } catch (error) {
       res.status(400).json({ message: "Invalid proposal data" });
+    }
+  });
+
+  app.patch("/api/proposals/:id/archive", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updated = await storage.archiveProposal(id);
+      if (!updated) {
+        return res.status(404).json({ message: "Proposal not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to archive proposal" });
+    }
+  });
+
+  app.patch("/api/proposals/:id/unarchive", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updated = await storage.unarchiveProposal(id);
+      if (!updated) {
+        return res.status(404).json({ message: "Proposal not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to unarchive proposal" });
     }
   });
 

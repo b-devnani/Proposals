@@ -9,6 +9,7 @@ import { PasswordProtection } from "@/components/password-protection";
 import { AppLayout } from "@/components/app-layout";
 import HomeSelector from "@/pages/home-selector";
 import PurchaseOrder from "@/pages/purchase-order";
+import ArchivePage from "@/pages/archive";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,7 +17,8 @@ function Router() {
     <AppLayout>
       <Switch>
         <Route path="/" component={HomeSelector} />
-        <Route path="/proposal/:template" component={PurchaseOrder} />
+        <Route path="/proposal/:template/:proposalId?" component={PurchaseOrder} />
+        <Route path="/archive" component={ArchivePage} />
         <Route component={NotFound} />
       </Switch>
     </AppLayout>

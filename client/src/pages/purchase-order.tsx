@@ -59,9 +59,13 @@ export default function PurchaseOrder() {
   const queryClient = useQueryClient();
   const params = useParams();
   
-  // Get proposalId from URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const proposalId = urlParams.get('proposalId');
+  // Get proposalId from route params
+  const proposalId = params.proposalId || null;
+  
+  // Debug: Log when proposalId changes
+  useEffect(() => {
+    console.log('ProposalId changed:', proposalId);
+  }, [proposalId]);
   
   // State
   const [activeTemplate, setActiveTemplate] = useState<string>("2"); // Default to Sorrento
@@ -145,7 +149,7 @@ export default function PurchaseOrder() {
   });
 
   // Fetch existing proposal data if proposalId is present
-  const { data: existingProposal, isLoading: proposalLoading } = useQuery<Proposal>({
+  const { data: existingProposal, isLoading: proposalLoading, refetch } = useQuery<Proposal | null>({
     queryKey: ["/api/proposals", proposalId],
     queryFn: async () => {
       if (!proposalId) return null;
@@ -156,7 +160,17 @@ export default function PurchaseOrder() {
       return await response.json();
     },
     enabled: !!proposalId,
+    staleTime: 0, // Always refetch when query key changes
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
+
+  // Force refetch when proposalId changes
+  useEffect(() => {
+    if (proposalId) {
+      refetch();
+    }
+  }, [proposalId, refetch]);
 
   // Set template based on URL parameter or existing proposal
   useEffect(() => {
@@ -180,6 +194,7 @@ export default function PurchaseOrder() {
 
   // Populate form fields when existing proposal is loaded
   useEffect(() => {
+    console.log('Form population useEffect triggered:', { existingProposal, proposalId });
     if (existingProposal) {
       setFormData({
         todaysDate: existingProposal.todaysDate || new Date().toISOString().split('T')[0],
@@ -194,11 +209,24 @@ export default function PurchaseOrder() {
       
       // Set selected upgrades from existing proposal
       if (existingProposal.selectedUpgrades) {
-        const upgradeIds = existingProposal.selectedUpgrades.map(id => parseInt(id)).filter(id => !isNaN(id));
+        const upgradeIds = existingProposal.selectedUpgrades.map((id: string) => parseInt(id)).filter((id: number) => !isNaN(id));
         setSelectedUpgrades(new Set(upgradeIds));
       }
+    } else if (proposalId === null) {
+      // Reset form when no proposal is selected
+      setFormData({
+        todaysDate: new Date().toISOString().split('T')[0],
+        buyerLastName: "",
+        community: "rolling-meadows",
+        lotNumber: "",
+        lotAddress: "",
+        lotPremium: "0",
+        salesIncentive: "0",
+        designStudioAllowance: "0",
+      });
+      setSelectedUpgrades(new Set());
     }
-  }, [existingProposal]);
+  }, [existingProposal, proposalId]);
 
   const { data: upgrades = [], isLoading: upgradesLoading } = useQuery<Upgrade[]>({
     queryKey: ["/api/upgrades", activeTemplate],
@@ -1540,7 +1568,7 @@ export default function PurchaseOrder() {
   const uniqueLocations = Array.from(new Set(upgrades?.map(u => u.location) || [])).sort();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div key={proposalId || 'new'} className="min-h-screen bg-background">
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-7xl">
         {/* Header with Back Button and Theme Toggle */}
         <div className="mb-4 sm:mb-8">
