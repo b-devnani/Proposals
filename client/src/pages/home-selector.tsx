@@ -46,7 +46,7 @@ export default function HomeSelector() {
                   <CardContent className="p-0">
                     <div className="aspect-[4/3] overflow-hidden">
                       <img
-                        src={`/api/templates/${home.id}/image`}
+                        src={home.imageUrl || ''}
                         alt={`${home.name} Floor Plan`}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       />

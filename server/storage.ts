@@ -117,8 +117,6 @@ export class MemStorage implements IStorage {
         garage: "2 Car Garage",
         sqft: 2184,
         imageUrl: "/attached_assets/Ravello_1754950998192.webp",
-        imageData: null, // Will be populated from database
-        imageMimeType: "image/webp",
       },
       {
         id: this.currentTemplateId++,
@@ -130,8 +128,6 @@ export class MemStorage implements IStorage {
         garage: "2 Car Garage",
         sqft: 2002,
         imageUrl: "/attached_assets/Sorrento_1754950998192.webp",
-        imageData: null, // Will be populated from database
-        imageMimeType: "image/webp",
       },
       {
         id: this.currentTemplateId++,
@@ -143,8 +139,6 @@ export class MemStorage implements IStorage {
         garage: "2 Car Garage",
         sqft: 1987,
         imageUrl: "/attached_assets/Verona_1754950998191.webp",
-        imageData: null, // Will be populated from database
-        imageMimeType: "image/webp",
       },
     ];
 
@@ -183,8 +177,6 @@ export class MemStorage implements IStorage {
       garage: template.garage || "",
       sqft: template.sqft || 0,
       imageUrl: template.imageUrl || "",
-      imageData: template.imageData || null,
-      imageMimeType: template.imageMimeType || "image/webp",
     };
     this.homeTemplatesMap.set(id, newTemplate);
     return newTemplate;

@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { homeTemplates } from "@shared/schema";
+import { homeTemplates } from "../shared/schema.js";
 import fs from "fs";
 import path from "path";
 
@@ -14,9 +14,11 @@ const db = drizzle(pool);
 /**
  * Add a new home template with image to the database
  * 
+ * Images are now stored as files in the attached_assets folder instead of base64 in the database.
+ * 
  * Usage examples:
  * 
- * 1. From a file in attached_assets folder:
+ * 1. From a file already in attached_assets folder:
  *    await addTemplateWithImage({
  *      name: "New Template",
  *      basePrice: "650000",
@@ -28,7 +30,7 @@ const db = drizzle(pool);
  *      imageFile: "NewTemplate_1234567890.webp" // file in attached_assets/
  *    });
  * 
- * 2. From a base64 string (if you already have the image data):
+ * 2. From a file path (will copy to attached_assets folder):
  *    await addTemplateWithImage({
  *      name: "New Template",
  *      basePrice: "650000",
@@ -37,20 +39,7 @@ const db = drizzle(pool);
  *      baths: "2.5 Baths",
  *      garage: "2 Car Garage",
  *      sqft: 2100,
- *      imageBase64: "data:image/webp;base64,/9j/4AAQSkZJRgABAQAAAQ...", // full data URL
- *      mimeType: "image/webp"
- *    });
- * 
- * 3. From a file path anywhere on your system:
- *    await addTemplateWithImage({
- *      name: "New Template", 
- *      basePrice: "650000",
- *      baseCost: "520000",
- *      beds: "3 Beds",
- *      baths: "2.5 Baths",
- *      garage: "2 Car Garage", 
- *      sqft: 2100,
- *      imagePath: "/path/to/your/image.webp" // full system path
+ *      imagePath: "/path/to/your/image.webp" // full system path - will be copied
  *    });
  */
 
@@ -62,59 +51,48 @@ interface TemplateData {
   baths: string;
   garage: string;
   sqft: number;
-  // One of these image options:
-  imageFile?: string; // filename in attached_assets/ folder
-  imageBase64?: string; // full data URL or base64 string
-  imagePath?: string; // full system path to image file
-  mimeType?: string; // MIME type (auto-detected from file extension if not provided)
+  // Image file to copy to attached_assets folder:
+  imageFile?: string; // filename to use in attached_assets/ folder
+  imagePath?: string; // full system path to image file to copy
 }
 
 async function addTemplateWithImage(templateData: TemplateData) {
   try {
     console.log(`Adding template: ${templateData.name}...`);
     
-    let imageData: string | null = null;
-    let mimeType = templateData.mimeType || "image/webp";
+    let imageUrl = "";
     
-    // Handle different image input methods
-    if (templateData.imageFile) {
-      // From attached_assets folder
+    // Handle image file copying to attached_assets folder
+    if (templateData.imagePath) {
+      // Copy image from source path to attached_assets folder
+      const sourcePath = templateData.imagePath;
+      if (!fs.existsSync(sourcePath)) {
+        throw new Error(`Image file not found: ${sourcePath}`);
+      }
+      
+      // Generate a unique filename based on template name and timestamp
+      const timestamp = Date.now();
+      const ext = path.extname(sourcePath);
+      const filename = `${templateData.name.replace(/\s+/g, '_')}_${timestamp}${ext}`;
+      const destPath = path.join(process.cwd(), 'attached_assets', filename);
+      
+      // Copy the file
+      fs.copyFileSync(sourcePath, destPath);
+      
+      // Set the image URL
+      imageUrl = `/attached_assets/${filename}`;
+      
+      console.log(`✅ Copied image from ${sourcePath} to ${destPath}`);
+      
+    } else if (templateData.imageFile) {
+      // Image file is already in attached_assets folder
       const imagePath = path.join(process.cwd(), 'attached_assets', templateData.imageFile);
       if (!fs.existsSync(imagePath)) {
         throw new Error(`Image file not found: ${imagePath}`);
       }
       
-      const imageBuffer = fs.readFileSync(imagePath);
-      imageData = imageBuffer.toString('base64');
-      mimeType = getMimeTypeFromFile(templateData.imageFile);
-      
-      console.log(`✅ Loaded image from attached_assets: ${templateData.imageFile}`);
-      
-    } else if (templateData.imageBase64) {
-      // From base64 string
-      if (templateData.imageBase64.startsWith('data:')) {
-        // Extract base64 from data URL
-        const [header, base64] = templateData.imageBase64.split(',');
-        imageData = base64;
-        mimeType = header.split(';')[0].split(':')[1];
-      } else {
-        // Pure base64 string
-        imageData = templateData.imageBase64;
-      }
-      
-      console.log(`✅ Using provided base64 image data`);
-      
-    } else if (templateData.imagePath) {
-      // From system path
-      if (!fs.existsSync(templateData.imagePath)) {
-        throw new Error(`Image file not found: ${templateData.imagePath}`);
-      }
-      
-      const imageBuffer = fs.readFileSync(templateData.imagePath);
-      imageData = imageBuffer.toString('base64');
-      mimeType = getMimeTypeFromFile(templateData.imagePath);
-      
-      console.log(`✅ Loaded image from path: ${templateData.imagePath}`);
+      imageUrl = `/attached_assets/${templateData.imageFile}`;
+      console.log(`✅ Using existing image file: ${templateData.imageFile}`);
     }
     
     // Insert the template into database
@@ -128,17 +106,14 @@ async function addTemplateWithImage(templateData: TemplateData) {
         baths: templateData.baths,
         garage: templateData.garage,
         sqft: templateData.sqft,
-        imageData: imageData,
-        imageMimeType: mimeType,
-        imageUrl: "", // Keep empty since we're using database storage
+        imageUrl: imageUrl,
       })
       .returning();
     
     if (result.length > 0) {
       const template = result[0];
       console.log(`✅ Successfully added template "${template.name}" with ID ${template.id}`);
-      console.log(`   Image data size: ${imageData ? imageData.length : 0} characters`);
-      console.log(`   MIME type: ${mimeType}`);
+      console.log(`   Image URL: ${imageUrl || 'No image'}`);
       return template;
     } else {
       throw new Error("Failed to insert template");

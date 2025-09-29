@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertProposalSchema, insertHomeTemplateSchema } from "@shared/schema";
@@ -51,31 +52,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Serve template images from database
-  app.get("/api/templates/:id/image", async (req, res) => {
-    try {
-      const templateId = parseInt(req.params.id);
-      const template = await storage.getHomeTemplate(templateId);
-      
-      if (!template || !template.imageData) {
-        return res.status(404).json({ message: "Image not found" });
-      }
-      
-      // Convert base64 to buffer
-      const imageBuffer = Buffer.from(template.imageData, 'base64');
-      
-      // Set appropriate headers
-      res.set({
-        'Content-Type': template.imageMimeType || 'image/webp',
-        'Content-Length': imageBuffer.length,
-        'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
-      });
-      
-      res.send(imageBuffer);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch image" });
-    }
-  });
+  // Serve static files from attached_assets folder
+  app.use('/attached_assets', express.static('attached_assets'));
 
   // Upgrades
   app.get("/api/upgrades", async (req, res) => {

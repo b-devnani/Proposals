@@ -24,9 +24,8 @@ async function addTemplateViaAPI(templateData: TemplateData) {
   try {
     console.log(`Adding template via API: ${templateData.name}...`);
     
-    // Convert image to base64 if provided
-    let imageData: string | null = null;
-    let mimeType = "image/webp";
+    // Prepare the image URL if provided
+    let imageUrl = "";
     
     if (templateData.imageFile) {
       const imagePath = path.join(process.cwd(), 'attached_assets', templateData.imageFile);
@@ -34,11 +33,8 @@ async function addTemplateViaAPI(templateData: TemplateData) {
         throw new Error(`Image file not found: ${imagePath}`);
       }
       
-      const imageBuffer = fs.readFileSync(imagePath);
-      imageData = imageBuffer.toString('base64');
-      mimeType = getMimeTypeFromFile(templateData.imageFile);
-      
-      console.log(`✅ Loaded image: ${templateData.imageFile}`);
+      imageUrl = `/attached_assets/${templateData.imageFile}`;
+      console.log(`✅ Using image: ${templateData.imageFile}`);
     }
     
     // Prepare the template data
@@ -50,9 +46,7 @@ async function addTemplateViaAPI(templateData: TemplateData) {
       baths: templateData.baths,
       garage: templateData.garage,
       sqft: templateData.sqft,
-      imageData: imageData,
-      imageMimeType: mimeType,
-      imageUrl: "", // Empty since we're using database storage
+      imageUrl: imageUrl,
     };
     
     // Make API call to add template

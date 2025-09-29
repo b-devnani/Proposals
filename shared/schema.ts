@@ -12,8 +12,6 @@ export const homeTemplates = pgTable("home_templates", {
   garage: text("garage").default(""),
   sqft: integer("sqft").default(0),
   imageUrl: text("image_url").default(""),
-  imageData: text("image_data"), // Base64 encoded image data
-  imageMimeType: text("image_mime_type").default("image/webp"),
 });
 
 export const upgrades = pgTable("upgrades", {
