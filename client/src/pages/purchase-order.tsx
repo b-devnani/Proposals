@@ -2099,6 +2099,7 @@ export default function PurchaseOrder() {
                     }}
                     className="flex items-center gap-2"
                     size="sm"
+                    disabled={!currentProposal}
                   >
                     <Plus className="h-4 w-4" />
                     Add New SRO
@@ -2110,7 +2111,7 @@ export default function PurchaseOrder() {
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     <Package className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                     <p className="text-sm">No special request options added</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Please save project to add custom selections</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Please save project to create custom selections</p>
                   </div>
                 ) : (
                   <div className="space-y-3">

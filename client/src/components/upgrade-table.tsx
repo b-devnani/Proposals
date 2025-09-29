@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo, useRef } from "react";
 import { ChevronDown, ChevronRight, MapPin, Package, Expand, Shrink } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +23,7 @@ export function UpgradeTable({
   onSelectAll,
 }: UpgradeTableProps) {
   // Generate all possible location keys for default expansion
-  const getAllLocationKeys = () => {
+  const getAllLocationKeys = useCallback(() => {
     const keys: string[] = [];
     Object.entries(groupedUpgrades).forEach(([category, locations]) => {
       Object.keys(locations).forEach(location => {
@@ -31,21 +31,38 @@ export function UpgradeTable({
       });
     });
     return keys;
-  };
-
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(Object.keys(groupedUpgrades))
-  );
-  const [expandedLocations, setExpandedLocations] = useState<Set<string>>(
-    new Set(getAllLocationKeys())
-  );
-
-  // Update expanded locations when data changes
-  React.useEffect(() => {
-    setExpandedLocations(new Set(getAllLocationKeys()));
   }, [groupedUpgrades]);
 
+  const allLocationKeys = useMemo(() => getAllLocationKeys(), [getAllLocationKeys]);
+  const categoryKeys = useMemo(() => Object.keys(groupedUpgrades), [groupedUpgrades]);
+
+  // Keep track of whether we've initialized the expanded state for this data
+  const previousDataHash = useRef<string>("");
+  
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    new Set(categoryKeys)
+  );
+  const [expandedLocations, setExpandedLocations] = useState<Set<string>>(
+    new Set(allLocationKeys)
+  );
+
+  // Only update expanded state on initial load or when data structure significantly changes
+  React.useEffect(() => {
+    const currentDataHash = JSON.stringify({
+      categories: categoryKeys,
+      locations: allLocationKeys
+    });
+    
+    // Only reset expanded state if this is truly new data
+    if (previousDataHash.current !== currentDataHash) {
+      setExpandedCategories(new Set(categoryKeys));
+      setExpandedLocations(new Set(allLocationKeys));
+      previousDataHash.current = currentDataHash;
+    }
+  }, [categoryKeys, allLocationKeys]);
+
   const toggleCategory = (category: string) => {
+    console.log('Toggle category:', category, 'currently expanded:', expandedCategories.has(category));
     const newExpanded = new Set(expandedCategories);
     if (newExpanded.has(category)) {
       newExpanded.delete(category);
@@ -56,6 +73,7 @@ export function UpgradeTable({
   };
 
   const toggleLocation = (key: string) => {
+    console.log('Toggle location:', key, 'currently expanded:', expandedLocations.has(key));
     const newExpanded = new Set(expandedLocations);
     if (newExpanded.has(key)) {
       newExpanded.delete(key);
@@ -66,13 +84,15 @@ export function UpgradeTable({
   };
 
   const expandAll = () => {
-    setExpandedCategories(new Set(Object.keys(groupedUpgrades)));
-    setExpandedLocations(new Set(getAllLocationKeys()));
+    console.log('Expanding all:', { categoryKeys, allLocationKeys });
+    setExpandedCategories(new Set(categoryKeys));
+    setExpandedLocations(new Set(allLocationKeys));
   };
 
   const collapseAll = () => {
+    console.log('Collapsing all:', { categoryKeys });
     // Keep categories expanded, only collapse locations
-    setExpandedCategories(new Set(Object.keys(groupedUpgrades)));
+    setExpandedCategories(new Set(categoryKeys));
     setExpandedLocations(new Set());
   };
 
@@ -101,8 +121,21 @@ export function UpgradeTable({
     return Object.values(parentSelections).every(upgrades => areAllSelected(upgrades));
   };
 
-  const areAllExpanded = expandedCategories.size === Object.keys(groupedUpgrades).length && 
-                       expandedLocations.size === getAllLocationKeys().length;
+  const areAllExpanded = expandedCategories.size === categoryKeys.length && 
+                       expandedLocations.size === allLocationKeys.length;
+  
+  // Debug logging
+  console.log('Current state:', {
+    expandedCategories: Array.from(expandedCategories),
+    expandedCategoriesSize: expandedCategories.size,
+    categoryKeys,
+    categoryKeysLength: categoryKeys.length,
+    expandedLocations: Array.from(expandedLocations),
+    expandedLocationsSize: expandedLocations.size,
+    allLocationKeys,
+    allLocationKeysLength: allLocationKeys.length,
+    areAllExpanded
+  });
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
