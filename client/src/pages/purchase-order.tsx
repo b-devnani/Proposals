@@ -2099,7 +2099,6 @@ export default function PurchaseOrder() {
                     }}
                     className="flex items-center gap-2"
                     size="sm"
-                    disabled={!currentProposal}
                   >
                     <Plus className="h-4 w-4" />
                     Add New SRO
