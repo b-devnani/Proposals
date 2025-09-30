@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { Plus, FolderOpen, Home, Archive, RotateCcw, Copy } from "lucide-react";
+import { Plus, FolderOpen, Home, Archive, RotateCcw, Copy, Search, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Proposal } from "@shared/schema";
 
 interface ProjectSidebarProps {
@@ -15,6 +17,9 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
   const [location] = useLocation();
   const queryClient = useQueryClient();
   const [showArchived, setShowArchived] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<string>("newest");
+  const [filterPlan, setFilterPlan] = useState<string>("all");
 
   const { data: proposals = [], isLoading } = useQuery<Proposal[]>({
     queryKey: ['/api/proposals'],
@@ -81,12 +86,114 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
     });
   };
 
+  // Filter, search, and sort proposals
+  const filteredAndSortedProposals = useMemo(() => {
+    let result = [...proposals];
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(p => 
+        p.buyerLastName.toLowerCase().includes(query) ||
+        p.lotNumber.toLowerCase().includes(query) ||
+        p.housePlan.toLowerCase().includes(query) ||
+        p.community.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply house plan filter
+    if (filterPlan !== "all") {
+      result = result.filter(p => p.housePlan === filterPlan);
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case "newest":
+        result.sort((a, b) => b.id - a.id);
+        break;
+      case "oldest":
+        result.sort((a, b) => a.id - b.id);
+        break;
+      case "buyer-az":
+        result.sort((a, b) => a.buyerLastName.localeCompare(b.buyerLastName));
+        break;
+      case "buyer-za":
+        result.sort((a, b) => b.buyerLastName.localeCompare(a.buyerLastName));
+        break;
+      case "lot-asc":
+        result.sort((a, b) => a.lotNumber.localeCompare(b.lotNumber));
+        break;
+      case "lot-desc":
+        result.sort((a, b) => b.lotNumber.localeCompare(a.lotNumber));
+        break;
+      case "price-high":
+        result.sort((a, b) => parseFloat(b.totalPrice) - parseFloat(a.totalPrice));
+        break;
+      case "price-low":
+        result.sort((a, b) => parseFloat(a.totalPrice) - parseFloat(b.totalPrice));
+        break;
+    }
+
+    return result;
+  }, [proposals, searchQuery, sortBy, filterPlan]);
+
+  // Filter, search, and sort archived proposals
+  const filteredAndSortedArchived = useMemo(() => {
+    let result = [...archivedProposals];
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(p => 
+        p.buyerLastName.toLowerCase().includes(query) ||
+        p.lotNumber.toLowerCase().includes(query) ||
+        p.housePlan.toLowerCase().includes(query) ||
+        p.community.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply house plan filter
+    if (filterPlan !== "all") {
+      result = result.filter(p => p.housePlan === filterPlan);
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case "newest":
+        result.sort((a, b) => b.id - a.id);
+        break;
+      case "oldest":
+        result.sort((a, b) => a.id - b.id);
+        break;
+      case "buyer-az":
+        result.sort((a, b) => a.buyerLastName.localeCompare(b.buyerLastName));
+        break;
+      case "buyer-za":
+        result.sort((a, b) => b.buyerLastName.localeCompare(a.buyerLastName));
+        break;
+      case "lot-asc":
+        result.sort((a, b) => a.lotNumber.localeCompare(b.lotNumber));
+        break;
+      case "lot-desc":
+        result.sort((a, b) => b.lotNumber.localeCompare(a.lotNumber));
+        break;
+      case "price-high":
+        result.sort((a, b) => parseFloat(b.totalPrice) - parseFloat(a.totalPrice));
+        break;
+      case "price-low":
+        result.sort((a, b) => parseFloat(a.totalPrice) - parseFloat(b.totalPrice));
+        break;
+    }
+
+    return result;
+  }, [archivedProposals, searchQuery, sortBy, filterPlan]);
+
   return (
     <div className="flex h-screen">
       {/* Main Proposals Sidebar */}
       <div className="w-80 h-screen bg-background border-r border-border flex flex-col">
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-4 border-b border-border space-y-3">
+        <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">Proposals</h2>
           <div className="flex items-center gap-1">
             <Button 
@@ -99,6 +206,48 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
               <Archive className="w-4 h-4" />
             </Button>
           </div>
+        </div>
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by buyer, lot, or plan..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8 h-9"
+          />
+        </div>
+
+        {/* Sort and Filter */}
+        <div className="grid grid-cols-2 gap-2">
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="h-9 text-xs">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="buyer-az">Buyer A-Z</SelectItem>
+              <SelectItem value="buyer-za">Buyer Z-A</SelectItem>
+              <SelectItem value="lot-asc">Lot Number ↑</SelectItem>
+              <SelectItem value="lot-desc">Lot Number ↓</SelectItem>
+              <SelectItem value="price-high">Price High-Low</SelectItem>
+              <SelectItem value="price-low">Price Low-High</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterPlan} onValueChange={setFilterPlan}>
+            <SelectTrigger className="h-9 text-xs">
+              <SelectValue placeholder="Filter plan" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Plans</SelectItem>
+              <SelectItem value="Verona">Verona</SelectItem>
+              <SelectItem value="Sorrento">Sorrento</SelectItem>
+              <SelectItem value="Ravello">Ravello</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         <Link href="/">
@@ -114,12 +263,14 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
           <div className="text-sm text-muted-foreground text-center py-8">
             Loading proposals...
           </div>
-        ) : proposals.length === 0 ? (
+        ) : filteredAndSortedProposals.length === 0 ? (
           <div className="text-sm text-muted-foreground text-center py-8">
-            No proposals yet. Create your first proposal to get started.
+            {searchQuery || filterPlan !== "all" 
+              ? "No proposals match your search criteria." 
+              : "No proposals yet. Create your first proposal to get started."}
           </div>
         ) : (
-          proposals?.map((proposal) => (
+          filteredAndSortedProposals?.map((proposal) => (
             <div key={proposal.id} className="relative group">
               <Link 
                 href={`/proposal/${proposal.housePlan.toLowerCase()}/${proposal.id}`}
@@ -202,12 +353,14 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
               <div className="text-sm text-muted-foreground text-center py-8">
                 Loading archived proposals...
               </div>
-            ) : archivedProposals.length === 0 ? (
+            ) : filteredAndSortedArchived.length === 0 ? (
               <div className="text-sm text-muted-foreground text-center py-8">
-                No archived proposals.
+                {searchQuery || filterPlan !== "all" 
+                  ? "No archived proposals match your search criteria." 
+                  : "No archived proposals."}
               </div>
             ) : (
-              archivedProposals?.map((proposal) => (
+              filteredAndSortedArchived?.map((proposal) => (
                 <div key={proposal.id} className="relative group">
                   <Link 
                     href={`/proposal/${proposal.housePlan.toLowerCase()}/${proposal.id}`}
