@@ -187,7 +187,7 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
                     >
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium truncate">
-                        {proposal.buyerLastName} - {proposal.housePlan}
+                        {proposal.lotNumber} - {proposal.housePlan}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-0">
