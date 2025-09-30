@@ -19,7 +19,7 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
   const [showArchived, setShowArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<string>("newest");
-  const [filterPlan, setFilterPlan] = useState<string>("all");
+  const [filterCommunity, setFilterCommunity] = useState<string>("all");
 
   const { data: proposals = [], isLoading } = useQuery<Proposal[]>({
     queryKey: ['/api/proposals'],
@@ -101,9 +101,9 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
       );
     }
 
-    // Apply house plan filter
-    if (filterPlan !== "all") {
-      result = result.filter(p => p.housePlan === filterPlan);
+    // Apply community filter
+    if (filterCommunity !== "all") {
+      result = result.filter(p => p.community === filterCommunity);
     }
 
     // Apply sorting
@@ -135,7 +135,7 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
     }
 
     return result;
-  }, [proposals, searchQuery, sortBy, filterPlan]);
+  }, [proposals, searchQuery, sortBy, filterCommunity]);
 
   // Filter, search, and sort archived proposals
   const filteredAndSortedArchived = useMemo(() => {
@@ -152,9 +152,9 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
       );
     }
 
-    // Apply house plan filter
-    if (filterPlan !== "all") {
-      result = result.filter(p => p.housePlan === filterPlan);
+    // Apply community filter
+    if (filterCommunity !== "all") {
+      result = result.filter(p => p.community === filterCommunity);
     }
 
     // Apply sorting
@@ -186,7 +186,7 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
     }
 
     return result;
-  }, [archivedProposals, searchQuery, sortBy, filterPlan]);
+  }, [archivedProposals, searchQuery, sortBy, filterCommunity]);
 
   return (
     <div className="flex h-screen">
@@ -207,6 +207,13 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
             </Button>
           </div>
         </div>
+
+        <Link href="/">
+          <Button className="w-full" size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Create a New Proposal
+          </Button>
+        </Link>
 
         {/* Search */}
         <div className="relative">
@@ -237,25 +244,16 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
             </SelectContent>
           </Select>
 
-          <Select value={filterPlan} onValueChange={setFilterPlan}>
+          <Select value={filterCommunity} onValueChange={setFilterCommunity}>
             <SelectTrigger className="h-9 text-xs">
-              <SelectValue placeholder="Filter plan" />
+              <SelectValue placeholder="Filter community" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Plans</SelectItem>
-              <SelectItem value="Verona">Verona</SelectItem>
-              <SelectItem value="Sorrento">Sorrento</SelectItem>
-              <SelectItem value="Ravello">Ravello</SelectItem>
+              <SelectItem value="all">All Communities</SelectItem>
+              <SelectItem value="Rolling Meadows">Rolling Meadows</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        
-        <Link href="/">
-          <Button className="w-full" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Select a Floor Plan
-          </Button>
-        </Link>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -265,7 +263,7 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
           </div>
         ) : filteredAndSortedProposals.length === 0 ? (
           <div className="text-sm text-muted-foreground text-center py-8">
-            {searchQuery || filterPlan !== "all" 
+            {searchQuery || filterCommunity !== "all" 
               ? "No proposals match your search criteria." 
               : "No proposals yet. Create your first proposal to get started."}
           </div>
@@ -355,7 +353,7 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
               </div>
             ) : filteredAndSortedArchived.length === 0 ? (
               <div className="text-sm text-muted-foreground text-center py-8">
-                {searchQuery || filterPlan !== "all" 
+                {searchQuery || filterCommunity !== "all" 
                   ? "No archived proposals match your search criteria." 
                   : "No archived proposals."}
               </div>
