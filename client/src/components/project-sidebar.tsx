@@ -123,7 +123,7 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
                   <div className="space-y-1">
                     <div className="flex items-center text-xs text-muted-foreground">
                       <FolderOpen className="w-3 h-3 mr-1" />
-                      {proposal.community}
+                      {proposal.buyerLastName}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       Lot: {proposal.lotNumber}
@@ -194,7 +194,7 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
                       <div className="space-y-1">
                         <div className="flex items-center text-xs text-muted-foreground">
                           <FolderOpen className="w-3 h-3 mr-1" />
-                          {proposal.community}
+                          {proposal.buyerLastName}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Lot: {proposal.lotNumber}
