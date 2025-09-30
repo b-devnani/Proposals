@@ -255,7 +255,7 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
             <SelectContent>
               <SelectItem value="all">All Communities</SelectItem>
               {communities.map((community) => (
-                <SelectItem key={community.id} value={community.name}>
+                <SelectItem key={community.id} value={community.slug}>
                   {community.name}
                 </SelectItem>
               ))}
