@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { Plus, FolderOpen, Home, Archive, RotateCcw } from "lucide-react";
+import { Plus, FolderOpen, Home, Archive, RotateCcw, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Proposal } from "@shared/schema";
@@ -48,6 +48,22 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
       });
       if (!response.ok) {
         throw new Error('Failed to unarchive proposal');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/proposals/archived'] });
+    },
+  });
+
+  const duplicateMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/proposals/${id}/duplicate`, {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to duplicate proposal');
       }
       return response.json();
     },
@@ -135,19 +151,36 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
                 </CardContent>
                 </Card>
               </Link>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-6 w-6"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  archiveMutation.mutate(proposal.id);
-                }}
-                disabled={archiveMutation.isPending}
-              >
-                <Archive className="w-3 h-3" />
-              </Button>
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-1 h-6 w-6"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    duplicateMutation.mutate(proposal.id);
+                  }}
+                  disabled={duplicateMutation.isPending}
+                  title="Duplicate proposal"
+                >
+                  <Copy className="w-3 h-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-1 h-6 w-6"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    archiveMutation.mutate(proposal.id);
+                  }}
+                  disabled={archiveMutation.isPending}
+                  title="Archive proposal"
+                >
+                  <Archive className="w-3 h-3" />
+                </Button>
+              </div>
             </div>
           ))
         )}
@@ -206,20 +239,36 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
                     </CardContent>
                     </Card>
                   </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-6 w-6"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      unarchiveMutation.mutate(proposal.id);
-                    }}
-                    disabled={unarchiveMutation.isPending}
-                    title="Unarchive proposal"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                  </Button>
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="p-1 h-6 w-6"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        duplicateMutation.mutate(proposal.id);
+                      }}
+                      disabled={duplicateMutation.isPending}
+                      title="Duplicate proposal"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="p-1 h-6 w-6"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        unarchiveMutation.mutate(proposal.id);
+                      }}
+                      disabled={unarchiveMutation.isPending}
+                      title="Unarchive proposal"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
               ))
             )}

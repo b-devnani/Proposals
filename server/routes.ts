@@ -163,6 +163,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/proposals/:id/duplicate", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const duplicated = await storage.duplicateProposal(id);
+      if (!duplicated) {
+        return res.status(404).json({ message: "Proposal not found" });
+      }
+      res.status(201).json(duplicated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to duplicate proposal" });
+    }
+  });
+
   // Special Requests routes
   app.get("/api/proposals/:id/special-requests", async (req, res) => {
     try {

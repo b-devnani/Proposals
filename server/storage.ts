@@ -47,6 +47,7 @@ export interface IStorage {
   updateProposal(id: number, proposal: Partial<InsertProposal>): Promise<Proposal | undefined>;
   archiveProposal(id: number): Promise<Proposal | undefined>;
   unarchiveProposal(id: number): Promise<Proposal | undefined>;
+  duplicateProposal(id: number): Promise<Proposal | undefined>;
   
   // Special Requests
   getSpecialRequests(proposalId: number): Promise<SpecialRequest[]>;
@@ -394,6 +395,21 @@ export class MemStorage implements IStorage {
     this.proposalsMap.set(id, updated);
     return updated;
   }
+
+  async duplicateProposal(id: number): Promise<Proposal | undefined> {
+    const existing = this.proposalsMap.get(id);
+    if (!existing) return undefined;
+    
+    const newId = this.currentProposalId++;
+    const duplicated: Proposal = {
+      ...existing,
+      id: newId,
+      buyerLastName: `${existing.buyerLastName} (Copy)`,
+      todaysDate: new Date().toLocaleDateString('en-US'),
+    };
+    this.proposalsMap.set(newId, duplicated);
+    return duplicated;
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -543,6 +559,30 @@ export class DatabaseStorage implements IStorage {
       .where(eq(proposals.id, id))
       .returning();
     return result[0];
+  }
+
+  async duplicateProposal(id: number): Promise<Proposal | undefined> {
+    const original = await this.getProposal(id);
+    if (!original) return undefined;
+
+    const { id: _, ...proposalData } = original;
+    const duplicated = await this.createProposal({
+      ...proposalData,
+      buyerLastName: `${original.buyerLastName} (Copy)`,
+      todaysDate: new Date().toLocaleDateString('en-US'),
+    });
+    
+    // Also duplicate special requests if any
+    const specialRequests = await this.getSpecialRequests(id);
+    for (const sr of specialRequests) {
+      const { id: srId, proposalId: _, ...srData } = sr;
+      await this.createSpecialRequest({
+        ...srData,
+        proposalId: duplicated.id,
+      });
+    }
+    
+    return duplicated;
   }
 
   // Special Requests
