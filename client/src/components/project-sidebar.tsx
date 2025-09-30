@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Proposal } from "@shared/schema";
+import { Proposal, Community } from "@shared/schema";
 
 interface ProjectSidebarProps {
   onSelectProposal?: (proposalId: number) => void;
@@ -28,6 +28,10 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
   const { data: archivedProposals = [], isLoading: archivedLoading } = useQuery<Proposal[]>({
     queryKey: ['/api/proposals/archived'],
     enabled: showArchived,
+  });
+
+  const { data: communities = [] } = useQuery<Community[]>({
+    queryKey: ["/api/communities"],
   });
 
   const archiveMutation = useMutation({
@@ -250,7 +254,11 @@ export function ProjectSidebar({ onSelectProposal, currentProposalId }: ProjectS
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Communities</SelectItem>
-              <SelectItem value="Rolling Meadows">Rolling Meadows</SelectItem>
+              {communities.map((community) => (
+                <SelectItem key={community.id} value={community.name}>
+                  {community.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
