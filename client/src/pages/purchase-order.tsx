@@ -304,8 +304,11 @@ export default function PurchaseOrder() {
     }
   }, [existingSpecialRequests, existingProposal]);
 
-  // Auto-save effect - triggers when form data or selections change
+  // Auto-save effect - only triggers for EXISTING proposals
   useEffect(() => {
+    // Only auto-save if this is an existing proposal
+    if (!currentProposal) return;
+    
     const currentTemplate = templates.find(t => t.id.toString() === activeTemplate);
     if (!currentTemplate) return;
     
@@ -336,8 +339,8 @@ export default function PurchaseOrder() {
       totalPrice: totalPrice.toString()
     };
     
-    saveDraft(currentProposal?.id || null, proposalData);
-  }, [formData, selectedUpgrades, specialRequests, activeTemplate, templates, salesIncentiveEnabled]);
+    saveDraft(currentProposal.id, proposalData);
+  }, [formData, selectedUpgrades, specialRequests, activeTemplate, templates, salesIncentiveEnabled, currentProposal]);
 
   const { data: upgrades = [], isLoading: upgradesLoading } = useQuery<Upgrade[]>({
     queryKey: ["/api/upgrades", activeTemplate],
@@ -2278,6 +2281,8 @@ export default function PurchaseOrder() {
                     showCostColumns={showCostColumns}
                     saveStatus={saveStatus}
                     saveErrorMessage={saveErrorMessage}
+                    isExistingProposal={!!currentProposal}
+                    onSaveDraft={handleSaveDraft}
                     onExportExcel={handleExportExcel}
                     onGenerateProposal={handleGeneratePO}
                   />
