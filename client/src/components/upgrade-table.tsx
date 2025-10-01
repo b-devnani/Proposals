@@ -90,8 +90,9 @@ export function UpgradeTable({
   };
 
   const collapseAll = () => {
-    console.log('Collapsing all');
-    setExpandedCategories(new Set());
+    console.log('Collapsing all locations');
+    // Keep categories expanded, only collapse locations
+    setExpandedCategories(new Set(categoryKeys));
     setExpandedLocations(new Set());
   };
 
