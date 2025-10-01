@@ -15,6 +15,7 @@ interface OrderSummaryProps {
   specialRequests: SpecialRequest[];
   showCostColumns: boolean;
   isExistingProposal?: boolean;
+  hasUnsavedChanges?: boolean;
   onSaveDraft: () => void;
   onSaveChanges?: () => void;
   onGenerateProposal: () => void;
@@ -32,6 +33,7 @@ export function OrderSummary({
   specialRequests,
   showCostColumns,
   isExistingProposal = false,
+  hasUnsavedChanges = false,
   onSaveDraft,
   onSaveChanges,
   onGenerateProposal,
@@ -177,7 +179,13 @@ export function OrderSummary({
 
           <div className="flex flex-col sm:flex-row lg:flex-col space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-0 lg:space-y-2 mt-4 lg:mt-0 lg:ml-6">
             {isExistingProposal ? (
-              <Button variant="outline" size="sm" onClick={onSaveChanges} className="w-full sm:w-auto">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onSaveChanges} 
+                disabled={!hasUnsavedChanges}
+                className={`w-full sm:w-auto ${!hasUnsavedChanges ? 'opacity-40 cursor-not-allowed' : ''}`}
+              >
                 <Save className="w-3 h-3 mr-1" />
                 Save Changes
               </Button>

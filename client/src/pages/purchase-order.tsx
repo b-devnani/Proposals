@@ -63,6 +63,7 @@ export default function PurchaseOrder() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   
   // Form state
@@ -80,6 +81,13 @@ export default function PurchaseOrder() {
   const [specialRequests, setSpecialRequests] = useState<SpecialRequest[]>([]);
 
   const [salesIncentiveEnabled, setSalesIncentiveEnabled] = useState(false);
+
+  // Saved state snapshot for change detection
+  const [savedState, setSavedState] = useState<{
+    formData: typeof formData;
+    selectedUpgrades: Set<string>;
+    salesIncentiveEnabled: boolean;
+  } | null>(null);
 
   // Special Requests mutations
   const createSpecialRequestMutation = useMutation({
@@ -240,21 +248,29 @@ export default function PurchaseOrder() {
   useEffect(() => {
     if (existingProposal && lastPopulatedProposalId.current !== existingProposal.id) {
       console.log('Populating form with existing proposal:', existingProposal.id);
-      setFormData({
+      const newFormData = {
         todaysDate: existingProposal.todaysDate || new Date().toISOString().split('T')[0],
         buyerLastName: existingProposal.buyerLastName || "",
         community: existingProposal.community || "",
         lotNumber: existingProposal.lotNumber || "",
         lotAddress: existingProposal.lotAddress || "",
         lotPremium: existingProposal.lotPremium || "0",
-        salesIncentive: existingProposal.salesIncentive || "0", // Default value since it's not stored in proposals
-        designStudioAllowance: existingProposal.designAllowance || "0", // Default value since it's not stored in proposals
-      });
+        salesIncentive: existingProposal.salesIncentive || "0",
+        designStudioAllowance: existingProposal.designAllowance || "0",
+      };
+      setFormData(newFormData);
       
       // Set selected upgrades from existing proposal
-      if (existingProposal.selectedUpgrades) {
-        setSelectedUpgrades(new Set(existingProposal.selectedUpgrades));
-      }
+      const newSelectedUpgrades = new Set(existingProposal.selectedUpgrades || []);
+      setSelectedUpgrades(newSelectedUpgrades);
+
+      // Snapshot the saved state
+      setSavedState({
+        formData: newFormData,
+        selectedUpgrades: newSelectedUpgrades,
+        salesIncentiveEnabled: false,
+      });
+      setHasUnsavedChanges(false);
 
       lastPopulatedProposalId.current = existingProposal.id;
     } else if (proposalId === null && lastPopulatedProposalId.current !== null) {
@@ -271,6 +287,8 @@ export default function PurchaseOrder() {
         designStudioAllowance: "0",
       });
       setSelectedUpgrades(new Set());
+      setSavedState(null);
+      setHasUnsavedChanges(false);
       lastPopulatedProposalId.current = null;
     }
   }, [existingProposal, proposalId]);
@@ -293,6 +311,27 @@ export default function PurchaseOrder() {
       setSpecialRequests([]);
     }
   }, [existingSpecialRequests, existingProposal]);
+
+  // Detect changes for existing proposals
+  useEffect(() => {
+    if (!currentProposal || !savedState) {
+      setHasUnsavedChanges(false);
+      return;
+    }
+
+    // Compare form data
+    const formChanged = JSON.stringify(formData) !== JSON.stringify(savedState.formData);
+    
+    // Compare selected upgrades
+    const upgradesChanged = 
+      selectedUpgrades.size !== savedState.selectedUpgrades.size ||
+      Array.from(selectedUpgrades).some(id => !savedState.selectedUpgrades.has(id));
+    
+    // Compare sales incentive enabled
+    const salesIncentiveChanged = salesIncentiveEnabled !== savedState.salesIncentiveEnabled;
+
+    setHasUnsavedChanges(formChanged || upgradesChanged || salesIncentiveChanged);
+  }, [formData, selectedUpgrades, salesIncentiveEnabled, currentProposal, savedState]);
 
   const { data: upgrades = [], isLoading: upgradesLoading } = useQuery<Upgrade[]>({
     queryKey: ["/api/upgrades", activeTemplate],
@@ -1043,8 +1082,18 @@ export default function PurchaseOrder() {
     };
 
     try {
-      const newProposal = await apiRequest('POST', '/api/proposals', proposalData);
+      const response = await apiRequest('POST', '/api/proposals', proposalData);
+      const newProposal = await response.json();
       setCurrentProposal(newProposal);
+      
+      // Update saved state snapshot
+      setSavedState({
+        formData: { ...formData },
+        selectedUpgrades: new Set(selectedUpgrades),
+        salesIncentiveEnabled,
+      });
+      setHasUnsavedChanges(false);
+      
       queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
       
       toast({
@@ -1085,6 +1134,15 @@ export default function PurchaseOrder() {
 
     try {
       await apiRequest('PATCH', `/api/proposals/${currentProposal.id}`, proposalData);
+      
+      // Update saved state snapshot
+      setSavedState({
+        formData: { ...formData },
+        selectedUpgrades: new Set(selectedUpgrades),
+        salesIncentiveEnabled,
+      });
+      setHasUnsavedChanges(false);
+      
       queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
       
       toast({
@@ -2231,6 +2289,7 @@ export default function PurchaseOrder() {
                     specialRequests={existingSpecialRequests}
                     showCostColumns={showCostColumns}
                     isExistingProposal={!!currentProposal}
+                    hasUnsavedChanges={hasUnsavedChanges}
                     onSaveDraft={handleSaveDraft}
                     onSaveChanges={handleSaveChanges}
                     onExportExcel={handleExportExcel}
