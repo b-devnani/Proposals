@@ -92,6 +92,7 @@ Three main entities:
 - TypeScript path aliases for clean imports
 
 ## Changelog
+- October 01, 2025. Implemented hybrid save system: manual "Save New Draft" button for new proposals, auto-save (1.5s debounce) for existing proposals with status indicator
 - July 05, 2025. Initial setup
 - July 05, 2025. Added lot premium feature with running total calculation
 - July 05, 2025. Added base cost tracking and comprehensive margin calculations
