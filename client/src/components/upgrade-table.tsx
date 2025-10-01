@@ -40,10 +40,10 @@ export function UpgradeTable({
   const previousDataHash = useRef<string>("");
   
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(categoryKeys)
+    new Set()
   );
   const [expandedLocations, setExpandedLocations] = useState<Set<string>>(
-    new Set(allLocationKeys)
+    new Set()
   );
 
   // Only update expanded state on initial load or when data structure significantly changes
@@ -55,8 +55,8 @@ export function UpgradeTable({
     
     // Only reset expanded state if this is truly new data
     if (previousDataHash.current !== currentDataHash) {
-      setExpandedCategories(new Set(categoryKeys));
-      setExpandedLocations(new Set(allLocationKeys));
+      setExpandedCategories(new Set());
+      setExpandedLocations(new Set());
       previousDataHash.current = currentDataHash;
     }
   }, [categoryKeys, allLocationKeys]);
@@ -90,9 +90,8 @@ export function UpgradeTable({
   };
 
   const collapseAll = () => {
-    console.log('Collapsing all:', { categoryKeys });
-    // Keep categories expanded, only collapse locations
-    setExpandedCategories(new Set(categoryKeys));
+    console.log('Collapsing all');
+    setExpandedCategories(new Set());
     setExpandedLocations(new Set());
   };
 
