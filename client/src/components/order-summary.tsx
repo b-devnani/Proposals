@@ -1,10 +1,8 @@
-import { FileText, Download, Save } from "lucide-react";
+import { Save, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency, formatMargin } from "@/lib/upgrade-data";
 import { Upgrade, SpecialRequest } from "@shared/schema";
-import { SaveStatusIndicator } from "@/components/save-status-indicator";
-import { SaveStatus } from "@/hooks/use-auto-save";
 
 interface OrderSummaryProps {
   basePrice: string;
@@ -16,10 +14,9 @@ interface OrderSummaryProps {
   selectedUpgrades: Upgrade[];
   specialRequests: SpecialRequest[];
   showCostColumns: boolean;
-  saveStatus: SaveStatus;
-  saveErrorMessage?: string | null;
   isExistingProposal?: boolean;
-  onSaveDraft?: () => void;
+  onSaveDraft: () => void;
+  onSaveChanges?: () => void;
   onGenerateProposal: () => void;
   onExportExcel: () => void;
 }
@@ -34,10 +31,9 @@ export function OrderSummary({
   selectedUpgrades,
   specialRequests,
   showCostColumns,
-  saveStatus,
-  saveErrorMessage,
   isExistingProposal = false,
   onSaveDraft,
+  onSaveChanges,
   onGenerateProposal,
   onExportExcel,
 }: OrderSummaryProps) {
@@ -181,20 +177,21 @@ export function OrderSummary({
 
           <div className="flex flex-col sm:flex-row lg:flex-col space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-0 lg:space-y-2 mt-4 lg:mt-0 lg:ml-6">
             {isExistingProposal ? (
-              <div className="flex items-center justify-center py-2">
-                <SaveStatusIndicator status={saveStatus} errorMessage={saveErrorMessage} />
-              </div>
+              <Button variant="outline" size="sm" onClick={onSaveChanges} className="w-full sm:w-auto">
+                <Save className="w-3 h-3 mr-1" />
+                Save Changes
+              </Button>
             ) : (
               <Button variant="outline" size="sm" onClick={onSaveDraft} className="w-full sm:w-auto">
                 <Save className="w-3 h-3 mr-1" />
                 Save New Draft
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={onExportExcel} className="w-full sm:w-auto" disabled={saveStatus === 'saving'}>
+            <Button variant="outline" size="sm" onClick={onExportExcel} className="w-full sm:w-auto">
               <Download className="w-3 h-3 mr-1" />
               Export Excel
             </Button>
-            <Button size="sm" onClick={onGenerateProposal} className="w-full sm:w-auto" disabled={saveStatus === 'saving'}>
+            <Button size="sm" onClick={onGenerateProposal} className="w-full sm:w-auto">
               <FileText className="w-3 h-3 mr-1" />
               Generate Proposal
             </Button>
