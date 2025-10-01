@@ -21,6 +21,7 @@ import { HomeTemplate, Upgrade, Proposal, SpecialRequest } from "@shared/schema"
 import { groupUpgradesByCategory, sortUpgrades } from "@/lib/upgrade-data";
 import { apiRequest } from "@/lib/queryClient";
 import { formatNumberWithCommas, handleNumberInputChange } from "@/lib/number-utils";
+import { useAutoSave } from "@/hooks/use-auto-save";
 
 // Types for communities and lots
 interface Community {
@@ -80,6 +81,15 @@ export default function PurchaseOrder() {
   const [specialRequests, setSpecialRequests] = useState<SpecialRequest[]>([]);
 
   const [salesIncentiveEnabled, setSalesIncentiveEnabled] = useState(false);
+
+  // Auto-save hook
+  const { status: saveStatus, errorMessage: saveErrorMessage, saveDraft } = useAutoSave({
+    onSuccess: (newProposal) => {
+      if (!currentProposal) {
+        setCurrentProposal(newProposal);
+      }
+    },
+  });
 
   // Special Requests mutations
   const createSpecialRequestMutation = useMutation({
@@ -293,6 +303,41 @@ export default function PurchaseOrder() {
       setSpecialRequests([]);
     }
   }, [existingSpecialRequests, existingProposal]);
+
+  // Auto-save effect - triggers when form data or selections change
+  useEffect(() => {
+    const currentTemplate = templates.find(t => t.id.toString() === activeTemplate);
+    if (!currentTemplate) return;
+    
+    // Only auto-save if we have minimum required data
+    if (!formData.buyerLastName || !formData.community) return;
+    
+    const selectedUpgradeItems = Array.from(selectedUpgrades)
+      .map(id => upgrades.find(u => u.id === id))
+      .filter((u): u is Upgrade => u !== undefined);
+    
+    const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
+    const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
+    const specialRequestsTotal = specialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0);
+    const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestsTotal;
+    
+    const proposalData = {
+      todaysDate: formData.todaysDate || new Date().toISOString().split('T')[0],
+      buyerLastName: formData.buyerLastName,
+      community: formData.community,
+      lotNumber: formData.lotNumber || "TBD",
+      lotAddress: formData.lotAddress || "TBD",
+      housePlan: currentTemplate.name,
+      basePrice: currentTemplate.basePrice,
+      lotPremium: formData.lotPremium || "0",
+      salesIncentive: formData.salesIncentive || "0",
+      designAllowance: formData.designStudioAllowance || "0",
+      selectedUpgrades: Array.from(selectedUpgrades),
+      totalPrice: totalPrice.toString()
+    };
+    
+    saveDraft(currentProposal?.id || null, proposalData);
+  }, [formData, selectedUpgrades, specialRequests, activeTemplate, templates, salesIncentiveEnabled]);
 
   const { data: upgrades = [], isLoading: upgradesLoading } = useQuery<Upgrade[]>({
     queryKey: ["/api/upgrades", activeTemplate],
@@ -2231,9 +2276,8 @@ export default function PurchaseOrder() {
                     selectedUpgrades={selectedUpgradeItems}
                     specialRequests={existingSpecialRequests}
                     showCostColumns={showCostColumns}
-                    isExistingProposal={!!currentProposal}
-                    onSaveDraft={handleSaveDraft}
-                    onSaveChanges={handleSaveChanges}
+                    saveStatus={saveStatus}
+                    saveErrorMessage={saveErrorMessage}
                     onExportExcel={handleExportExcel}
                     onGenerateProposal={handleGeneratePO}
                   />
