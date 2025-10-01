@@ -1043,7 +1043,8 @@ export default function PurchaseOrder() {
     };
 
     try {
-      const newProposal = await apiRequest('POST', '/api/proposals', proposalData);
+      const response = await apiRequest('POST', '/api/proposals', proposalData);
+      const newProposal = await response.json();
       setCurrentProposal(newProposal);
       queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
       
