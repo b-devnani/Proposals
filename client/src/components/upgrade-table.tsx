@@ -40,7 +40,7 @@ export function UpgradeTable({
   const previousDataHash = useRef<string>("");
   
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set()
+    new Set(categoryKeys)
   );
   const [expandedLocations, setExpandedLocations] = useState<Set<string>>(
     new Set()
@@ -55,7 +55,7 @@ export function UpgradeTable({
     
     // Only reset expanded state if this is truly new data
     if (previousDataHash.current !== currentDataHash) {
-      setExpandedCategories(new Set());
+      setExpandedCategories(new Set(categoryKeys));
       setExpandedLocations(new Set());
       previousDataHash.current = currentDataHash;
     }
