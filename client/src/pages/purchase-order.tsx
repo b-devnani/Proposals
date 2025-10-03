@@ -1923,7 +1923,7 @@ export default function PurchaseOrder() {
                                     className="w-40"
                                     value={formatNumberWithCommas(localBaseCost)}
                                     onChange={(e) => handleNumberInputChange(e.target.value, handleBaseCostChange)}
-                                    onBlur={handleBaseCostBlur}
+                                    // onBlur={handleBaseCostBlur}
                                   />
                                 </div>
                               )}
@@ -1935,7 +1935,7 @@ export default function PurchaseOrder() {
                                   className="w-40 font-semibold"
                                   value={formatNumberWithCommas(localBasePrice)}
                                   onChange={(e) => handleNumberInputChange(e.target.value, handleBasePriceChange)}
-                                  onBlur={handleBasePriceBlur}
+                                  // onBlur={handleBasePriceBlur}
                                 />
                               </div>
                             </div>
