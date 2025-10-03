@@ -1801,10 +1801,10 @@ export default function PurchaseOrder() {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Customer Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div>
-                  <Label htmlFor="buyer-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">Buyer's Last Name</Label>
+                  <Label htmlFor="buyer-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">Homebuyer's Name</Label>
                   <Input
                     id="buyer-name"
-                    placeholder="Enter buyer's last name"
+                    placeholder="Enter Homebuyer's name"
                     value={formData.buyerLastName}
                     onChange={(e) => setFormData({ ...formData, buyerLastName: e.target.value })}
                     className="mt-1"
