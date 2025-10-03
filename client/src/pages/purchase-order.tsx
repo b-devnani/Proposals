@@ -82,6 +82,10 @@ export default function PurchaseOrder() {
 
   const [salesIncentiveEnabled, setSalesIncentiveEnabled] = useState(false);
 
+  // Local state for base price and cost to prevent lag during editing
+  const [localBasePrice, setLocalBasePrice] = useState<string>("");
+  const [localBaseCost, setLocalBaseCost] = useState<string>("");
+
   // Saved state snapshot for change detection
   const [savedState, setSavedState] = useState<{
     formData: typeof formData;
@@ -243,6 +247,17 @@ export default function PurchaseOrder() {
       }
     }
   }, [templates, params.template, existingProposal]);
+
+  // Sync local price/cost state when template changes
+  useEffect(() => {
+    if (templates.length > 0) {
+      const template = templates.find(t => t.id.toString() === activeTemplate);
+      if (template) {
+        setLocalBasePrice(template.basePrice);
+        setLocalBaseCost(template.baseCost || "0");
+      }
+    }
+  }, [activeTemplate, templates]);
 
   // Populate form fields when existing proposal is loaded
   useEffect(() => {
@@ -411,20 +426,28 @@ export default function PurchaseOrder() {
     }
   };
 
-  const handleBasePriceUpdate = (price: string) => {
-    if (currentTemplate) {
+  const handleBasePriceChange = (price: string) => {
+    setLocalBasePrice(price);
+  };
+
+  const handleBasePriceBlur = () => {
+    if (currentTemplate && localBasePrice !== currentTemplate.basePrice) {
       updateTemplateMutation.mutate({
         id: currentTemplate.id,
-        data: { basePrice: price }
+        data: { basePrice: localBasePrice }
       });
     }
   };
 
-  const handleBaseCostUpdate = (cost: string) => {
-    if (currentTemplate) {
+  const handleBaseCostChange = (cost: string) => {
+    setLocalBaseCost(cost);
+  };
+
+  const handleBaseCostBlur = () => {
+    if (currentTemplate && localBaseCost !== (currentTemplate.baseCost || "0")) {
       updateTemplateMutation.mutate({
         id: currentTemplate.id,
-        data: { baseCost: cost }
+        data: { baseCost: localBaseCost }
       });
     }
   };
@@ -1898,8 +1921,9 @@ export default function PurchaseOrder() {
                                     id="base-cost"
                                     type="text"
                                     className="w-40"
-                                    value={formatNumberWithCommas(currentTemplate.baseCost || "0")}
-                                    onChange={(e) => handleNumberInputChange(e.target.value, handleBaseCostUpdate)}
+                                    value={formatNumberWithCommas(localBaseCost)}
+                                    onChange={(e) => handleNumberInputChange(e.target.value, handleBaseCostChange)}
+                                    onBlur={handleBaseCostBlur}
                                   />
                                 </div>
                               )}
@@ -1909,8 +1933,9 @@ export default function PurchaseOrder() {
                                   id="base-price"
                                   type="text"
                                   className="w-40 font-semibold"
-                                  value={formatNumberWithCommas(currentTemplate.basePrice)}
-                                  onChange={(e) => handleNumberInputChange(e.target.value, handleBasePriceUpdate)}
+                                  value={formatNumberWithCommas(localBasePrice)}
+                                  onChange={(e) => handleNumberInputChange(e.target.value, handleBasePriceChange)}
+                                  onBlur={handleBasePriceBlur}
                                 />
                               </div>
                             </div>
