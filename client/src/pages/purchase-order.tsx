@@ -695,7 +695,7 @@ export default function PurchaseOrder() {
     
     // Base pricing items
     const baseItems = [
-      [`${currentTemplate.name} Base Price`, currentTemplate.basePrice],
+      [`${currentTemplate.name} Base Price`, localBasePrice],
       ['Lot Premium', formData.lotPremium || "0"],
       ['Design Studio Allowance', formData.designStudioAllowance || "0"]
     ];
@@ -1084,7 +1084,7 @@ export default function PurchaseOrder() {
   const handleSaveDraft = async () => {
     if (!currentTemplate) return;
     
-    const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
+    const baseSubtotal = parseFloat(localBasePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
     const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
     const specialRequestsTotal = existingSpecialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0);
     const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestsTotal;
@@ -1096,7 +1096,7 @@ export default function PurchaseOrder() {
       lotNumber: formData.lotNumber || "1",
       lotAddress: formData.lotAddress || "TBD",
       housePlan: currentTemplate.name,
-      basePrice: currentTemplate.basePrice,
+      basePrice: localBasePrice,
       lotPremium: formData.lotPremium || "0",
       salesIncentive: formData.salesIncentive || "0",
       designAllowance: formData.designStudioAllowance || "0",
@@ -1135,7 +1135,7 @@ export default function PurchaseOrder() {
   const handleSaveChanges = async () => {
     if (!currentTemplate || !currentProposal) return;
     
-    const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
+    const baseSubtotal = parseFloat(localBasePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
     const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
     const specialRequestsTotal = existingSpecialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0);
     const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestsTotal;
@@ -1147,7 +1147,7 @@ export default function PurchaseOrder() {
       lotNumber: formData.lotNumber || "1",
       lotAddress: formData.lotAddress || "TBD",
       housePlan: currentTemplate.name,
-      basePrice: currentTemplate.basePrice,
+      basePrice: localBasePrice,
       lotPremium: formData.lotPremium || "0",
       salesIncentive: formData.salesIncentive || "0",
       designAllowance: formData.designStudioAllowance || "0",
@@ -1184,7 +1184,7 @@ export default function PurchaseOrder() {
   const generatePDF = async () => {
     if (!currentTemplate) return;
     
-    const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
+    const baseSubtotal = parseFloat(localBasePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
     const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
     const specialRequestsTotal = existingSpecialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0);
     const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestsTotal;
@@ -1263,7 +1263,7 @@ export default function PurchaseOrder() {
     
     let rightYPos = yPos + 14; // Start two lines lower (2 * 7pt spacing)
     const basePricing = [
-      [`Base Price:`, `$${parseInt(currentTemplate.basePrice).toLocaleString()}`],
+      [`Base Price:`, `$${parseInt(localBasePrice).toLocaleString()}`],
       [`Lot Premium:`, `$${parseInt(formData.lotPremium || "0").toLocaleString()}`],
     ];
     
@@ -1683,7 +1683,7 @@ export default function PurchaseOrder() {
   const handleGeneratePO = async () => {
     if (!currentTemplate) return;
     
-    const baseSubtotal = parseFloat(currentTemplate.basePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
+    const baseSubtotal = parseFloat(localBasePrice) + parseFloat(formData.lotPremium || "0") + (salesIncentiveEnabled ? parseFloat(formData.salesIncentive || "0") : 0);
     const upgradesTotal = selectedUpgradeItems.reduce((sum, upgrade) => sum + parseFloat(upgrade.clientPrice), 0);
     const specialRequestsTotal = existingSpecialRequests.reduce((sum, req) => sum + parseFloat(req.clientPrice), 0);
     const totalPrice = baseSubtotal + parseFloat(formData.designStudioAllowance || "0") + upgradesTotal + specialRequestsTotal;
@@ -1695,7 +1695,7 @@ export default function PurchaseOrder() {
       lotNumber: formData.lotNumber || "1",
       lotAddress: formData.lotAddress || "TBD",
       housePlan: currentTemplate.name,
-      basePrice: currentTemplate.basePrice,
+      basePrice: localBasePrice,
       lotPremium: formData.lotPremium || "0",
       salesIncentive: formData.salesIncentive || "0",
       designAllowance: formData.designStudioAllowance || "0",
@@ -2304,8 +2304,8 @@ export default function PurchaseOrder() {
                 {/* Order Summary */}
                 {currentTemplate && (
                   <OrderSummary
-                    basePrice={currentTemplate.basePrice}
-                    baseCost={currentTemplate.baseCost || "0"}
+                    basePrice={localBasePrice}
+                    baseCost={localBaseCost|| "0"}
                     lotPremium={formData.lotPremium}
                     salesIncentive={formData.salesIncentive}
                     salesIncentiveEnabled={salesIncentiveEnabled}
