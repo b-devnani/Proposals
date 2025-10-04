@@ -248,16 +248,16 @@ export default function PurchaseOrder() {
     }
   }, [templates, params.template, existingProposal]);
 
-  // Sync local price/cost state when template changes
+  // Sync local price/cost state when template changes (only for new proposals)
   useEffect(() => {
-    if (templates.length > 0) {
+    if (templates.length > 0 && !existingProposal) {
       const template = templates.find(t => t.id.toString() === activeTemplate);
       if (template) {
         setLocalBasePrice(template.basePrice);
         setLocalBaseCost(template.baseCost || "0");
       }
     }
-  }, [activeTemplate, templates]);
+  }, [activeTemplate, templates, existingProposal]);
 
   // Populate form fields when existing proposal is loaded
   useEffect(() => {
@@ -274,6 +274,9 @@ export default function PurchaseOrder() {
         designStudioAllowance: existingProposal.designAllowance || "0",
       };
       setFormData(newFormData);
+      
+      // Set base price from existing proposal (cost comes from template)
+      setLocalBasePrice(existingProposal.basePrice);
       
       // Set selected upgrades from existing proposal
       const newSelectedUpgrades = new Set(existingProposal.selectedUpgrades || []);
